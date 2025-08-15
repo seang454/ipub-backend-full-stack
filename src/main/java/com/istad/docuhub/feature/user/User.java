@@ -1,4 +1,4 @@
-package com.istad.docuhub.domain;
+package com.istad.docuhub.feature.user;
 
 
 import jakarta.persistence.Entity;
