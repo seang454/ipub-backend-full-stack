@@ -42,6 +42,12 @@ public class User {
     @Column(nullable = false)
     private LocalDate createDate;
     private LocalDate updateDate;
+    private String contactNumber;
+    private Boolean isUser;
+    private Boolean isAdmin;
+    private Boolean isStudent;
+    private Boolean isModerator;
+    private Boolean isDeleted;
 
 
 }

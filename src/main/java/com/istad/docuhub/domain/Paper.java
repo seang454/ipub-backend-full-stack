@@ -26,6 +26,10 @@ public class Paper {
     private LocalDate publishDate;
     private  Boolean approved;
 
+    //new
+    private Boolean adminApproved;
+    private Boolean mentorApproved;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_uuid")
     private User author;
