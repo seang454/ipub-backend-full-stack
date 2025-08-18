@@ -3,37 +3,95 @@ package com.istad.docuhub.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Entity(name = "paper")
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "papers")
 public class Paper {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String uuid;
+    @Column(nullable = false)
+    private Integer studentId;
+
+
+    @Column(nullable = false)
+    private Integer mentorId;
+
+
+    @Column(nullable = false)
+    private Integer categoryId;
+
+
+    @Column(nullable = false)
     private String title;
-    private String content;
+
+
+    @Column(nullable = true)
+    private String abstractText;
+
+
+    @Column(nullable = true)
     private String fileUrl;
-    private LocalDate submitDate;
-    private LocalDate createDate;
-    private Boolean published;
-    private LocalDate publishDate;
-    private  Boolean approved;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_uuid")
-    private User author;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approver_uuid")
-    private User approver;
+    @Column(nullable = false)
+    private String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Category category;
+
+    @Column(nullable = false)
+    private LocalDate submittedAt;
+
+
+    @Column(nullable = false)
+    private LocalDate createdAt;
+
+
+    @Column(nullable = true)
+    private String rejectReason;
+
+
+    @Column(nullable = true)
+    private Integer downloadCount = 0;
+
+
+    @Column(nullable = false)
+    private Boolean isApproved;
+
+
+    @Column(nullable = false)
+    private Boolean isDeleted;
+
+
+    @Column(nullable = false)
+    private Boolean isPublished;
+
+
+    @Column(nullable = true)
+    private LocalDate publishedAt;
+
+
+    private String content;
+
+
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "author_uuid")
+//    private User author;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "approver_uuid")
+//    private User approver;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    private Category category;
 }
