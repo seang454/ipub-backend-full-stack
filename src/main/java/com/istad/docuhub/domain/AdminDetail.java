@@ -1,15 +1,29 @@
 package com.istad.docuhub.domain;
 
-import java.sql.Date;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.List;
+
+@Getter
+@Setter
+@Entity
+@NoArgsConstructor
+@Table(name = "admin_details")
 public class AdminDetail {
-    private int id;
-    private String department;
-    private String position;
-    private String cardId;
-    private String  adminCode;
-    private String status;
-    private Date hireDate;
-    private String permission;
-    //one to one with user and map user uuid
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    private String slug;
+
+    @OneToOne
+    @JoinColumn(name = "user_id",referencedColumnName = "uuid")
+    private User user;
+
+    @ManyToMany
+    private List<Specialize> specializeList;
+
 }
