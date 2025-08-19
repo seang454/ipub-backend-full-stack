@@ -1,9 +1,7 @@
 package com.istad.docuhub.domain;
 
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,56 +9,48 @@ import java.util.List;
 @Entity(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@Setter
+@Getter
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false, unique = true)
     private String uuid;
 
-    @Column(nullable = false, unique = true)
-    private String userName;
+    @Column(nullable = false)
+    private String fullName;
 
-    @Column(nullable = false, length = 10)
     private String gender;
 
-    @Column(nullable = false)
-    private String password;
+//    @Column(nullable = false)
+//    private String keyUserId;
 
+//    @Column(nullable = false)
+//    private String password;
+//
+//    @Column(nullable = false)
+//    private String confirmPassword;
 
-    @Column(nullable = false,  unique = true)
-    private String email;
+//    @Column(nullable = false, unique = true)
+//    private String email;
 
+//    private String firstName;
+//
+//    private String lastName;
 
-    @Column(nullable = false)
-    private String firstName;
-
-
-    @Column(nullable = false)
-    private String lastName;
-
-
-    @Column(nullable = true)
     private String imageUrl;
-
-
-    @Column(nullable = false)
     private Boolean status;
 
-
-    @Column(nullable = false)
     private LocalDate createDate;
-
-    @Column(nullable = true)
     private LocalDate updateDate;
 
     private String bio;
-
     private String address;
 
-    @Column(nullable = true,unique = true)
+    @Column(unique = true)
     private String contactNumber;
 
     private String telegramId;
@@ -69,9 +59,6 @@ public class User {
     private Boolean isAdmin;
     private Boolean isStudent;
     private Boolean isAdvisor;
-
-
-    @Column(nullable = false)
     private Boolean isDeleted;
 
     @OneToMany(mappedBy = "user")
@@ -91,7 +78,4 @@ public class User {
 
     @OneToMany(mappedBy = "receiver")
     private List<Feedback> receivers;
-
-
-
 }

@@ -15,7 +15,6 @@ import java.time.LocalDate;
 public class Feedback {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
@@ -36,16 +35,16 @@ public class Feedback {
     //paper_id //one paper to many feedbacks
 
     @ManyToOne
-    @JoinColumn(name = "paper_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "paper_uuid",referencedColumnName = "uuid")
     private Paper paper;
 
     @ManyToOne
-    @JoinColumn(name = "advisor_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "advisor_uuid",referencedColumnName = "uuid")
     private User advisor;
 
     //send to student
     @ManyToOne
-    @JoinColumn(name = "receiver_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "receiver_uuid",referencedColumnName = "uuid")
     private User receiver;
     //advisor_id one user to many feedbacks
     //student_id //

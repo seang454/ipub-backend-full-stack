@@ -15,8 +15,10 @@ import java.time.LocalDate;
 public class StudentDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
+    private String uuid;
 
     @Column(nullable = false)
     private String studentCardUrl;
@@ -33,7 +35,7 @@ public class StudentDetail {
 
     // one to one user
     @OneToOne
-    @JoinColumn(name = "user_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "user_uuid",referencedColumnName = "uuid")
     private User user;
 
 }

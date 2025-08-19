@@ -17,6 +17,9 @@ public class AdviserDetail {
     @Id
     private Integer id;
 
+    @Column(nullable = false, unique = true)
+    private String uuid;
+
     private Integer experienceYears;
 
     @Column(nullable = false)
@@ -24,19 +27,17 @@ public class AdviserDetail {
 
     private Boolean isDeleted;
 
-    //one to one user
+    // AdviserDetail → User (One-to-One via uuid)
     @OneToOne
-    @JoinColumn(name = "user_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "user_uuid", referencedColumnName = "uuid")
     private User user;
 
-    //one to many specialize
-    @OneToMany
+    // AdviserDetail → Specialize (Many-to-Many via uuid)
+    @ManyToMany
     @JoinTable(
             name = "adviser_specializes",
-            joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "uuid"),
-            inverseJoinColumns = @JoinColumn(name = "specialize_id",referencedColumnName = "uuid")
+            joinColumns = @JoinColumn(name = "adviser_uuid", referencedColumnName = "uuid"),
+            inverseJoinColumns = @JoinColumn(name = "specialize_uuid", referencedColumnName = "uuid")
     )
     private List<Specialize> specialize;
-
-
 }

@@ -16,10 +16,9 @@ import java.time.LocalDate;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
     private String uuid;
 
     @Column(nullable = false, unique = true)
@@ -32,7 +31,7 @@ public class Category {
     private LocalDate createdDate;
 
     @ManyToOne
-    @JoinColumn(name = "paper_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "paper_uuid",referencedColumnName = "uuid")
     private Paper paper;
 
 }

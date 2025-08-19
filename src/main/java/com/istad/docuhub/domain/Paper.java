@@ -18,10 +18,9 @@ import java.util.List;
 public class Paper {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String uuid;
 
     @Column(nullable = false)
@@ -70,12 +69,12 @@ public class Paper {
 
     //one student_id to many paper
     @ManyToOne
-    @JoinColumn(name = "author_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "author_uuid",referencedColumnName = "uuid")
     private User author;
 
     //one assigned to one paper
     @OneToOne
-    @JoinColumn(name = "assigned_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "assigned_uuid",referencedColumnName = "uuid")
     private AdviserAssignment assignedId;
 
     @OneToMany(mappedBy = "paper")
@@ -89,7 +88,6 @@ public class Paper {
 
     @OneToMany(mappedBy = "paper")
     private List<Comment> comments;
-
 
     @OneToMany(mappedBy = "paper")
     private List<Feedback> feedbacks;
