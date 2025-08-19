@@ -15,7 +15,6 @@ import java.time.LocalDate;
 public class Comment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
@@ -25,11 +24,11 @@ public class Comment {
     private LocalDate createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "paper_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "paper_uuid", referencedColumnName = "id", nullable = false)
     private Paper paper;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_uuid", referencedColumnName = "id", nullable = false)
     private User user;
 
 

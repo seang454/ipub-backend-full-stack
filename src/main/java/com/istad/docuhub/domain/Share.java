@@ -16,12 +16,13 @@ import java.util.List;
 public class Share {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
+    private String uuid;
 
     @Column(nullable = false)
     private String platform;
-
 
     @Column(nullable = false)
     private LocalDate startDate;
@@ -32,11 +33,11 @@ public class Share {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "paper_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "paper_uuid", referencedColumnName = "id", nullable = false)
     private Paper paper;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_uuid", referencedColumnName = "id", nullable = false)
     private User user;
 
 }

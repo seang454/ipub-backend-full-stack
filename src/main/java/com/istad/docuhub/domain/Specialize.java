@@ -1,6 +1,5 @@
 package com.istad.docuhub.domain;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,10 +15,9 @@ import java.util.List;
 public class Specialize {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String uuid;
 
     @Column(nullable = false)
@@ -28,7 +26,6 @@ public class Specialize {
     @Column(nullable = false)
     private String slug;
 
-    @ManyToMany(mappedBy = "adviserDetail")
-    private List<AdviserDetail> adviserDetail;
-
+    @ManyToMany(mappedBy = "specialize")
+    private List<AdviserDetail> adviserDetails;
 }

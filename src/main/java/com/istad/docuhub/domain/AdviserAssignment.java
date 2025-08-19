@@ -15,10 +15,9 @@ import java.time.LocalDate;
 public class AdviserAssignment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
     private String uuid;
 
     @Column(nullable = false)
@@ -35,16 +34,16 @@ public class AdviserAssignment {
 
 
     @OneToOne
-    @JoinColumn(name = "advisor_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "advisor_uuid",referencedColumnName = "uuid")
     private User advisor;
     //one to one paper
     @OneToOne
-    @JoinColumn(name = "paper_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "paper_uuid",referencedColumnName = "uuid")
     private Paper paper;
     //one to one admin
 
     @OneToOne
-    @JoinColumn(name = "admin_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "admin_uuid",referencedColumnName = "uuid")
     private User admin;
 
 }

@@ -1,4 +1,29 @@
 package com.istad.docuhub.feature.user.dto;
+import lombok.Builder;
 
-public record UserResponse() {
+import java.time.LocalDate;
+
+@Builder
+public record UserResponse(
+     Integer id,
+     String uuid,
+     String userName,
+     String gender,
+     String email,
+     String fullName,
+     String firstName,
+     String lastName,
+     String imageUrl,
+     Boolean status,
+     LocalDate createDate,
+     LocalDate updateDate,
+     String bio,
+     String address,
+     String contactNumber,
+     String telegramId,
+     Boolean isUser,
+     Boolean isAdmin,
+     Boolean isStudent,
+     Boolean isAdvisor
+) {
 }

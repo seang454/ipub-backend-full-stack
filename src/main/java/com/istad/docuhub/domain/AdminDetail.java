@@ -15,12 +15,11 @@ import java.util.List;
 public class AdminDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String slug;
 
     @OneToOne
-    @JoinColumn(name = "user_id",referencedColumnName = "uuid")
+    @JoinColumn(name = "user_uuid",referencedColumnName = "uuid")
     private User user;
 
     @ManyToMany
