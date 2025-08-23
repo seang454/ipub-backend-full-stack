@@ -1,4 +1,4 @@
-package com.istad.docuhub.Repository;
+package com.istad.docuhub.feature.user;
 
 import com.istad.docuhub.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;

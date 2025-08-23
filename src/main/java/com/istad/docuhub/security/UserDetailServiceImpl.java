@@ -26,7 +26,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
     private final Keycloak keycloak;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UsersResource usersResource = keycloak.realm("docuhub").users();
+        UsersResource usersResource = keycloak.realm("ducuapi").users();
         List<UserRepresentation> userRepresentations = usersResource.search(username,true);
         if (userRepresentations.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
