@@ -1,6 +1,5 @@
 package com.istad.docuhub.feature.user;
 
-import com.istad.docuhub.Repository.UserRepository;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.dto.AuthResponse;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
@@ -11,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,7 +57,6 @@ public class UserServiceImpl implements UserService {
             AtomicReference<String> UserUuid = new AtomicReference<>("");
             if (response.getStatus() == HttpStatus.CREATED.value()) {
                 //verify email
-                log.info("User created with id " + user.getUsername());
                 List<UserRepresentation> userRepresentations = keycloak.realm("docuapi")
                         .users()
                         .search(user.getUsername(),true);
@@ -69,14 +69,19 @@ public class UserServiceImpl implements UserService {
 
                         });
                 Integer id;
+
+                //assign role
+                UserResource userResource = keycloak.realm("docuapi").users().get(UserUuid.get());
+                RoleRepresentation userRole = keycloak.realm("docuapi").roles().get("USER").toRepresentation();
+                userResource.roles().realmLevel().add(Collections.singletonList(userRole));
+
                 int retries = 0;
                 do {
                     if (retries++ > 50) {
                         throw new RuntimeException("Unable to generate unique ID after 50 attempts");
                     }
                     id = new Random().nextInt(Integer.parseInt("1000000"));
-                }
-                while (userRepository.existsByIdAndIsDeletedFalse(id));
+                } while (userRepository.existsByIdAndIsDeletedFalse(id));
                 String fullName = userCreateDto.firstname() + " " + userCreateDto.lastname();
                 log.info("User id ",user.getId());
 
