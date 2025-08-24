@@ -32,9 +32,12 @@ public class KeyCloakSecurityConfig {
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
                         .requestMatchers(HttpMethod.POST,"api/v1/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/media").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").permitAll()
                         .anyRequest().authenticated()
                 );
-
+    
         //it is used to authenticate user role from
         http.oauth2ResourceServer(author2->
                 author2.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter()))

@@ -1,6 +1,6 @@
-package com.istad.docuhub.feature.mentorDetail.dto;
+package com.istad.docuhub.feature.adviserDetail.dto;
 
-public record MentorResponseDto (
+public record AdviserResponseDto(
          Long id,
          Integer yearsExperience,
          String idCard,
