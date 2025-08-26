@@ -16,7 +16,8 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/media")
+    @RequestMapping("/api/v1/media")
+@CrossOrigin("*")
 public class MediaController {
 
     private final MediaService mediaService;
