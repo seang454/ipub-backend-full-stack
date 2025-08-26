@@ -1,4 +1,4 @@
-package com.istad.docuhub.contoller;
+package com.istad.docuhub.feature.user.contoller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

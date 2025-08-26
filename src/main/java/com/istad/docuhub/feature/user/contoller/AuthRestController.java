@@ -1,4 +1,4 @@
-package com.istad.docuhub.contoller;
+package com.istad.docuhub.feature.user.contoller;
 
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.UpdateUserDto;
