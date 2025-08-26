@@ -4,10 +4,13 @@ import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.dto.AuthResponse;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
+import com.istad.docuhub.feature.user.mapper.UserMapperManual;
+import com.istad.docuhub.slugGeneration.SlugUtil;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -18,10 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -96,6 +98,7 @@ public class UserServiceImpl implements UserService {
                         .isDeleted(false)
                         .createDate(LocalDate.now())
                         .updateDate(LocalDate.now())
+                        .slug(SlugUtil.toSlug(fullName,userCreateDto.username()))
                         .build();
                 userRepository.save(saveUser);
 
@@ -113,6 +116,7 @@ public class UserServiceImpl implements UserService {
                         .isStudent(saveUser.getIsStudent())
                         .createDate(saveUser.getCreateDate())
                         .updateDate(saveUser.getUpdateDate())
+                        .slug(saveUser.getSlug())
                         .build();
             }
         }
@@ -121,6 +125,53 @@ public class UserServiceImpl implements UserService {
     @Override
     public AuthResponse login(String username, String password) {
         return null;
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<UserRepresentation> userRepresentations = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
+        List<User> users = userRepository.findAll();
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (UserRepresentation userRepresentation : userRepresentations) {
+            Optional<User> singleUser = users.stream().filter(user -> user.getUuid().equals(userRepresentation.getId())).findFirst();
+            if (singleUser.isPresent()) {
+                User user = singleUser.get();
+                userResponses.add(
+                        UserMapperManual.mapUserToUserResponse(user,userRepresentation)
+                );
+            }
+        }
+        return userResponses;
+    }
+    @Override
+    public UserResponse getSingleUser(String uuid) {
+        UserResponse userResponse = getAllUsers().stream().filter(user -> uuid.equals(user.uuid()) ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return userResponse;
+    }
+
+    @Override
+    public List<UserResponse> searchUserByUsername(String username) {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<UserRepresentation> userRepresentations = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
+        List<User> users = userRepository.findBySlugContainingAndIsDeletedFalse(username);
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (UserRepresentation userRepresentation : userRepresentations) {
+            Optional<User> singleUser = users.stream().filter(user -> user.getUuid().equals(userRepresentation.getId())).findFirst();
+            if (singleUser.isPresent()) {
+                userResponses.add(
+                        UserMapperManual.mapUserToUserResponse(singleUser.get(),userRepresentation)
+                );
+            }
+        }
+        return userResponses;
+    }
+
+    @Override
+    public void deleteUser(Integer id) {
+
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<UserRepresentation> userRepresentations = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
     }
 
     public void verify(String userId) {
