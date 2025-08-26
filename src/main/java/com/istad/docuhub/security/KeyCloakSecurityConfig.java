@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableWebSecurity
 public class KeyCloakSecurityConfig {
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -64,13 +63,10 @@ public class KeyCloakSecurityConfig {
                         .logoutSuccessHandler((request, response, authentication) -> {
                             // Keycloak logout endpoint
                             String keycloakLogoutUrl = "http://localhost:9090/realms/docuapi/protocol/openid-connect/logout";
-
                             // Redirect back to your backend endpoint after logout
                             String redirectAfterLogout = "http://localhost:8080/api/v1/auth/tokens";
-
                             // Full logout URL
                             String logoutUrl = keycloakLogoutUrl + "?redirect_uri=" + redirectAfterLogout;
-
                             // Redirect browser to Keycloak logout
                             response.sendRedirect(logoutUrl);
                         })
@@ -92,10 +88,8 @@ public class KeyCloakSecurityConfig {
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                     .collect(Collectors.toList());
         };
-
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
         jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
         return jwtConverter;
     }
-    // Correct LogoutSuccessHandler implementation
 }

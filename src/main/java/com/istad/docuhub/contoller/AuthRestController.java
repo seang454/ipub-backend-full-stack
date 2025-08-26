@@ -1,6 +1,7 @@
 package com.istad.docuhub.contoller;
 
 import com.istad.docuhub.feature.user.UserService;
+import com.istad.docuhub.feature.user.dto.UpdateUserDto;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -52,13 +53,23 @@ public class AuthRestController {
     public List<UserResponse> getUsers(){
         return userService.getAllUsers();
     }
-    @GetMapping("user/{id}")
-    public UserResponse getSingleUser(@PathVariable String id){
-        return userService.getSingleUser(id);
+    @GetMapping("user/{uuid}")
+    public UserResponse getSingleUser(@PathVariable String uuid){
+        return userService.getSingleUser(uuid);
     }
     @GetMapping("slug")
     public List<UserResponse> searchUserByUsername(@RequestParam String username){
         return userService.searchUserByUsername(username);
     }
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("user/{uuid}")
+    public void deleteUser(@PathVariable String uuid) {
+        log.info("User id controller {} ",uuid);
+         userService.deleteUser(uuid);
+    }
+    @PatchMapping("/user/{uuid}")
+    public void updateUser(@PathVariable String uuid, @RequestBody UpdateUserDto updateUserDto) {
+        log.info("User id controller {} ",updateUserDto);
+        userService.updateUser(uuid, updateUserDto);
+    }
 }

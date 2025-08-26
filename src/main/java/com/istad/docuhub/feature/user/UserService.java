@@ -1,6 +1,8 @@
 package com.istad.docuhub.feature.user;
 
+import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.dto.AuthResponse;
+import com.istad.docuhub.feature.user.dto.UpdateUserDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 
@@ -12,6 +14,6 @@ public interface UserService {
      List<UserResponse> getAllUsers();
      UserResponse getSingleUser(String id);
     List<UserResponse> searchUserByUsername(String username);
-    void deleteUser(Integer id);
-
+    void deleteUser(String userId);
+    void updateUser(String userUuid, UpdateUserDto updateUserDto);
 }

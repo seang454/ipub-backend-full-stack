@@ -2,8 +2,10 @@ package com.istad.docuhub.feature.user;
 
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.dto.AuthResponse;
+import com.istad.docuhub.feature.user.dto.UpdateUserDto;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
+import com.istad.docuhub.feature.user.mapper.UseMapper;
 import com.istad.docuhub.feature.user.mapper.UserMapperManual;
 import com.istad.docuhub.slugGeneration.SlugUtil;
 import jakarta.ws.rs.core.Response;
@@ -20,10 +22,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final Keycloak keycloak;
     private final UserRepository userRepository;
+    private final UseMapper useMapper;
     private final PasswordEncoder passwordEncoder;
     @Override
     public UserResponse register(UserCreateDto userCreateDto) {
@@ -149,7 +153,6 @@ public class UserServiceImpl implements UserService {
         UserResponse userResponse = getAllUsers().stream().filter(user -> uuid.equals(user.uuid()) ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return userResponse;
     }
-
     @Override
     public List<UserResponse> searchUserByUsername(String username) {
         RealmResource realmResource = keycloak.realm("docuapi");
@@ -168,10 +171,55 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Integer id) {
-
+    public void deleteUser(String userId) {
+        log.info("User id {} ",userId);
+        // userId should be String, not Integer
         RealmResource realmResource = keycloak.realm("docuapi");
-        List<UserRepresentation> userRepresentations = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
+        // Get the Keycloak user
+        UserResource userResource = realmResource.users().get(userId);
+        UserRepresentation userRep = userResource.toRepresentation();
+        if (userRep != null && userRep.isEnabled()) {
+            // Soft delete in local DB
+            User dbUser = userRepository.findByUuidAndIsDeletedFalse(userId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
+            dbUser.setIsDeleted(true);
+            log.info("dbUser {} ",dbUser);
+            userRepository.save(dbUser);
+            // Disable user in Keycloak
+            userRep.setEnabled(false);
+            userResource.update(userRep);
+        }else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled");
+        }
+    }
+
+    @Override
+    public void updateUser(String userUuid, UpdateUserDto updateUserDto) {
+        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
+        RealmResource realmResource = keycloak.realm("docuapi");
+        UserResource userResource = realmResource.users().get(user.getUuid());
+        UserRepresentation userRep = userResource.toRepresentation();
+        if (userRep == null || !userRep.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or already disabled");
+        }
+        useMapper.updateUser(user,updateUserDto);
+        user.setSlug(SlugUtil.toSlug(updateUserDto.fullName(),updateUserDto.userName()));
+        user.setUpdateDate(LocalDate.now());
+        User user1= userRepository.save(user);
+
+        if (updateUserDto.firstName() != null) userRep.setFirstName(updateUserDto.firstName());
+        if (updateUserDto.lastName() != null) userRep.setLastName(updateUserDto.lastName());
+        if (updateUserDto.email() != null) userRep.setEmail(updateUserDto.email());
+        if (updateUserDto.userName() != null && !updateUserDto.userName().isBlank()) {
+            userRep.setUsername(updateUserDto.userName()); // Only if allowed by Keycloak
+        }
+        log.info("updateUser {} ",userRep);
+        userResource.update(userRep);
+
+        UserResource updatedUserResource = realmResource.users().get(user.getUuid());
+        UserRepresentation updatedUserRepresentation = updatedUserResource.toRepresentation();
+        if (updatedUserRepresentation.isEnabled() && !updatedUserRepresentation.isEmailVerified()) {
+            verify(user.getUuid());
+        }
     }
 
     public void verify(String userId) {
