@@ -1,6 +1,5 @@
-package com.istad.docuhub.feature.paper;
+package com.istad.docuhub.feature.paper.controller;
 
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
