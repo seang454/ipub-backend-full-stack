@@ -77,8 +77,9 @@ public class Paper {
     @JoinColumn(name = "assigned_uuid",referencedColumnName = "uuid")
     private AdviserAssignment assignedId;
 
-    @OneToMany(mappedBy = "paper")
-    private List<Category> categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_uuid",referencedColumnName = "uuid")
+    private Category category;
 
     @OneToMany(mappedBy = "paper")
     private List<Star> stars;

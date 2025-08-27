@@ -1,10 +1,21 @@
 package com.istad.docuhub.feature.user;
 
-import com.istad.docuhub.feature.user.dto.AuthResponse;
-import com.istad.docuhub.feature.user.dto.UserCreateDto;
-import com.istad.docuhub.feature.user.dto.UserResponse;
+import com.istad.docuhub.domain.User;
+import com.istad.docuhub.feature.user.dto.*;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+
+import java.util.List;
+import java.util.Map;
 
 public interface UserService {
-    public UserResponse register(UserCreateDto userCreateDto);
-    public AuthResponse login(String username, String password);
+     UserResponse register(UserCreateDto userCreateDto);
+     AuthResponse login(String username, String password);
+     List<UserResponse> getAllUsers();
+     UserResponse getSingleUser(String id);
+    List<UserResponse> searchUserByUsername(String username);
+    void deleteUser(String userId);
+    void updateUser(String userUuid, UpdateUserDto updateUserDto);
+    UpdateUserImageDto updateImageUrl(String imageUrl, String userUuid);
+    Map<String, Object> getValidTokens(OAuth2AuthorizedClient client, OidcUser oidcUser);
 }

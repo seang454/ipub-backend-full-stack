@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,8 +31,7 @@ public class Category {
     @Column(nullable = false)
     private LocalDate createdDate;
 
-    @ManyToOne
-    @JoinColumn(name = "paper_uuid",referencedColumnName = "uuid")
-    private Paper paper;
+    @OneToMany(mappedBy = "category")
+    private List<Paper> paper;
 
 }
