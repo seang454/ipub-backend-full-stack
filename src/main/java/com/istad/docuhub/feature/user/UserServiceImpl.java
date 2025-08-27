@@ -1,10 +1,7 @@
 package com.istad.docuhub.feature.user;
 
 import com.istad.docuhub.domain.User;
-import com.istad.docuhub.feature.user.dto.AuthResponse;
-import com.istad.docuhub.feature.user.dto.UpdateUserDto;
-import com.istad.docuhub.feature.user.dto.UserCreateDto;
-import com.istad.docuhub.feature.user.dto.UserResponse;
+import com.istad.docuhub.feature.user.dto.*;
 import com.istad.docuhub.feature.user.mapper.UseMapper;
 import com.istad.docuhub.feature.user.mapper.UserMapperManual;
 import com.istad.docuhub.slugGeneration.SlugUtil;
@@ -19,6 +16,11 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -36,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UseMapper useMapper;
     private final PasswordEncoder passwordEncoder;
+    private final OAuth2AuthorizedClientManager authorizedClientManager;
     @Override
     public UserResponse register(UserCreateDto userCreateDto) {
 //        log.info("Registering user in service {}", userCreateDto);
@@ -174,8 +177,8 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(String userId) {
         log.info("User id {} ",userId);
         // userId should be String, not Integer
-        RealmResource realmResource = keycloak.realm("docuapi");
         // Get the Keycloak user
+        RealmResource realmResource = keycloak.realm("docuapi");
         UserResource userResource = realmResource.users().get(userId);
         UserRepresentation userRep = userResource.toRepresentation();
         if (userRep != null && userRep.isEnabled()) {
@@ -194,8 +197,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(String userUuid, UpdateUserDto updateUserDto) {
-        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
         RealmResource realmResource = keycloak.realm("docuapi");
+        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
         UserResource userResource = realmResource.users().get(user.getUuid());
         UserRepresentation userRep = userResource.toRepresentation();
         if (userRep == null || !userRep.isEnabled()) {
@@ -222,10 +225,51 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public UpdateUserImageDto updateImageUrl(String imageUrl, String userUuid) {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
+        UserResource userResource = realmResource.users().get(user.getUuid());
+        UserRepresentation userRep = userResource.toRepresentation();
+        if (userRep == null || !userRep.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or already disabled");
+        }
+        if (imageUrl == null || imageUrl.isBlank() || imageUrl.isEmpty()) {
+            user.setImageUrl(null);
+        }else {
+            user.setImageUrl(imageUrl);
+        }
+        User user1= userRepository.save(user);
+        return UpdateUserImageDto.builder()
+                .imageUrl(user1.getImageUrl())
+                .build();
+    }
     public void verify(String userId) {
         log.info("Verifying user {}", userId);
         UserResource userResource = keycloak.realm("docuapi").users().get(userId);
         userResource.sendVerifyEmail();
 
+    }
+
+    public Map<String, Object> getValidTokens(OAuth2AuthorizedClient client, OidcUser oidcUser) {
+        Map<String, Object> tokens = new HashMap<>();
+
+        OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("keycloak")
+                .principal(oidcUser.getName())
+                .build();
+
+        OAuth2AuthorizedClient updatedClient = authorizedClientManager.authorize(authorizeRequest);
+
+        // no need
+        if (updatedClient != null) {
+            OAuth2AccessToken accessToken = updatedClient.getAccessToken();
+            tokens.put("accessToken", accessToken.getTokenValue());
+            tokens.put("refreshToken", updatedClient.getRefreshToken() != null
+                    ? updatedClient.getRefreshToken().getTokenValue()
+                    : null);
+            tokens.put("claims", oidcUser.getClaims());
+        }
+
+        return tokens;
     }
 }
