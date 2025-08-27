@@ -42,7 +42,7 @@ public class MediaController {
         String contentType = FileServiceUtil.guessContentType(file);
 
         if (contentType == null) {
-            contentType = "application/octet-stream";
+            contentType = "app lication/octet-stream";
         }
 
         return ResponseEntity.ok()
