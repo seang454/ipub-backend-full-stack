@@ -8,7 +8,6 @@ public class UserMapperManual {
    public static UserResponse mapUserToUserResponse(User user, UserRepresentation userRepresentation) {
         return UserResponse.builder()
                 .slug(user.getSlug())
-                .id(user.getId())
                 .uuid(user.getUuid())
                 .fullName(user.getFullName())
                 .isUser(user.getIsUser())

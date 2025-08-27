@@ -110,7 +110,6 @@ public class UserServiceImpl implements UserService {
                 userRepository.save(saveUser);
 
                 return UserResponse.builder()
-                        .id(id)
                         .uuid(UserUuid.get())
                         .userName(userCreateDto.username())
                         .email(user.getEmail())
