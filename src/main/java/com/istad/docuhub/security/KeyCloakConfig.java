@@ -14,10 +14,10 @@ public class KeyCloakConfig {
         return KeycloakBuilder
                 .builder()
                 .serverUrl("http://localhost:9090")
-                .realm("docuapi")
+                .realm("docuhub")
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-                .clientId("admin-cli")
-                .clientSecret("86d63eALLAz7HTd8Updik3ukXTYuuYZH")
+                .clientId("docuhub-frontend")
+                .clientSecret("rzHBy3r5qHqfepwbetlxfY4sqB8OJssR")
                 .build();
     }
 }
