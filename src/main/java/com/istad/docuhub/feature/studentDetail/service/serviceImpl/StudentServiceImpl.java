@@ -1,13 +1,14 @@
 package com.istad.docuhub.feature.studentDetail.service.serviceImpl;
 
-import com.istad.docuhub.Repository.StudentDetailRepository;
-import com.istad.docuhub.Repository.UserRepository;
+
 import com.istad.docuhub.domain.StudentDetail;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.studentDetail.dto.StudentDetailRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentDetailResponse;
 import com.istad.docuhub.feature.studentDetail.dto.UpdateStudentDetailRequest;
 import com.istad.docuhub.feature.studentDetail.mapper.StudentMapper;
+import com.istad.docuhub.feature.studentDetail.repository.StudentRepositoryForStudentDetailFeature;
+import com.istad.docuhub.feature.studentDetail.repository.UserRepositoryForStudentDetailFeature;
 import com.istad.docuhub.feature.studentDetail.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,8 @@ import java.util.UUID;
 @Slf4j
 public class StudentServiceImpl implements StudentService {
 
-    private final StudentDetailRepository repository;
-    private final UserRepository userRepository;
+    private final StudentRepositoryForStudentDetailFeature studentRepository;
+    private final UserRepositoryForStudentDetailFeature userRepository;
     private final StudentMapper studentMapperImpl;
 
 
@@ -43,7 +44,7 @@ public class StudentServiceImpl implements StudentService {
         student.setUser(user);            // attach managed user
 
         // 3. Persist
-        repository.save(student);
+        studentRepository.save(student);
         return studentMapperImpl.toResponse(student);
     }
 
@@ -53,7 +54,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<StudentDetailResponse> getAll() {
-        return repository.findAll()
+        return studentRepository.findAll()
                 .stream()
                 .map(studentMapperImpl::toResponse)
                 .toList();
@@ -65,7 +66,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDetailResponse getByUuid(String uuid) {
-        return repository.findByUuid(uuid)
+        return studentRepository.findByUuid(uuid)
                 .map(studentMapperImpl::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Student detail not found"));
@@ -77,7 +78,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDetailResponse updatePartial(String uuid, UpdateStudentDetailRequest request) {
-        StudentDetail existing = repository.findByUuid(uuid)
+        StudentDetail existing = studentRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Student detail not found"));
 
@@ -90,7 +91,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         studentMapperImpl.updatePartial(existing, request);
-        repository.save(existing);
+        studentRepository.save(existing);
         return studentMapperImpl.toResponse(existing);
     }
 
@@ -100,11 +101,11 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void delete(String uuid) {
-        if (!repository.existsByUuid(uuid)) {
+        if (!studentRepository.existsByUuid(uuid)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Student detail not found");
         }
-        repository.deleteByUuid(uuid);
+        studentRepository.deleteByUuid(uuid);
     }
 
 

@@ -1,8 +1,5 @@
 package com.istad.docuhub.feature.star.service.serviceImpl;
 
-import com.istad.docuhub.Repository.PaperRepository;
-import com.istad.docuhub.Repository.StarRepository;
-import com.istad.docuhub.Repository.UserRepository;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.Star;
 import com.istad.docuhub.domain.User;
@@ -11,6 +8,9 @@ import com.istad.docuhub.feature.star.dto.DeleteStarRequest;
 import com.istad.docuhub.feature.star.dto.StarCountResponse;
 import com.istad.docuhub.feature.star.dto.StarResponse;
 import com.istad.docuhub.feature.star.mapper.StarMapper;
+import com.istad.docuhub.feature.star.repository.PaperRepositoryForStarFeature;
+import com.istad.docuhub.feature.star.repository.StarRepositoryForStarFeature;
+import com.istad.docuhub.feature.star.repository.UserRepositoryForStarFeature;
 import com.istad.docuhub.feature.star.service.StarService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +31,9 @@ import java.util.UUID;
 public class StarServiceImpl implements StarService {
 
 
-    private final UserRepository userRepository;
-    private final PaperRepository paperRepository;
-    private final StarRepository starRepository;
+    private final UserRepositoryForStarFeature userRepository;
+    private final PaperRepositoryForStarFeature paperRepository;
+    private final StarRepositoryForStarFeature starRepository;
     private final StarMapper starMapper;
 
 
@@ -41,7 +41,7 @@ public class StarServiceImpl implements StarService {
     public StarResponse starPaper(CreateStarRequest createStarRequest) {
 
         // Check if star already exists
-        if (starRepository.existsByUserIdAndPaperId(createStarRequest.userId(), createStarRequest.paperId())) {
+        if (starRepository.existsByUserId(createStarRequest.userId()) && starRepository.existsByPaperId(createStarRequest.paperId()) ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You have already starred this paper");
         }
 
@@ -51,11 +51,11 @@ public class StarServiceImpl implements StarService {
         star.setStaredAt(LocalDate.now());
 
         // Validation User
-        User user = userRepository.findUserById(createStarRequest.userId())
+        User user = userRepository.findById(createStarRequest.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // Validation Paper
-        Paper paper = paperRepository.findPaperById(createStarRequest.paperId())
+        Paper paper = paperRepository.findById(createStarRequest.paperId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
 
         // Additional validation - check if paper can be starred
@@ -77,12 +77,12 @@ public class StarServiceImpl implements StarService {
     @Override
     public void unstarPaper(DeleteStarRequest deleteStarRequest) {
 
-        if (!starRepository.existsByUserIdAndPaperId(deleteStarRequest.userId(), deleteStarRequest.paperId())) {
+        if (!starRepository.existsByUserId(deleteStarRequest.userId()) || !starRepository.existsByPaperId(deleteStarRequest.paperId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Star not found or you don't have permission to remove it");
         }
 
-        starRepository.deleteByUserIdAndPaperId(deleteStarRequest.userId(), deleteStarRequest.paperId());
+        starRepository.deleteByUserId(deleteStarRequest.userId());
 
     }
 
@@ -94,11 +94,11 @@ public class StarServiceImpl implements StarService {
     public StarResponse toggleStar(CreateStarRequest createStarRequest) {
 
         // Validation User
-        User user = userRepository.findUserById(createStarRequest.userId())
+        User user = userRepository.findById(createStarRequest.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // Validation Paper
-        Paper paper = paperRepository.findPaperById(createStarRequest.paperId())
+        Paper paper = paperRepository.findById(createStarRequest.paperId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
 
         // Additional validation
@@ -107,9 +107,9 @@ public class StarServiceImpl implements StarService {
         }
 
         // Check if star exists
-        if (starRepository.existsByUserIdAndPaperId(createStarRequest.userId(), createStarRequest.paperId())) {
+        if (starRepository.existsByUserId(createStarRequest.userId()) && starRepository.existsByPaperId(createStarRequest.paperId())) {
             // Remove star
-            starRepository.deleteByUserIdAndPaperId(createStarRequest.userId(), createStarRequest.paperId());
+            starRepository.deleteByUserId(createStarRequest.userId());
 
             // Return response indicating unstarred
             return StarResponse.builder()
@@ -136,11 +136,11 @@ public class StarServiceImpl implements StarService {
     @Override
     public StarCountResponse getStarInfo(Integer paperId, Integer userId) {
         // Validation Paper exists
-        paperRepository.findPaperById(paperId)
+        paperRepository.findById(paperId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
 
         Long starCount = starRepository.countByPaperId(paperId);
-        boolean userHasStarred = starRepository.existsByUserIdAndPaperId(userId, paperId);
+        boolean userHasStarred = starRepository.existsByUserId(userId);
 
         return StarCountResponse.builder()
                 .paperId(paperId)
@@ -153,17 +153,17 @@ public class StarServiceImpl implements StarService {
 
 
 
-    @Override
-    public Page<StarResponse> getUserStarredPapers(Integer userId, int page, int size) {
-        // Validation User
-        userRepository.findUserById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Star> stars = starRepository.findByUserIdOrderByStaredAtDesc(userId, pageable);
-
-        return stars.map(starMapper::toStarResponse);
-    }
+//    @Override
+//    public Page<StarResponse> getUserStarredPapers(Integer userId, int page, int size) {
+//        // Validation User
+//        userRepository.findById(userId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+//
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<Star> stars = starRepository.findByUserIdOrderByStaredAtDesc(userId, pageable);
+//
+//        return stars.map(starMapper::toStarResponse);
+//    }
 
 
 

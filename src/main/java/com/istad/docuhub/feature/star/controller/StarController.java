@@ -65,15 +65,5 @@ public class StarController {
 
 
 
-    @GetMapping("/my-stars/{userId}")
-    public ResponseEntity<Page<StarResponse>> getUserStarredPapers(
-            @PathVariable Integer userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<StarResponse> stars = starService.getUserStarredPapers(userId, page, size);
-        return ResponseEntity.ok(stars);
-    }
-
-
 
 }

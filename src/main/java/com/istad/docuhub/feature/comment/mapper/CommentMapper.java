@@ -15,7 +15,6 @@ public interface CommentMapper {
     @Mapping(target = "id", ignore = true) // JPA will generate ID
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "paper", ignore = true)
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDate.now())")
     Comment toComment(CreateCommentRequest createCommentRequest);
 
 

@@ -30,16 +30,24 @@ public class CommentController {
     }
 
 
-    @PutMapping("/edit")
-    public CommentResponse editComment(@Valid @RequestBody EditCommentRequest editCommentRequest) {
-        return commentService.editComment(editCommentRequest);
+//    @PutMapping("/edit")
+//    public CommentResponse editComment(@Valid @RequestBody EditCommentRequest editCommentRequest) {
+//        return commentService.editComment(editCommentRequest);
+//    }
+
+    @PutMapping   // /api/v1/comments
+    public CommentResponse editComment(@Valid @RequestBody EditCommentRequest req) {
+        return commentService.editComment(req);
     }
 
 
-    @DeleteMapping("/delete")
+
+    @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteComment(@Valid @RequestBody DeleteCommentRequest deleteCommentRequest) {
         commentService.deleteCommentByUserIdAndCommentId(deleteCommentRequest);
     }
+
+
 
 }

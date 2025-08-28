@@ -1,8 +1,5 @@
 package com.istad.docuhub.feature.comment.service.serviceImpl;
 
-import com.istad.docuhub.Repository.CommentRepository;
-import com.istad.docuhub.Repository.PaperRepository;
-import com.istad.docuhub.Repository.UserRepository;
 import com.istad.docuhub.domain.Comment;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
@@ -11,6 +8,9 @@ import com.istad.docuhub.feature.comment.dto.CreateCommentRequest;
 import com.istad.docuhub.feature.comment.dto.DeleteCommentRequest;
 import com.istad.docuhub.feature.comment.dto.EditCommentRequest;
 import com.istad.docuhub.feature.comment.mapper.CommentMapper;
+import com.istad.docuhub.feature.comment.repository.CommentRepositoryForCommentFeature;
+import com.istad.docuhub.feature.comment.repository.PaperRepositoryForCommentFeature;
+import com.istad.docuhub.feature.comment.repository.UserRepositoryForCommentFeature;
 import com.istad.docuhub.feature.comment.service.CommentService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,34 +24,51 @@ import java.time.LocalDate;
 public class CommentServiceImpl implements CommentService {
 
 
-    private final UserRepository userRepository;
-    private final PaperRepository paperRepository;
-    private final CommentRepository commentRepository;
+    private final UserRepositoryForCommentFeature userRepository;
+    private final PaperRepositoryForCommentFeature paperRepository;
+    private final CommentRepositoryForCommentFeature commentRepository;
     private final CommentMapper commentMapper;
 
 
+//    @Override
+//    public CommentResponse comment(CreateCommentRequest createCommentRequest) {
+//
+//        Comment comment = new Comment();
+//
+//        comment.setContent(createCommentRequest.content());
+//        comment.setCreatedAt(LocalDate.now());
+//
+//        User user = userRepository.findById(createCommentRequest.userId())
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+//
+//        Paper paper = paperRepository.findById(createCommentRequest.paperId())
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
+//
+//        comment.setPaper(paper);
+//        comment.setUser(user);
+//
+//        Comment saved = commentRepository.save(comment);
+//
+//
+//        return commentMapper.toCommentResponse(saved);
+//    }
+
+
+
     @Override
-    public CommentResponse comment(CreateCommentRequest createCommentRequest) {
-
-        Comment comment = new Comment();
-
-        comment.setContent(createCommentRequest.content());
-        comment.setCreatedAt(LocalDate.now());
-
-        // Validation User
-        User user = userRepository.findUserById(createCommentRequest.userId())
+    public CommentResponse comment(CreateCommentRequest req) {
+        User user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Validation Paper
-        Paper paper = paperRepository.findPaperById(createCommentRequest.paperId())
+        Paper paper = paperRepository.findById(req.paperId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
 
+        Comment comment = commentMapper.toComment(req); // mapper sets content & createdAt
+        comment.setUser(user);                          // relations set manually
         comment.setPaper(paper);
-        comment.setUser(user);
+        comment.setCreatedAt(LocalDate.now());
 
         Comment saved = commentRepository.save(comment);
-
-
         return commentMapper.toCommentResponse(saved);
     }
 
@@ -60,13 +77,16 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public CommentResponse editComment(EditCommentRequest editCommentRequest) {
-
-        Comment comment = commentRepository.findById(editCommentRequest.commentId())
+    public CommentResponse editComment(EditCommentRequest req) {
+        Comment comment = commentRepository.findById(req.commentId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
 
-        comment.setContent(editCommentRequest.content());
+        if (!comment.getUser().getId().equals(req.userId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You are not allowed to edit this comment");
+        }
 
+        comment.setContent(req.content());
         return commentMapper.toCommentResponse(commentRepository.save(comment));
     }
 

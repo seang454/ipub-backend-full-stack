@@ -26,6 +26,6 @@ public interface StarService {
 
 
     //Get user's starred papers with pagination
-    Page<StarResponse> getUserStarredPapers(Integer userId, int page, int size);
+//    Page<StarResponse> getUserStarredPapers(Integer userId, int page, int size);
 
 }
