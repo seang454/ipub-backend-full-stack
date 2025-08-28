@@ -1,11 +1,10 @@
-package com.istad.docuhub.contoller;
+package com.istad.docuhub.feature.adminDetail.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin")
-public class AdminController {
-
+@RequestMapping("/api/v1/admin")
+public class AdminControllerPaper {
 
 }
