@@ -25,29 +25,16 @@ public class User {
 
     private String gender;
 
-//    @Column(nullable = false)
-//    private String keyUserId;
-
-//    @Column(nullable = false)
-//    private String password;
-//
-//    @Column(nullable = false)
-//    private String confirmPassword;
-
-//    @Column(nullable = false, unique = true)
-//    private String email;
-
-//    private String firstName;
-//
-//    private String lastName;
-
     private String imageUrl;
+
     private Boolean status;
 
     private LocalDate createDate;
+
     private LocalDate updateDate;
 
     private String bio;
+
     private String address;
 
     @Column(unique = true)
