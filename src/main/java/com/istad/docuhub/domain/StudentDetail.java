@@ -15,6 +15,7 @@ import java.time.LocalDate;
 public class StudentDetail {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Just added by Vannarith
     private Integer id;
 
     @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
