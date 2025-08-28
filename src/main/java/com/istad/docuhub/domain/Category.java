@@ -2,10 +2,7 @@ package com.istad.docuhub.domain;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,12 +11,14 @@ import java.util.List;
 @Setter
 @Entity(name = "categories")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Category {
 
     @Id
     private Integer id;
 
-    @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
+    @Column(nullable = false, unique = true)
     private String uuid;
 
     @Column(nullable = false, unique = true)

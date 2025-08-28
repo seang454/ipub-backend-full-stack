@@ -21,7 +21,7 @@ public class KeyCloakConfig {
                 .realm("docuapi")
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .clientId("admin-cli")
-                .clientSecret("o0oMFhSe9w7CiRWXXnaZI30ljw4Z3jzM")
+                .clientSecret("Tga7gc0Me3FG88eAj3SPaItNzqgWuZOX")
                 .build();
     }
 }
