@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
                 log.info("User id ",user.getId());
 
                 User saveUser = User.builder()
-                        //   .id(id)
+                        .id(id)
                         .uuid(UserUuid.get())
                         .fullName(fullName)
                         .isUser(true)
