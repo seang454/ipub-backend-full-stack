@@ -16,7 +16,8 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/media")
+    @RequestMapping("/api/v1/media")
+@CrossOrigin("*")
 public class MediaController {
 
     private final MediaService mediaService;
@@ -41,7 +42,7 @@ public class MediaController {
         String contentType = FileServiceUtil.guessContentType(file);
 
         if (contentType == null) {
-            contentType = "application/octet-stream";
+            contentType = "app lication/octet-stream";
         }
 
         return ResponseEntity.ok()

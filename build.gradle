@@ -45,6 +45,7 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// OAuth / Keycloak
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.keycloak:keycloak-admin-client:26.0.6'
 
@@ -53,6 +54,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'io.minio:minio:8.4.3'
+
+	//testing UI
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {

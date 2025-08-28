@@ -51,7 +51,6 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public InputStream getMediaUrl(String fileName) {
-
         try {
             minioClient.statObject(StatObjectArgs.builder()
                     .bucket(bucketName)

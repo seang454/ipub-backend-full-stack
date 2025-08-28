@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 @Builder
 public record UserResponse(
-     Integer id,
+     String slug,
      String uuid,
      String userName,
      String gender,

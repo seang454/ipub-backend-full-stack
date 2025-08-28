@@ -47,6 +47,8 @@ public class User {
     private Boolean isAdvisor;
     private Boolean isDeleted;
 
+    private String slug;
+
     @OneToMany(mappedBy = "user")
     private List<Star> stars;
 
@@ -64,4 +66,5 @@ public class User {
 
     @OneToMany(mappedBy = "receiver")
     private List<Feedback> receivers;
+
 }
