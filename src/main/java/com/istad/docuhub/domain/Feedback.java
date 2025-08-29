@@ -23,7 +23,7 @@ public class Feedback {
     @Column(nullable = false)
     private String status;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate deadline;
 
     @Column(nullable = false)
@@ -31,6 +31,9 @@ public class Feedback {
 
     @Column(nullable = true)
     private LocalDate updatedAt;
+
+    @Column(nullable = true)
+    private String fileUrl;
 
     //paper_id //one paper to many feedbacks
 
@@ -48,9 +51,5 @@ public class Feedback {
     private User receiver;
     //advisor_id one user to many feedbacks
     //student_id //
-
-
-
-
 
 }

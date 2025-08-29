@@ -11,6 +11,5 @@ public record AdviserResponseDto(
          String availability,
          String socialLinks,
          String userUuid
-
 ){
 }

@@ -17,11 +17,11 @@ public class KeyCloakConfig {
     public Keycloak keyCloak() {
         return KeycloakBuilder
                 .builder()
-                .serverUrl("http://localhost:9090")
+                .serverUrl("https://keycloak.docuhub.me")
                 .realm("docuapi")
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .clientId("admin-cli")
-                .clientSecret("Tga7gc0Me3FG88eAj3SPaItNzqgWuZOX")
+                .clientSecret("i9C5KGtVXMuWwrkEFIq4esJKUMMomxPl")
                 .build();
     }
 }
