@@ -11,7 +11,15 @@ import java.util.Optional;
 @RequestMapping
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUuidAndIsDeletedFalse(String uuid);
+    Optional<User> getUserByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(String uuid);
+    Optional<User> getUserByUuidAndIsAdvisorIsFalseAndIsDeletedIsFalse(String uuid);
+    Boolean existsByUuidAndIsAdvisorIsFalseAndIsDeletedIsFalse(String uuid);
+    Boolean existsByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(String uuid);
+    boolean existsByUuidAndIsDeletedFalse(String uuid);
     Boolean existsByIdAndIsDeletedFalse(Integer id);
     List<User> getAllUsersByIsDeletedFalse();
     List<User> findBySlugContainingAndIsDeletedFalse(String slug);
+    List<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse();
+    List<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentTrueAndIsAdminFalseAndIsDeletedFalse();
+    List<User> getUserByIsUserTrueAndIsAdvisorTrueAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse();
 }

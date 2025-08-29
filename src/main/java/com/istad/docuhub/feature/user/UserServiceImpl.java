@@ -271,4 +271,85 @@ public class UserServiceImpl implements UserService {
 
         return tokens;
     }
+
+    @Override
+    public List<UserResponse> getAllPublicUser() {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<User> user = userRepository.getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse();
+        List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user1 : user) {
+            UserRepresentation userRepresentation =  userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
+            userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
+        }
+        return userResponses;
+    }
+
+    @Override
+    public List<UserResponse> getAllStudent() {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<User> user = userRepository.getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentTrueAndIsAdminFalseAndIsDeletedFalse();
+        List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user1 : user) {
+            UserRepresentation userRepresentation =  userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
+            userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
+        }
+        return userResponses;
+    }
+
+    @Override
+    public List<UserResponse> getAllMentor() {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<User> user = userRepository.getUserByIsUserTrueAndIsAdvisorTrueAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse();
+        List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user1 : user) {
+            UserRepresentation userRepresentation =  userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
+            userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
+        }
+        return userResponses;
+    }
+
+    @Override
+    public void promoteAsStudent(String studentUuid) {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        UserRepresentation userRepresentation = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).findFirst().get();
+        if (!userRepository.existsByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(studentUuid)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+        }
+        Optional<User> user = userRepository.getUserByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(studentUuid);
+        if (userRepresentation.isEnabled()) {
+            if (user.isPresent()) {
+                UserResource userResource = realmResource.users().get(studentUuid);
+                RoleRepresentation roleRepresentation = realmResource.roles().get("STUDENT").toRepresentation();
+                userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
+                User user1 = user.get();
+                user1.setIsStudent(true);
+                userRepository.save(user1);
+                return;
+            }else throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+        }throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+    }
+
+    @Override
+    public void promoteAsMentor(String mentorUuid) {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        UserRepresentation userRepresentation = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).findFirst().get();
+        if (!userRepository.existsByUuidAndIsAdvisorIsFalseAndIsDeletedIsFalse(mentorUuid)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+        }
+        Optional<User> user = userRepository.getUserByUuidAndIsAdvisorIsFalseAndIsDeletedIsFalse(mentorUuid);
+        if (userRepresentation.isEnabled()) {
+            if (user.isPresent()) {
+                UserResource userResource = realmResource.users().get(mentorUuid);
+                RoleRepresentation roleRepresentation = realmResource.roles().get("ADVISER").toRepresentation();
+                userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
+                User user1 = user.get();
+                user1.setIsStudent(true);
+                userRepository.save(user1);
+                return;
+            }else throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+        }throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+    }
 }

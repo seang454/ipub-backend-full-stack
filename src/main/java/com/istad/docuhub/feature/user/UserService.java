@@ -18,4 +18,9 @@ public interface UserService {
     void updateUser(String userUuid, UpdateUserDto updateUserDto);
     UpdateUserImageDto updateImageUrl(String imageUrl, String userUuid);
     Map<String, Object> getValidTokens(OAuth2AuthorizedClient client, OidcUser oidcUser);
+    List<UserResponse> getAllPublicUser();
+    List<UserResponse> getAllStudent();
+    List<UserResponse> getAllMentor();
+    void promoteAsStudent(String studentUuid);
+    void promoteAsMentor(String mentorUuid);
 }

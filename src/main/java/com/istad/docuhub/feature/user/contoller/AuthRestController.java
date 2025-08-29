@@ -90,7 +90,7 @@ public class AuthRestController {
         return userService.searchUserByUsername(username);
     }
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("user/{uuid}")
+    @DeleteMapping("/user/{uuid}")
     public void deleteUser(@PathVariable String uuid) {
         log.info("User id controller {} ",uuid);
          userService.deleteUser(uuid);
@@ -100,8 +100,28 @@ public class AuthRestController {
         log.info("User id controller {} ",updateUserDto);
         userService.updateUser(uuid, updateUserDto);
     }
-    @PutMapping("user/{uuid}")
+    @PutMapping("/user/{uuid}")
     public UpdateUserImageDto updateProfileImage(@PathVariable String uuid,@RequestBody UpdateUserImageDto updateUserImageDto) {
         return userService.updateImageUrl(updateUserImageDto.imageUrl(),uuid);
+    }
+    @GetMapping("/user")
+    public List<UserResponse> getAllUsers(){
+        return userService.getAllPublicUser();
+    }
+    @GetMapping("/user/student")
+    public List<UserResponse> getAllStudents(){
+        return userService.getAllStudent();
+    }
+    @GetMapping ("/user/mentor")
+    public List<UserResponse> getAllMentors(){
+        return userService.getAllMentor();
+    }
+    @PostMapping("/user/student/{uuid}")
+    public void promoteStudent(@PathVariable String uuid) {
+        userService.promoteAsStudent(uuid);
+    }
+    @PostMapping("/user/mentor/{uuid}")
+    public void promoteMentor(@PathVariable String uuid) {
+        userService.promoteAsMentor(uuid);
     }
 }
