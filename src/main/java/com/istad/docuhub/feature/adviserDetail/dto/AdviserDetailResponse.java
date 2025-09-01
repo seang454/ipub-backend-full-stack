@@ -10,6 +10,5 @@ public record AdviserDetailResponse(
          String availability,
          String socialLinks,
          String userUuid
-
 ){
 }
