@@ -1,14 +1,16 @@
 package com.istad.docuhub.feature.feedback.dto;
 
+import java.time.LocalDate;
+
 public record FeedbackResponse(
         String feedbackText,
         String status,
         String paperUuid,
         String fileUrl,
-        String deadline,
+        LocalDate deadline,
         String advisorName,
         String receiverName,
-        String createdAt,
-        String updatedAt
+        LocalDate createdAt,
+        LocalDate updatedAt
 ) {
 }
