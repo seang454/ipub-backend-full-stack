@@ -1,13 +1,12 @@
 package com.istad.docuhub.feature.adviserDetail.dto;
 
-public record AdviserResponseDto(
-         Long id,
+import lombok.Builder;
+
+@Builder
+public record AdviserDetailResponse(
          Integer yearsExperience,
-         String idCard,
          String linkedinUrl,
          String publication,
-         String address,
-         String certifications,
          String availability,
          String socialLinks,
          String userUuid

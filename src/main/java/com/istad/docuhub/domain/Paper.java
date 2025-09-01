@@ -35,7 +35,7 @@ public class Paper {
 
 
     @Column(nullable = false)
-    private String status;
+    private String status; // status from adviser ( pending, underreview, approve or reject
 
 
     @Column(nullable = false)
@@ -49,7 +49,7 @@ public class Paper {
 
 
     @Column(nullable = false)
-    private Boolean isApproved;
+    private Boolean isApproved; // status from admin approve or not
 
 
     @Column(nullable = false)

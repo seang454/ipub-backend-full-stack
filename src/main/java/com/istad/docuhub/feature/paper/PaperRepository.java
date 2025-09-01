@@ -9,4 +9,6 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     boolean existsById(Integer id);
 
     Optional<Paper> findByUuid(String uuid);
+
+    // Thong have change from boolean to optional<Paper>
 }
