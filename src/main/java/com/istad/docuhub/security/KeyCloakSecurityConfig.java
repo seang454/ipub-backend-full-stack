@@ -52,7 +52,6 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details/**").hasAnyRole("ADVISER")
-
                         .requestMatchers(HttpMethod.POST, "/api/v1/adviser-assignments/**").hasAnyRole("ADMIN", "ADVISER")
                         .anyRequest().authenticated()
                 )
