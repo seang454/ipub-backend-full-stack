@@ -14,4 +14,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Boolean existsByIdAndIsDeletedFalse(Integer id);
     List<User> getAllUsersByIsDeletedFalse();
     List<User> findBySlugContainingAndIsDeletedFalse(String slug);
+
+
+    // find user by thong
+    Optional<User> findByUuid(String uuid);
 }

@@ -15,12 +15,19 @@ import java.util.List;
 public class AdviserDetail {
 
     @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false, unique = true)
     private String uuid;
 
     private Integer experienceYears;
+
+    private String linkedinUrl;
+
+    private String publication;
+
+    private String socialLinks;
 
     @Column(nullable = false)
     private String status;
@@ -30,7 +37,7 @@ public class AdviserDetail {
     // AdviserDetail → User (One-to-One via uuid)
     @OneToOne
     @JoinColumn(name = "user_uuid", referencedColumnName = "uuid")
-    private User user;
+    private User userUuid;
 
     // AdviserDetail → Specialize (Many-to-Many via uuid)
     @ManyToMany
