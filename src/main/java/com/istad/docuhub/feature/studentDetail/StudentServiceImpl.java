@@ -62,5 +62,7 @@ public class StudentServiceImpl implements StudentService {
         studentDetail.setIsStudent(false);
         studentDetailRepository.save(studentDetail);
     }
+
+
 }
 
