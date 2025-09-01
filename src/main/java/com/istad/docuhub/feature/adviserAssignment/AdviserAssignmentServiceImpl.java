@@ -39,7 +39,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
 
         // ✅ Update paper status
-        paper.setStatus("UNDER_REVIEW"); // pending adviser adviser
+        paper.setStatus("UNDER_REVIEW"); // pending adviser
         paper.setIsApproved(true); // by admin
         paperRepository.save(paper);
 
@@ -68,6 +68,55 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 .updateDate(saved.getUpdateDate())
                 .build();
     }
+
+    @Override
+    public AdviserAssignmentResponse reassignAdviser(String paperUuid, String newAdviserUuid, String adminUuid, LocalDate newDeadline) {
+        // fetch paper
+        Paper paper = paperRepository.findByUuid(paperUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+
+        // fetch new adviser
+        User newAdviser = userRepository.findByUuid(newAdviserUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
+
+        // fetch admin
+        User admin = userRepository.findByUuid(adminUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
+
+        // find current assignment (if any)
+        AdviserAssignment currentAssignment = adviserAssignmentRepository.findByPaperUuid(paperUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No Current Adviser Assigned"));
+
+        // mark old one as REASSIGNED
+        currentAssignment.setStatus("REASSIGNED");
+        currentAssignment.setUpdateDate(LocalDate.now());
+        adviserAssignmentRepository.save(currentAssignment);
+
+        // create new assignment
+        AdviserAssignment newAssignment = new AdviserAssignment();
+        newAssignment.setUuid(UUID.randomUUID().toString());
+        newAssignment.setPaper(paper);
+        newAssignment.setAdvisor(newAdviser);
+        newAssignment.setAdmin(admin);
+        newAssignment.setDeadline(newDeadline);
+        newAssignment.setStatus("ASSIGNED");
+        newAssignment.setAssignedDate(LocalDate.now());
+        newAssignment.setUpdateDate(null);
+
+        AdviserAssignment saved = adviserAssignmentRepository.save(newAssignment);
+
+        return AdviserAssignmentResponse.builder()
+                .uuid(saved.getUuid())
+                .paperUuid(saved.getPaper().getUuid())
+                .adviserUuid(saved.getAdvisor().getUuid())
+                .adminUuid(saved.getAdmin().getUuid())
+                .deadline(saved.getDeadline())
+                .status(saved.getStatus())
+                .assignedDate(saved.getAssignedDate())
+                .updateDate(saved.getUpdateDate())
+                .build();
+    }
+
 
     // adviser review paper
     @Transactional
@@ -104,5 +153,6 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 .updateDate(saved.getUpdateDate())
                 .build();
     }
+
 
 }
