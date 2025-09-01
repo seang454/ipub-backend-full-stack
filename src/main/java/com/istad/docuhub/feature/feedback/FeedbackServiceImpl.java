@@ -54,7 +54,6 @@ public class FeedbackServiceImpl implements FeedbackService {
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor not found")
         );
 
-
         if (feedbackRequest.paperUuid() == null || feedbackRequest.paperUuid().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid paper UUID");
         }
@@ -62,6 +61,15 @@ public class FeedbackServiceImpl implements FeedbackService {
         Paper paper = paperRepository.findByUuid(feedbackRequest.paperUuid()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper not found")
         );
+
+        if(!paper.getAuthor().getUuid().equals(receiver.getUuid())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver is not the author of the paper");
+        }
+
+        if (!paper.getAssignedId().getAdvisor().getUuid().equals(advisor.getUuid())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor is not assigned to the paper");
+        }
+
 
         int id;
         int retries = 0;
