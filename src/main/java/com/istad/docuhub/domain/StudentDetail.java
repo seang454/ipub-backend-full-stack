@@ -23,15 +23,15 @@ public class StudentDetail {
     @Column(nullable = false)
     private String studentCardUrl;
 
-
     @Column(nullable = false, length = 100)
     private String university;
-
 
     @Column(nullable = false, length = 100)
     private String major;
 
     private Integer yearsOfStudy;
+
+    private Boolean isStudent;
 
     // one to one user
     @OneToOne
