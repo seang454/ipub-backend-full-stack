@@ -1,7 +1,6 @@
 package com.istad.docuhub.feature.studentDetail;
 
 
-import com.istad.docuhub.domain.StudentDetail;
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

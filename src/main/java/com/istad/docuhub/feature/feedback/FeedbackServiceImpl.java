@@ -70,7 +70,6 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor is not assigned to the paper");
         }
 
-
         int id;
         int retries = 0;
         do {
@@ -89,6 +88,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.setUpdatedAt(null);
         feedback.setFileUrl(feedback.getFileUrl());
         feedback.setPaper(paper);
+        if (feedbackRequest.status().equals("APPROVED")){
+            paper.setIsApproved(true);
+        }
         feedback.setAdvisor(advisor);
         feedback.setReceiver(receiver);
 

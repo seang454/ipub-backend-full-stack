@@ -31,6 +31,8 @@ public class StudentDetail {
 
     private Integer yearsOfStudy;
 
+    private Boolean isStudent;
+
     // one to one user
     @OneToOne
     @JoinColumn(name = "user_uuid",referencedColumnName = "uuid")

@@ -59,8 +59,7 @@ public class StudentServiceImpl implements StudentService {
         studentDetail.setMajor(studentRequest.major());
         studentDetail.setYearsOfStudy(Integer.parseInt(studentRequest.yearsOfStudy()));
         studentDetail.setUser(user);
-        user.setIsStudent(true);
-        userService.promoteAsStudent(user.getUuid());
+        studentDetail.setIsStudent(false);
         studentDetailRepository.save(studentDetail);
     }
 }
