@@ -2,7 +2,10 @@ package com.istad.docuhub.feature.studentDetail;
 
 import com.istad.docuhub.domain.StudentDetail;
 import com.istad.docuhub.domain.User;
+import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentApproveOrRejectRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +64,30 @@ public class StudentServiceImpl implements StudentService {
         studentDetail.setUser(user);
         studentDetail.setIsStudent(false);
         studentDetailRepository.save(studentDetail);
+    }
+
+    @Override
+    public StudentResponse approveStudentDetail(StudentApproveOrRejectRequest approvRequest) {
+        StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(approvRequest.userUuid())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
+
+        studentDetail.setIsStudent(true);
+        studentDetailRepository.save(studentDetail);
+
+        return new StudentResponse(
+                studentDetail.getUuid(),
+                studentDetail.getStudentCardUrl(),
+                studentDetail.getUniversity(),
+                studentDetail.getMajor(),
+                studentDetail.getYearsOfStudy(),
+                studentDetail.getIsStudent(),
+                studentDetail.getUser().getUuid()
+        );
+    }
+
+    @Override
+    public void rejectStudentDetail(RejectStudentRequest rejectRequest) {
+
     }
 }
 
