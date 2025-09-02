@@ -22,13 +22,8 @@ public class FileServiceUtil {
             extension = originalFileName.substring(lastDotIndex); // includes "."
         }
 
-        // Sanitize base name: replace spaces and illegal chars with underscore
-        String sanitizedBase = baseName
-                .replaceAll("\\s+", "_")           // Replace whitespace (incl. tabs, multiple spaces)
-                .replaceAll("[^a-zA-Z0-9._-]", "_"); // Replace any remaining illegal chars
-
         // Combine UUID + sanitized base + extension
-        return UUID.randomUUID() + "_" + sanitizedBase + extension;
+        return UUID.randomUUID() + extension;
     }
 
     public static  String guessContentType(String fileName) {

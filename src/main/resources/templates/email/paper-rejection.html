@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Rejection Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #dc3545;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+
+        .content {
+            padding: 20px 0;
+        }
+
+        .paper-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .reason-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #666;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📋 Paper Review Notification</h1>
+    </div>
+
+    <div class="content">
+        <h2>Hello <span th:text="${authorName}">Author</span>!</h2>
+
+        <p>We have completed the review of your submitted paper and unfortunately, it has been <strong
+                style="color: #dc3545;">rejected</strong>.</p>
+
+        <div class="paper-info">
+            <h3>📄 Paper Details:</h3>
+            <p><strong>Title:</strong> <span th:text="${paperTitle}">Paper Title</span></p>
+            <p><strong>Author:</strong> <span th:text="${authorName}">Author Name</span></p>
+            <p><strong>Submitted:</strong> <span th:text="${submittedDate}">Submission Date</span></p>
+        </div>
+
+        <div class="reason-box">
+            <h3>📝 Rejection Reason:</h3>
+            <p th:text="${rejectionReason}">Rejection reason will appear here</p>
+        </div>
+
+        <p>We encourage you to review the feedback provided and consider resubmitting your paper after addressing the
+            mentioned concerns.</p>
+
+    </div>
+
+    <div class="footer">
+        <p>Thank you for your submission to DocuHub!</p>
+        <p>If you have any questions, please don't hesitate to contact our editorial team.</p>
+        <p>&copy; 2025 DocuHub. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
+

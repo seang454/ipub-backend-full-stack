@@ -23,7 +23,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserDetailServiceImpl implements UserDetailsService {
+
     private final Keycloak keycloak;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UsersResource usersResource = keycloak.realm("ducuapi").users();

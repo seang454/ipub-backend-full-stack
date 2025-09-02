@@ -2,10 +2,7 @@ package com.istad.docuhub.domain;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,6 +11,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "papers")
 public class Paper {
 
@@ -36,24 +35,21 @@ public class Paper {
 
 
     @Column(nullable = false)
-    private String status;
+    private String status; // status from adviser ( pending, underreview, approve or reject
 
 
     @Column(nullable = false)
     private LocalDate submittedAt;
 
-
     @Column(nullable = false)
     private LocalDate createdAt;
-
-
 
     @Column(nullable = true)
     private Integer downloadCount = 0;
 
 
     @Column(nullable = false)
-    private Boolean isApproved;
+    private Boolean isApproved; // status from admin approve or not
 
 
     @Column(nullable = false)

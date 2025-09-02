@@ -15,6 +15,7 @@ import java.time.LocalDate;
 public class AdviserAssignment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // add by seavthong
     private Integer id;
 
     @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
