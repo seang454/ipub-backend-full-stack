@@ -150,7 +150,10 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserResponse getSingleUser(String uuid) {
-        UserResponse userResponse = getAllUsers().stream().filter(user -> uuid.equals(user.uuid()) ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        UserResponse userResponse = getAllUsers()
+                .stream()
+                .filter(user -> uuid.equals(user.uuid()) )
+                .findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return userResponse;
     }
     @Override
@@ -350,4 +353,6 @@ public class UserServiceImpl implements UserService {
             }else throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
         }throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
     }
+
+
 }
