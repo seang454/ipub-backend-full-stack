@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record FeedbackRequest(
-        @NotBlank @NotNull String feedbackText,
-        @NotBlank @NotNull String status,
-        @NotBlank @NotNull String paperUuid,
-        @NotBlank @NotNull String advisorUuid,
-        @NotBlank @NotNull String fileUrl,
+        String feedbackText,
+        String status,
+        String paperUuid,
+        String advisorUuid,
+        String fileUrl,
         LocalDate deadline
 ) {
 }

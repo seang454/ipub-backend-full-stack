@@ -91,7 +91,7 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public List<PaperResponse> getAllPapers() {
-        List<Paper> papers = paperRepository.findAll();
+        List<Paper> papers = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue();
 
         return papers.stream()
                 .map(paper -> new PaperResponse(

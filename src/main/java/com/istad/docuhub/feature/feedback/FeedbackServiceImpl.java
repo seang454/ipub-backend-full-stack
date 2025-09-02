@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 
@@ -41,11 +42,11 @@ public class FeedbackServiceImpl implements FeedbackService {
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver not found")
         );
 
-        if(!paper.getAuthor().getUuid().equals(receiver.getUuid())){
+        if (!paper.getAuthor().getUuid().equals(receiver.getUuid())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver is not the author of the paper");
         }
 
-        if (!paper.getAssignedId().getAdvisor().getUuid().equals(advisor.getUuid())){
+        if (!Objects.equals(paper.getAssignedId().getAdvisor().getUuid(), advisor.getUuid())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor is not assigned to the paper");
         }
 
@@ -60,18 +61,20 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         Feedback feedback = new Feedback();
         feedback.setId(id);
-        feedback.setFeedbackText(feedback.getFeedbackText());
-        feedback.setStatus(feedback.getStatus());
-        feedback.setDeadline(feedback.getDeadline());
+        feedback.setFeedbackText(feedbackRequest.feedbackText());
+        feedback.setStatus(feedbackRequest.status());
+        feedback.setDeadline(feedbackRequest.deadline());
         feedback.setCreatedAt(LocalDate.now());
         feedback.setUpdatedAt(null);
-        feedback.setFileUrl(feedback.getFileUrl());
+        feedback.setFileUrl(feedbackRequest.fileUrl());
         feedback.setPaper(paper);
-        paper.setIsApproved(feedbackRequest.status().equals("APPROVED"));
         feedback.setAdvisor(advisor);
         feedback.setReceiver(receiver);
+        paper.setIsApproved(true);
+        paper.setStatus(feedbackRequest.status());
 
         feedbackRepository.save(feedback);
+
     }
 
     @Override
