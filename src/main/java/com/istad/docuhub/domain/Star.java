@@ -15,9 +15,10 @@ import java.time.LocalDate;
 public class Star {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Just added by Vannarith
     private Integer id;
 
-    @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
+    @Column(nullable = false, unique = true)
     private String uuid;
 
     @Column(nullable = false)
