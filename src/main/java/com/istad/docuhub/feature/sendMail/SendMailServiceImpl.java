@@ -46,7 +46,7 @@ public class SendMailServiceImpl implements SendMailService {
             context.setVariable("authorName", authorName);
             context.setVariable("paperTitle", paper.getTitle());
             context.setVariable("submittedDate", paper.getSubmittedAt().toString());
-            context.setVariable("rejectionReason", sendMailRequest.body());
+            context.setVariable("rejectionReason", sendMailRequest.rejectionReason());
 
             // Process the rejection email template
             String htmlContent = templateEngine.process("email/paper-rejection", context);

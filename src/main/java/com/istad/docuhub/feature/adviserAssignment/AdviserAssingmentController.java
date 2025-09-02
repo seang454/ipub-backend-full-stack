@@ -1,23 +1,18 @@
 package com.istad.docuhub.feature.adviserAssignment;
 
 
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserReviewRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.ReassignAdviserRequest;
+import com.istad.docuhub.feature.adviserAssignment.dto.*;
+import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/advisers")
+@RequestMapping("/api/v1/admin/paper")
 public class AdviserAssingmentController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
-    @PostMapping("/assign")
+    @PostMapping("/assign-adviser")
     public ResponseEntity<AdviserAssignmentResponse> assignAdviser(
             @RequestBody AdviserAssignmentRequest request
     ) {
@@ -25,7 +20,7 @@ public class AdviserAssingmentController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/reassign")
+    @PostMapping("/reassign-adviser")
     public ResponseEntity<AdviserAssignmentResponse> reassignAdviser(
             @RequestBody ReassignAdviserRequest request
     ) {
@@ -37,8 +32,15 @@ public class AdviserAssingmentController {
         );
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/reject")
+    public ResponseEntity<PaperResponse> rejectPaper(@RequestBody RejectPaperRequest rejectRequest) {
+        PaperResponse response = adviserAssignmentService.rejectPaperByAdmin(rejectRequest);
+        return ResponseEntity.ok(response);
+    }
+
     // Review paper by adviser
-    @PostMapping("/review")
+    @PostMapping("/adviser-review")
     public ResponseEntity<AdviserAssignmentResponse> reviewPaper(
             @RequestBody AdviserReviewRequest reviewRequest
     ) {
