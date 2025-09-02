@@ -33,7 +33,6 @@ public class AdviserAssignment {
     @Column(nullable = true)
     private LocalDate updateDate;
 
-
     @OneToOne
     @JoinColumn(name = "advisor_uuid",referencedColumnName = "uuid")
     private User advisor;

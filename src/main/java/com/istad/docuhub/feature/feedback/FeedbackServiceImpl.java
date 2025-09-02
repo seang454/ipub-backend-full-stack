@@ -27,39 +27,18 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public void createFeedback(FeedbackRequest feedbackRequest) {
-        if (feedbackRequest.feedbackText() == null || feedbackRequest.feedbackText().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid feedback text");
-        }
-        if (feedbackRequest.feedbackText().length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feedback text is too long");
-        }
 
-        if (feedbackRequest.deadline().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid deadline");
-        }
 
-        // Validate receiver UUID
-        if (feedbackRequest.receiverUuid() == null || feedbackRequest.receiverUuid().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid receiver UUID");
-        }
-        User receiver = userRepository.findByUuidAndIsDeletedFalse(feedbackRequest.receiverUuid()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver not found")
-        );
-
-        // Validate advisor UUID
-        if (feedbackRequest.advisorUuid() == null || feedbackRequest.advisorUuid().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid advisor UUID");
-        }
         User advisor = userRepository.findByUuidAndIsDeletedFalse(feedbackRequest.advisorUuid()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor not found")
         );
 
-        if (feedbackRequest.paperUuid() == null || feedbackRequest.paperUuid().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid paper UUID");
-        }
-
         Paper paper = paperRepository.findByUuid(feedbackRequest.paperUuid()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper not found")
+        );
+
+        User receiver = userRepository.findByUuidAndIsDeletedFalse(paper.getAuthor().getUuid()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver not found")
         );
 
         if(!paper.getAuthor().getUuid().equals(receiver.getUuid())){
@@ -88,9 +67,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.setUpdatedAt(null);
         feedback.setFileUrl(feedback.getFileUrl());
         feedback.setPaper(paper);
-        if (feedbackRequest.status().equals("APPROVED")){
-            paper.setIsApproved(true);
-        }
+        paper.setIsApproved(feedbackRequest.status().equals("APPROVED"));
         feedback.setAdvisor(advisor);
         feedback.setReceiver(receiver);
 

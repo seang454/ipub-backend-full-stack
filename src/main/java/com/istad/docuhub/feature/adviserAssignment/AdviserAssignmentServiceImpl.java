@@ -35,7 +35,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         User adviser = userRepository.findByUuid(request.adviserUuid())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
         // fetch admin
-        User userAamin = userRepository.findByUuid(request.adminUuid())
+        User userAdmin = userRepository.findByUuid(request.adminUuid())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
 
         // ✅ Update paper status
@@ -49,7 +49,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         assignment.setUuid(UUID.randomUUID().toString());
         assignment.setPaper(paper);
         assignment.setAdvisor(adviser);
-        assignment.setAdmin(userAamin);
+        assignment.setAdmin(userAdmin);
         assignment.setDeadline(request.deadline());
         assignment.setStatus("ASSIGNED");
         assignment.setAssignedDate(LocalDate.now());
