@@ -118,6 +118,7 @@ public class AuthRestController {
     }
     @PostMapping("/user/student/{uuid}")
     public void promoteStudent(@PathVariable String uuid) {
+        log.info("User id controller {} ",uuid);
         userService.promoteAsStudent(uuid);
     }
     @PostMapping("/user/mentor/{uuid}")

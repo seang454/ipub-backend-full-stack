@@ -5,6 +5,7 @@ import com.istad.docuhub.feature.user.dto.*;
 import com.istad.docuhub.feature.user.mapper.UseMapper;
 import com.istad.docuhub.feature.user.mapper.UserMapperManual;
 import com.istad.docuhub.slugGeneration.SlugUtil;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -312,44 +313,115 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void promoteAsStudent(String studentUuid) {
+    public void promoteAsStudent(String studentUuidOrUsername) {
         RealmResource realmResource = keycloak.realm("docuapi");
-        UserRepresentation userRepresentation = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).findFirst().get();
-        if (!userRepository.existsByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(studentUuid)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+
+        UserResource userResource = null;
+        UserRepresentation userRepresentation = null;
+
+        try {
+            // 🔎 Try by UUID
+            userResource = realmResource.users().get(studentUuidOrUsername);
+            userRepresentation = userResource.toRepresentation();
+        } catch (NotFoundException e) {
+            // 🔎 Try by username/email exact match
+            List<UserRepresentation> foundUsers = realmResource.users().search(studentUuidOrUsername, true);
+            userRepresentation = foundUsers.stream()
+                    .filter(u -> studentUuidOrUsername.equalsIgnoreCase(u.getUsername()) ||
+                            studentUuidOrUsername.equalsIgnoreCase(u.getEmail()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (userRepresentation != null) {
+                userResource = realmResource.users().get(userRepresentation.getId());
+            }
         }
-        Optional<User> user = userRepository.getUserByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(studentUuid);
-        if (userRepresentation.isEnabled()) {
-            if (user.isPresent()) {
-                UserResource userResource = realmResource.users().get(studentUuid);
-                RoleRepresentation roleRepresentation = realmResource.roles().get("STUDENT").toRepresentation();
-                userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
-                User user1 = user.get();
-                user1.setIsStudent(true);
-                userRepository.save(user1);
-                return;
-            }else throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
-        }throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+
+        if (userRepresentation == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in Keycloak");
+        }
+
+        // ✅ Local DB check
+        Optional<User> userOpt = userRepository
+                .getUserByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(userRepresentation.getId());
+        if (userOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "User not found in local DB or already a student");
+        }
+
+        if (!Boolean.TRUE.equals(userRepresentation.isEnabled())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is disabled in Keycloak");
+        }
+
+        // ✅ Ensure role exists
+        RoleRepresentation roleRepresentation;
+        try {
+            roleRepresentation = realmResource.roles().get("STUDENT").toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "STUDENT role not found in Keycloak");
+        }
+
+        // ✅ Assign STUDENT role if missing
+        boolean hasStudentRole = userResource.roles().realmLevel().listAll().stream()
+                .anyMatch(r -> "STUDENT".equals(r.getName()));
+        if (!hasStudentRole) {
+            userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
+        }
+
+        // ✅ Update local DB
+        User user = userOpt.get();
+        user.setIsStudent(true);
+        userRepository.save(user);
     }
 
+
     @Override
-    public void promoteAsMentor(String mentorUuid) {
+    public void promoteAsMentor(String mentorUuidOrUsername) {
         RealmResource realmResource = keycloak.realm("docuapi");
-        UserRepresentation userRepresentation = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).findFirst().get();
-        if (!userRepository.existsByUuidAndIsAdvisorIsFalseAndIsDeletedIsFalse(mentorUuid)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+        UserResource userResource = null;
+        UserRepresentation userRepresentation = null;
+
+        try {
+            // Try direct lookup as UUID
+            userResource = realmResource.users().get(mentorUuidOrUsername);
+            userRepresentation = userResource.toRepresentation();
+        } catch (NotFoundException e) {
+            // If not found by UUID, search by username/email
+            List<UserRepresentation> foundUsers = realmResource.users()
+                    .search(mentorUuidOrUsername, true); // partial match allowed
+            if (!foundUsers.isEmpty()) {
+                userRepresentation = foundUsers.get(0);
+                userResource = realmResource.users().get(userRepresentation.getId());
+            }
         }
-        Optional<User> user = userRepository.getUserByUuidAndIsAdvisorIsFalseAndIsDeletedIsFalse(mentorUuid);
-        if (userRepresentation.isEnabled()) {
-            if (user.isPresent()) {
-                UserResource userResource = realmResource.users().get(mentorUuid);
-                RoleRepresentation roleRepresentation = realmResource.roles().get("ADVISER").toRepresentation();
-                userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
-                User user1 = user.get();
-                user1.setIsStudent(true);
-                userRepository.save(user1);
-                return;
-            }else throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
-        }throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or not enabled");
+
+        if (userRepresentation == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in Keycloak");
+        }
+
+        // ✅ Check local DB consistency
+        Optional<User> userOpt = userRepository.getUserByUuidAndIsAdvisorIsFalseAndIsDeletedIsFalse(userRepresentation.getId());
+        if (userOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in local DB or already an advisor");
+        }
+
+        // ✅ Ensure Keycloak user is enabled
+        if (!Boolean.TRUE.equals(userRepresentation.isEnabled())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is disabled in Keycloak");
+        }
+
+        // ✅ Add ADVISER role
+        RoleRepresentation adviserRole = realmResource.roles().get("ADVISER").toRepresentation();
+        userResource.roles().realmLevel().add(Collections.singletonList(adviserRole));
+
+        // ✅ Remove STUDENT role if present
+        RoleRepresentation studentRole = realmResource.roles().get("STUDENT").toRepresentation();
+        userResource.roles().realmLevel().remove(Collections.singletonList(studentRole));
+
+        // ✅ Update local DB
+        User user = userOpt.get();
+        user.setIsAdvisor(true);
+        user.setIsStudent(false);
+        userRepository.save(user);
     }
 }
