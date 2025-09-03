@@ -60,8 +60,8 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
 
                         // thong
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/creaet-student").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/creaet-adviser").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-student").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-adviser").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/approve-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/reject-student-detail").hasAnyRole("ADMIN")
 
