@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -208,6 +209,26 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 .build();
     }
 
+    @Override
+    public List<AdviserAssignmentResponse> getAssignmentsByAdviserUuid(String adviserUuid) {
+        List<AdviserAssignment> assignments = adviserAssignmentRepository.findByAdvisorUuid(adviserUuid);
 
+        if (assignments.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No assignments found for this adviser");
+        }
+
+        return assignments.stream()
+                .map(assignment -> AdviserAssignmentResponse.builder()
+                        .uuid(assignment.getUuid())
+                        .paperUuid(assignment.getPaper().getUuid())
+                        .adviserUuid(assignment.getAdvisor().getUuid())
+                        .adminUuid(assignment.getAdmin().getUuid())
+                        .deadline(assignment.getDeadline())
+                        .status(assignment.getStatus())
+                        .assignedDate(assignment.getAssignedDate())
+                        .updateDate(assignment.getUpdateDate())
+                        .build()
+                ).toList();
+    }
 
 }

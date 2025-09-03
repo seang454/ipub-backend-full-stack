@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/paper")
 public class AdviserAssignmentController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
+    private final AssignmentService assignmentService;
+
     @PostMapping("/assign-adviser")
     public ResponseEntity<AdviserAssignmentResponse> assignAdviser(
             @RequestBody AdviserAssignmentRequest request
@@ -48,5 +50,12 @@ public class AdviserAssignmentController {
         return ResponseEntity.ok(response);
     }
 
+    // Get all assignments of a specific adviser
+    @GetMapping("/adviser/{adviserUuid}")
+    public ResponseEntity<?> getAssignmentsByAdviser(@PathVariable String adviserUuid) {
+        return ResponseEntity.ok(
+                adviserAssignmentService.getAssignmentsByAdviserUuid(adviserUuid)
+        );
+    }
 
 }
