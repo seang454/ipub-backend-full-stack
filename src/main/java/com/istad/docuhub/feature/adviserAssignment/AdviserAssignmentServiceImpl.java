@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -45,27 +46,40 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         User adviser = userRepository.findByUuid(request.adviserUuid())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
         // fetch admin
-        User userAamin = userRepository.findByUuid(request.adminUuid())
+        User userAdmin = userRepository.findByUuid(request.adminUuid())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
 
         // ✅ Update paper status
         paper.setStatus("UNDER_REVIEW"); // pending adviser
         paper.setIsApproved(true); // by admin
-        paperRepository.save(paper);
+
+
+        int id;
+        int retire = 0;
+        do {
+            if (retire++ > 10) {
+                throw new RuntimeException("Failed to generate unique ID after 10 attempts");
+            }
+            id = new Random().nextInt(Integer.parseInt("1000000"));
+        }while (adviserAssignmentRepository.existsById(id));
 
 
         // create assignment
         AdviserAssignment assignment = new AdviserAssignment();
+        assignment.setId(id);
         assignment.setUuid(UUID.randomUUID().toString());
         assignment.setPaper(paper);
         assignment.setAdvisor(adviser);
-        assignment.setAdmin(userAamin);
+        assignment.setAdmin(userAdmin);
         assignment.setDeadline(request.deadline());
         assignment.setStatus("ASSIGNED");
         assignment.setAssignedDate(LocalDate.now());
         assignment.setUpdateDate(null);
 
         AdviserAssignment saved = adviserAssignmentRepository.save(assignment);
+        AdviserAssignment assignUuid = adviserAssignmentRepository.findByUuid(saved.getUuid()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment Not Found"));
+        paper.setAssignedId(assignUuid);
+        paperRepository.save(paper);
 
         return AdviserAssignmentResponse.builder()
                 .uuid(saved.getUuid())

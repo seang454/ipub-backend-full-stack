@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 
@@ -27,46 +28,25 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public void createFeedback(FeedbackRequest feedbackRequest) {
-        if (feedbackRequest.feedbackText() == null || feedbackRequest.feedbackText().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid feedback text");
-        }
-        if (feedbackRequest.feedbackText().length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feedback text is too long");
-        }
 
-        if (feedbackRequest.deadline().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid deadline");
-        }
 
-        // Validate receiver UUID
-        if (feedbackRequest.receiverUuid() == null || feedbackRequest.receiverUuid().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid receiver UUID");
-        }
-        User receiver = userRepository.findByUuidAndIsDeletedFalse(feedbackRequest.receiverUuid()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver not found")
-        );
-
-        // Validate advisor UUID
-        if (feedbackRequest.advisorUuid() == null || feedbackRequest.advisorUuid().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid advisor UUID");
-        }
         User advisor = userRepository.findByUuidAndIsDeletedFalse(feedbackRequest.advisorUuid()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor not found")
         );
-
-        if (feedbackRequest.paperUuid() == null || feedbackRequest.paperUuid().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid paper UUID");
-        }
 
         Paper paper = paperRepository.findByUuid(feedbackRequest.paperUuid()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper not found")
         );
 
-        if(!paper.getAuthor().getUuid().equals(receiver.getUuid())){
+        User receiver = userRepository.findByUuidAndIsDeletedFalse(paper.getAuthor().getUuid()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver not found")
+        );
+
+        if (!paper.getAuthor().getUuid().equals(receiver.getUuid())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver is not the author of the paper");
         }
 
-        if (!paper.getAssignedId().getAdvisor().getUuid().equals(advisor.getUuid())){
+        if (!Objects.equals(paper.getAssignedId().getAdvisor().getUuid(), advisor.getUuid())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor is not assigned to the paper");
         }
 
@@ -81,20 +61,20 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         Feedback feedback = new Feedback();
         feedback.setId(id);
-        feedback.setFeedbackText(feedback.getFeedbackText());
-        feedback.setStatus(feedback.getStatus());
-        feedback.setDeadline(feedback.getDeadline());
+        feedback.setFeedbackText(feedbackRequest.feedbackText());
+        feedback.setStatus(feedbackRequest.status());
+        feedback.setDeadline(feedbackRequest.deadline());
         feedback.setCreatedAt(LocalDate.now());
         feedback.setUpdatedAt(null);
-        feedback.setFileUrl(feedback.getFileUrl());
+        feedback.setFileUrl(feedbackRequest.fileUrl());
         feedback.setPaper(paper);
-        if (feedbackRequest.status().equals("APPROVED")){
-            paper.setIsApproved(true);
-        }
         feedback.setAdvisor(advisor);
         feedback.setReceiver(receiver);
+        paper.setIsApproved(true);
+        paper.setStatus(feedbackRequest.status());
 
         feedbackRepository.save(feedback);
+
     }
 
     @Override

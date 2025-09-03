@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/paper")
-public class AdviserAssingmentController {
+public class AdviserAssignmentController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
     @PostMapping("/assign-adviser")
     public ResponseEntity<AdviserAssignmentResponse> assignAdviser(
