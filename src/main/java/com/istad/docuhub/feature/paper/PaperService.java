@@ -8,4 +8,6 @@ import java.util.List;
 public interface PaperService {
     void createPaper(PaperRequest paperRequest);
     List<PaperResponse> getAllPapers();
+    List<PaperResponse> getAllPapersIsPending();
+    PaperResponse getPaperById(String Uuid);
 }

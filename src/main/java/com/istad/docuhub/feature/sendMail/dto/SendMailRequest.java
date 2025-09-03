@@ -7,5 +7,5 @@ public record SendMailRequest(
         String paperUuid,
         @NotNull
         String rejectionReason
-
-        ) {}
+) {
+}

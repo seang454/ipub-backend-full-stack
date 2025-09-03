@@ -112,5 +112,45 @@ public class PaperServiceImpl implements PaperService {
                 .toList(); // Java 16+ (use .collect(Collectors.toList()) if < Java 16)
     }
 
+    @Override
+    public List<PaperResponse> getAllPapersIsPending() {
+        List<Paper> papers = paperRepository.findByIsApprovedFalse();
+        return papers.stream()
+                .map(paper -> new PaperResponse(
+                        paper.getUuid(),
+                        paper.getTitle(),
+                        paper.getAbstractText(),
+                        paper.getFileUrl(),
+                        paper.getAuthor().getUuid(),
+                        List.of(paper.getCategory().getName()),
+                        paper.getStatus(),
+                        paper.getIsApproved(),
+                        paper.getSubmittedAt(),
+                        paper.getCreatedAt(),
+                        paper.getIsPublished(),
+                        paper.getPublishedAt()
+                )).toList();
+    }
+
+    @Override
+    public PaperResponse getPaperById(String Uuid) {
+        Paper paper = paperRepository.findByUuid(Uuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+        return new PaperResponse(
+                paper.getUuid(),
+                paper.getTitle(),
+                paper.getAbstractText(),
+                paper.getFileUrl(),
+                paper.getAuthor().getUuid(),
+                List.of(paper.getCategory().getName()),
+                paper.getStatus(),
+                paper.getIsApproved(),
+                paper.getSubmittedAt(),
+                paper.getCreatedAt(),
+                paper.getIsPublished(),
+                paper.getPublishedAt()
+        );
+    }
+
 }
 
