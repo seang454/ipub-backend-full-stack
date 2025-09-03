@@ -1,6 +1,8 @@
 package com.istad.docuhub.feature.studentDetail;
 
 
+import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentApproveRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/student")
+@RequestMapping("/api/v1/admin/student")
 public class StudentDetailController {
 
     private final StudentService studentService;
 
-    @PostMapping
+    @PostMapping("/create-student-detail")
     public ResponseEntity<?> createStudentDetail(@RequestBody StudentRequest studentRequest) {
         studentService.createStudentDetail(studentRequest);
         return new ResponseEntity<>(
@@ -25,4 +27,6 @@ public class StudentDetailController {
                 HttpStatus.CREATED
         );
     }
+
+
 }

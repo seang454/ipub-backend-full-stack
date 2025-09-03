@@ -1,5 +1,8 @@
 package com.istad.docuhub.feature.feedback.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 public record FeedbackRequest(
@@ -7,7 +10,6 @@ public record FeedbackRequest(
         String status,
         String paperUuid,
         String advisorUuid,
-        String receiverUuid,
         String fileUrl,
         LocalDate deadline
 ) {

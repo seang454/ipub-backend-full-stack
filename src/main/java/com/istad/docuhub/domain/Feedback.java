@@ -49,7 +49,5 @@ public class Feedback {
     @ManyToOne
     @JoinColumn(name = "receiver_uuid",referencedColumnName = "uuid")
     private User receiver;
-    //advisor_id one user to many feedbacks
-    //student_id //
 
 }

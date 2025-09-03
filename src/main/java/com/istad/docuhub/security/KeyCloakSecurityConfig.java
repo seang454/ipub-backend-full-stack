@@ -49,16 +49,34 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/categories").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                        .requestMatchers("/api/v1/media/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").hasAnyRole( "USER","ADMIN")
-                        .requestMatchers("/api/v1/media").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details/**").hasAnyRole("ADVISER")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/adviser-assignments/**").hasAnyRole("ADMIN", "ADVISER")
+                        //Paper Endpoints
+                        .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
+
+                        // thong
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-student").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-adviser").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/approve-student-detail").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/reject-student-detail").hasAnyRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

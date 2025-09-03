@@ -3,6 +3,7 @@ package com.istad.docuhub.feature.paper;
 import com.istad.docuhub.domain.Paper;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PaperRepository extends JpaRepository<Paper, Integer> {
@@ -10,5 +11,8 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
 
     Optional<Paper> findByUuid(String uuid);
 
-    // Thong have change from boolean to optional<Paper>
+    List<Paper> findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue();
+    List<Paper> findByIsApprovedFalse();
+
+    List<Paper> findByAuthor_UuidAndIsDeletedFalse(String id);
 }
