@@ -89,5 +89,4 @@ public class Paper {
     @OneToMany(mappedBy = "paper")
     private List<Feedback> feedbacks;
 
-
 }

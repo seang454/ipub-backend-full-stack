@@ -36,5 +36,37 @@ public class PaperController {
                         "message", "All papers retrieved successfully"
                 ), HttpStatus.OK
         );
-    };
+    }
+
+    ;
+
+    @GetMapping("/pending")
+    public ResponseEntity<?> getAllPapersIsPending() {
+        return new ResponseEntity<>(
+                Map.of(
+                        "papers", paperService.getAllPapersIsPending(),
+                        "message", "All pending papers retrieved successfully"
+                ), HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<?> getPaperById(@PathVariable String uuid) {
+        return new ResponseEntity<>(
+                Map.of(
+                        "paper", paperService.getPaperById(uuid),
+                        "message", "Paper retrieved successfully"
+                ), HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/author")
+    public ResponseEntity<?> getPapersByAuthor() {
+        return new ResponseEntity<>(
+                Map.of(
+                        "papers", paperService.getPapersByAuthor(),
+                        "message", "Papers by author retrieved successfully"
+                ), HttpStatus.OK
+        );
+    }
 }

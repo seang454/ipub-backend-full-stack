@@ -2,6 +2,7 @@ package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -36,11 +37,15 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableWebSecurity
 public class KeyCloakSecurityConfig {
+
+    @Value("${backend.endpoint}")
+    private String backendEndpoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
@@ -50,8 +55,13 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+
+                        //Paper Endpoints
                         .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
+
                         .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
@@ -61,6 +71,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/assign-adviser").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reassign-adviser").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reject").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
 
                         // by thong ( admin -create student, adviser, reject-user-reqeust-to-student and approve
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-student").hasAnyRole("ADMIN")
@@ -68,6 +79,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/approve-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/reject-student-detail").hasAnyRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
                         // by thong user create requetform to promote to student
                         .requestMatchers(HttpMethod.POST, "/api/v1/user-promote/create-student-detail").hasAnyRole("USER")
 
@@ -106,9 +118,9 @@ public class KeyCloakSecurityConfig {
                         .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
                             // Keycloak logout endpoint
-                            String keycloakLogoutUrl = "http://localhost:9090/realms/docuapi/protocol/openid-connect/logout";
+                            String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
                             // Redirect back to your backend endpoint after logout
-                            String redirectAfterLogout = "http://localhost:8080/api/v1/auth/tokens";
+                            String redirectAfterLogout = backendEndpoint + "/api/v1/auth/tokens";
                             // Full logout URL
                             String logoutUrl = keycloakLogoutUrl + "?redirect_uri=" + redirectAfterLogout;
                             // Redirect browser to Keycloak logout
