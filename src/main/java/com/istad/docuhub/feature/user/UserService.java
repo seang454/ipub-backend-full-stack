@@ -1,6 +1,6 @@
 package com.istad.docuhub.feature.user;
 
-import com.istad.docuhub.domain.User;
+
 import com.istad.docuhub.feature.user.dto.*;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
