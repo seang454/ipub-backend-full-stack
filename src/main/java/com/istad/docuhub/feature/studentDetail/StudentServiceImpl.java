@@ -5,11 +5,10 @@ import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.sendMail.SendMailService;
 import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
 import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
-import com.istad.docuhub.feature.studentDetail.dto.StudentApproveOrRejectRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentApproveRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
 import com.istad.docuhub.feature.user.UserRepository;
-import com.istad.docuhub.feature.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -68,7 +67,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentResponse approveStudentDetail(StudentApproveOrRejectRequest approvRequest) {
+    public StudentResponse approveStudentDetail(StudentApproveRequest approvRequest) {
         StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(approvRequest.userUuid())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
 

@@ -2,6 +2,7 @@ package com.istad.docuhub.feature.studentDetail;
 
 
 import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentApproveRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class StudentDetailController {
 
     private final StudentService studentService;
 
-    @PostMapping("aprove-student")
+    @PostMapping("/create-student-detail")
     public ResponseEntity<?> createStudentDetail(@RequestBody StudentRequest studentRequest) {
         studentService.createStudentDetail(studentRequest);
         return new ResponseEntity<>(
@@ -27,9 +28,5 @@ public class StudentDetailController {
         );
     }
 
-    @PostMapping("reject-student")
-    public ResponseEntity<?> rejectStudentDetail(@RequestBody RejectStudentRequest rejectRequest) {
-        studentService.rejectStudentDetail(rejectRequest);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
+
 }
