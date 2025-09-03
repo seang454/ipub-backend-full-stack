@@ -47,4 +47,6 @@ public class AdviserAssignmentController {
         AdviserAssignmentResponse response = adviserAssignmentService.reviewPaperByAdviser(reviewRequest);
         return ResponseEntity.ok(response);
     }
+
+
 }
