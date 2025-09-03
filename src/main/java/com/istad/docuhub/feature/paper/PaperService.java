@@ -10,4 +10,5 @@ public interface PaperService {
     List<PaperResponse> getAllPapers();
     List<PaperResponse> getAllPapersIsPending();
     PaperResponse getPaperById(String Uuid);
+    List<PaperResponse> getPapersByAuthor();
 }

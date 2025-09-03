@@ -59,4 +59,14 @@ public class PaperController {
                 ), HttpStatus.OK
         );
     }
+
+    @GetMapping("/author")
+    public ResponseEntity<?> getPapersByAuthor() {
+        return new ResponseEntity<>(
+                Map.of(
+                        "papers", paperService.getPapersByAuthor(),
+                        "message", "Papers by author retrieved successfully"
+                ), HttpStatus.OK
+        );
+    }
 }

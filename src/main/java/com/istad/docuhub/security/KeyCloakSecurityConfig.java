@@ -55,14 +55,17 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+
+                        //Paper Endpoints
                         .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET,"/api/v1/papers").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
+
                         .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN")
-
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
 
                         // thong

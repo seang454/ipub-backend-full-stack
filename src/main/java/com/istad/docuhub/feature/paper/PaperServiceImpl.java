@@ -8,6 +8,8 @@ import com.istad.docuhub.feature.category.CategoryRepository;
 import com.istad.docuhub.feature.paper.dto.PaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.user.UserRepository;
+import com.istad.docuhub.feature.user.UserService;
+import com.istad.docuhub.feature.user.dto.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class PaperServiceImpl implements PaperService {
     private final PaperRepository paperRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final UserService userService;
 
     @Override
     public void createPaper(PaperRequest paperRequest) {
@@ -46,8 +49,8 @@ public class PaperServiceImpl implements PaperService {
         }
 
         // Find author
-        User author = userRepository.findByUuidAndIsDeletedFalse(paperRequest.authorUuid())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found"));
+        CurrentUser subId = userService.getCurrentUserSub();
+        User author = userRepository.findByUuid(subId.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (!author.getIsStudent() || author.getIsAdvisor()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author must be a student");
@@ -64,27 +67,10 @@ public class PaperServiceImpl implements PaperService {
 
         // Find category by name and get its UUID
         String categoryName = paperRequest.categoryNames().getFirst();
-        Category category = categoryRepository.findByName(categoryName)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Category not found: " + categoryName));
+        Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
 
         // Create paper with auto-generated ID and category UUID
-        Paper paper = Paper.builder()
-                .id(id)
-                .uuid(UUID.randomUUID().toString())
-                .title(paperRequest.title())
-                .abstractText(paperRequest.abstractText())
-                .fileUrl(paperRequest.fileUrl())
-                .author(author)
-                .category(category)
-                .status("PENDING")
-                .submittedAt(LocalDate.now())
-                .createdAt(LocalDate.now())
-                .downloadCount(0)
-                .isApproved(false)
-                .isDeleted(false)
-                .isPublished(false)
-                .build();
+        Paper paper = Paper.builder().id(id).uuid(UUID.randomUUID().toString()).title(paperRequest.title()).abstractText(paperRequest.abstractText()).fileUrl(paperRequest.fileUrl()).author(author).category(category).status("PENDING").submittedAt(LocalDate.now()).createdAt(LocalDate.now()).downloadCount(0).isApproved(false).isDeleted(false).isPublished(false).build();
 
         paperRepository.save(paper);
     }
@@ -93,64 +79,29 @@ public class PaperServiceImpl implements PaperService {
     public List<PaperResponse> getAllPapers() {
         List<Paper> papers = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue();
 
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
+        return papers.stream().map(paper -> new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt()
 
-                ))
-                .toList(); // Java 16+ (use .collect(Collectors.toList()) if < Java 16)
+        )).toList(); // Java 16+ (use .collect(Collectors.toList()) if < Java 16)
     }
 
     @Override
     public List<PaperResponse> getAllPapersIsPending() {
         List<Paper> papers = paperRepository.findByIsApprovedFalse();
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
-                )).toList();
+        return papers.stream().map(paper -> new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt())).toList();
     }
 
     @Override
     public PaperResponse getPaperById(String Uuid) {
-        Paper paper = paperRepository.findByUuid(Uuid)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
-        return new PaperResponse(
-                paper.getUuid(),
-                paper.getTitle(),
-                paper.getAbstractText(),
-                paper.getFileUrl(),
-                paper.getAuthor().getUuid(),
-                List.of(paper.getCategory().getName()),
-                paper.getStatus(),
-                paper.getIsApproved(),
-                paper.getSubmittedAt(),
-                paper.getCreatedAt(),
-                paper.getIsPublished(),
-                paper.getPublishedAt()
-        );
+        Paper paper = paperRepository.findByUuid(Uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+        return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt());
     }
 
+    @Override
+    public List<PaperResponse> getPapersByAuthor() {
+        CurrentUser subId = userService.getCurrentUserSub();
+        List<Paper> paper = paperRepository.findByAuthor_UuidAndIsDeletedFalse(subId.id());
+
+        return paper.stream().map(paper1 -> new PaperResponse(paper1.getUuid(), paper1.getTitle(), paper1.getAbstractText(), paper1.getFileUrl(), paper1.getAuthor().getUuid(), List.of(paper1.getCategory().getName()), paper1.getStatus(), paper1.getIsApproved(), paper1.getSubmittedAt(), paper1.getCreatedAt(), paper1.getIsPublished(), paper1.getPublishedAt())).toList();
+    }
 }
 

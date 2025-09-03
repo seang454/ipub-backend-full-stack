@@ -6,7 +6,6 @@ public record PaperRequest(
         String title,
         String abstractText,
         String fileUrl,
-        String authorUuid,
         List<String> categoryNames
 ) {
 }
