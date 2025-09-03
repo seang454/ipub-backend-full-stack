@@ -57,13 +57,20 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
+                        // thong admin approve or reject paper endpoint
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/assign-adviser").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reassign-adviser").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reject").hasAnyRole("ADMIN")
 
-                        // thong
+                        // by thong ( admin -create student, adviser, reject-user-reqeust-to-student and approve
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-student").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-adviser").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/approve-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/reject-student-detail").hasAnyRole("ADMIN")
+
+                        // by thong user create requetform to promote to student
+                        .requestMatchers(HttpMethod.POST, "/api/v1/user-promote/create-student-detail").hasAnyRole("USER")
+
 
                         .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
