@@ -2,6 +2,7 @@ package com.istad.docuhub.feature.user;
 
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.dto.*;
+import org.springframework.data.domain.Page;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
@@ -10,6 +11,7 @@ import java.util.Map;
 
 public interface UserService {
      UserResponse register(UserCreateDto userCreateDto);
+     Page<UserResponse> getAllUsersByPage(int page, int size);
      AuthResponse login(String username, String password);
      List<UserResponse> getAllUsers();
      UserResponse getSingleUser(String id);
