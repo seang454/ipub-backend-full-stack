@@ -1,8 +1,8 @@
 package com.istad.docuhub.feature.user.contoller;
 
+import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.*;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,10 +12,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +23,7 @@ import java.util.Map;
 public class AuthRestController {
 
     private final UserService userService;
+    private final KeycloakAuthService keycloakAuthService;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -124,5 +122,19 @@ public class AuthRestController {
     @PostMapping("/user/mentor/{uuid}")
     public void promoteMentor(@PathVariable String uuid) {
         userService.promoteAsMentor(uuid);
+    }
+    @PostMapping("/login")
+    public Map<String, Object> login(@RequestBody Logindto login) {
+        Map<String, Object> tokenResponse = keycloakAuthService.login(login.username(), login.password());
+
+        // You can also return only the access token if you want:
+        // return Map.of("access_token", tokenResponse.get("access_token"));
+
+        return tokenResponse; // returns JSON with access_token, refresh_token, etc.
+    }
+
+    @GetMapping("/user/currentId")
+    public CurrentUser getCurrentUser() {
+        return userService.getCurrentUserSub();
     }
 }

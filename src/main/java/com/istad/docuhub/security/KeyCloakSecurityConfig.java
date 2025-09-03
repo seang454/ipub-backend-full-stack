@@ -2,6 +2,7 @@ package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -36,11 +37,15 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableWebSecurity
 public class KeyCloakSecurityConfig {
+
+    @Value("${backend.endpoint}")
+    private String backendEndpoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
@@ -86,9 +91,9 @@ public class KeyCloakSecurityConfig {
                         .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
                             // Keycloak logout endpoint
-                            String keycloakLogoutUrl = "http://localhost:9090/realms/docuapi/protocol/openid-connect/logout";
+                            String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
                             // Redirect back to your backend endpoint after logout
-                            String redirectAfterLogout = "http://localhost:8080/api/v1/auth/tokens";
+                            String redirectAfterLogout = backendEndpoint + "/api/v1/auth/tokens";
                             // Full logout URL
                             String logoutUrl = keycloakLogoutUrl + "?redirect_uri=" + redirectAfterLogout;
                             // Redirect browser to Keycloak logout

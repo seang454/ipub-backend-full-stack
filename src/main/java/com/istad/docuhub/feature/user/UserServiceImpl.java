@@ -16,12 +16,14 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -421,5 +423,14 @@ public class UserServiceImpl implements UserService {
         user.setIsAdvisor(true);
         user.setIsStudent(false);
         userRepository.save(user);
+    }
+
+    @Override
+    public CurrentUser getCurrentUserSub() {
+        JwtAuthenticationToken authentication =
+                (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        return CurrentUser.builder()
+                .id(authentication.getToken().getClaimAsString("sub"))
+                .build();
     }
 }

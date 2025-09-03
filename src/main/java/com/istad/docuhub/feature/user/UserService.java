@@ -23,4 +23,5 @@ public interface UserService {
     List<UserResponse> getAllMentor();
     void promoteAsStudent(String studentUuid);
     void promoteAsMentor(String mentorUuid);
+    CurrentUser getCurrentUserSub();
 }
