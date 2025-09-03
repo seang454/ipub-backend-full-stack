@@ -1,6 +1,6 @@
 package com.istad.docuhub.feature.studentDetail.dto;
 
-public record StudentApproveOrRejectRequest(
+public record StudentApproveRequest(
         String userUuid
 ) {
 }
