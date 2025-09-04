@@ -64,6 +64,7 @@ public class AdminController {
         return userService.getAllStudent();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/student/create-student")
     public ResponseEntity<String> createStudent(@RequestBody UserCreateDto dto) {
         adminService.createStudent(dto);
@@ -90,6 +91,12 @@ public class AdminController {
         return ResponseEntity.ok("Reject student detail successfully");
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/student/{uuid}")
+    public void deleteStudentByUuid(@PathVariable String uuid) {
+        log.info("User id controller {} ",uuid);
+        userService.deleteUser(uuid);
+    }
 
 
     // adviser section
@@ -104,6 +111,12 @@ public class AdminController {
         return ResponseEntity.ok("Adviser created successfully");
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/adviser/{uuid}")
+    public void deleteAdviserByUuid(@PathVariable String uuid) {
+        log.info("User id controller {} ",uuid);
+        userService.deleteUser(uuid);
+    }
 
 
 
