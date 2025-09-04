@@ -117,7 +117,7 @@ public class PaperServiceImpl implements PaperService {
         CurrentUser subId = userService.getCurrentUserSub();
         if (!paper.getAuthor().getUuid().equals(subId.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this paper");
-        }else {
+        } else {
             // Find category by name and get its UUID
             String categoryName = paperRequest.categoryNames().getFirst();
             Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
@@ -127,9 +127,13 @@ public class PaperServiceImpl implements PaperService {
             String fileUrl = paper.getFileUrl();
             mediaService.deleteMedia(fileUrl);
             paper.setFileUrl(paperRequest.fileUrl());
-            String thumbnailUrl = paper.getThumbnailUrl();
-            mediaService.deleteMedia(thumbnailUrl);
-            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+            if (paper.getThumbnailUrl() == null) {
+                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+            } else {
+                String thumbnailUrl = paper.getThumbnailUrl();
+                mediaService.deleteMedia(thumbnailUrl);
+                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+            }
             paper.setCategory(category);
             paper.setStatus("PENDING");
             paper.setIsApproved(false);
@@ -291,8 +295,16 @@ public class PaperServiceImpl implements PaperService {
         Paper paper = paperRepository.findByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
         paper.setTitle(paper.getTitle());
         paper.setAbstractText(paperRequest.abstractText());
+        String fileUrl = paper.getFileUrl();
+        mediaService.deleteMedia(fileUrl);
         paper.setFileUrl(paperRequest.fileUrl());
-        paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+        if (paper.getThumbnailUrl() == null) {
+            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+        } else {
+            String thumbnailUrl = paper.getThumbnailUrl();
+            mediaService.deleteMedia(thumbnailUrl);
+            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+        }
         // Find category by name and get its UUID
         String categoryName = paperRequest.category().getFirst();
         Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
