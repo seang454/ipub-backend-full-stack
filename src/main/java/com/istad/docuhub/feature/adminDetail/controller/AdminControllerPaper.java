@@ -26,7 +26,7 @@ public class AdminControllerPaper {
 
     @GetMapping("/papers")
     public List<PaperResponse> getAllPapers() {
-        return paperService.getAllPapers();
+        return paperService.getAllPapersIsApproved();
     }
 
     @PostMapping("/create-student")

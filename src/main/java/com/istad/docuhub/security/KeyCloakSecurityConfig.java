@@ -59,8 +59,13 @@ public class KeyCloakSecurityConfig {
                         //Paper Endpoints
                         .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/author/**").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/published").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/approved").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/all").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/pending").hasAnyRole("ADMIN")
+
 
                         .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()

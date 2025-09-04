@@ -8,7 +8,6 @@ import java.time.LocalDate;
 public record AdviserAssignmentRequest(
         String paperUuid,
         String adviserUuid,
-        String adminUuid,
         LocalDate deadline
 ) {
 }

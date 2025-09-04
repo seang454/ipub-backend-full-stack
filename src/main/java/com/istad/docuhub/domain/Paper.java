@@ -25,18 +25,17 @@ public class Paper {
     @Column(nullable = false)
     private String title;
 
-
     @Column(nullable = true)
     private String abstractText;
-
 
     @Column(nullable = true)
     private String fileUrl;
 
+    @Column(nullable = false)
+    private String thumbnailUrl;
 
     @Column(nullable = false)
-    private String status; // status from adviser ( pending, underreview, approve or reject
-
+    private String status;
 
     @Column(nullable = false)
     private LocalDate submittedAt;

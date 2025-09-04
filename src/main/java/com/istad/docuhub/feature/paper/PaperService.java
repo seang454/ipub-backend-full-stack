@@ -6,9 +6,19 @@ import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import java.util.List;
 
 public interface PaperService {
-    void createPaper(PaperRequest paperRequest);
-    List<PaperResponse> getAllPapers();
+    //Admin
+    List<PaperResponse> getAllPapersIsApproved();
     List<PaperResponse> getAllPapersIsPending();
+    List<PaperResponse> getAllPaper();
+    void deletePaperById(String uuid);
+
+    //Public
     PaperResponse getPaperById(String Uuid);
+    List<PaperResponse> getAllPapersIsPublished();
+
+    //Author
     List<PaperResponse> getPapersByAuthor();
+    void createPaper(PaperRequest paperRequest);
+    List<PaperResponse> getAllPapersIsApprovedForAuthor();
+    void deletePaperByAuthor(String uuid);
 }
