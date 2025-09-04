@@ -31,7 +31,7 @@ public class Paper {
     @Column(nullable = true)
     private String fileUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String thumbnailUrl;
 
     @Column(nullable = false)

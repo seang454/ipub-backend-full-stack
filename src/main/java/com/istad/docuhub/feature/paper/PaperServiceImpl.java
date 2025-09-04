@@ -5,6 +5,8 @@ import com.istad.docuhub.domain.Category;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.category.CategoryRepository;
+import com.istad.docuhub.feature.media.MediaService;
+import com.istad.docuhub.feature.paper.dto.AdminPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.user.UserRepository;
@@ -28,6 +30,7 @@ public class PaperServiceImpl implements PaperService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final UserService userService;
+    private final MediaService mediaService;
 
     @Override
     public void createPaper(PaperRequest paperRequest) {
@@ -105,6 +108,48 @@ public class PaperServiceImpl implements PaperService {
         } else {
             paper.setIsDeleted(true);
             paperRepository.save(paper);
+        }
+    }
+
+    @Override
+    public PaperResponse updatePaperByAuthor(String uuid, PaperRequest paperRequest) {
+        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedFalse(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found or already approved"));
+        CurrentUser subId = userService.getCurrentUserSub();
+        if (!paper.getAuthor().getUuid().equals(subId.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this paper");
+        }else {
+            // Find category by name and get its UUID
+            String categoryName = paperRequest.categoryNames().getFirst();
+            Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
+
+            paper.setTitle(paperRequest.title());
+            paper.setAbstractText(paperRequest.abstractText());
+            String fileUrl = paper.getFileUrl();
+            mediaService.deleteMedia(fileUrl);
+            paper.setFileUrl(paperRequest.fileUrl());
+            String thumbnailUrl = paper.getThumbnailUrl();
+            mediaService.deleteMedia(thumbnailUrl);
+            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+            paper.setCategory(category);
+            paper.setStatus("PENDING");
+            paper.setIsApproved(false);
+            paperRepository.save(paper);
+
+            return new PaperResponse(
+                    paper.getUuid(),
+                    paper.getTitle(),
+                    paper.getAbstractText(),
+                    paper.getFileUrl(),
+                    paper.getThumbnailUrl(),
+                    paper.getAuthor().getUuid(),
+                    List.of(paper.getCategory().getName()),
+                    paper.getStatus(),
+                    paper.getIsApproved(),
+                    paper.getSubmittedAt(),
+                    paper.getCreatedAt(),
+                    paper.getIsPublished(),
+                    paper.getPublishedAt()
+            );
         }
     }
 
@@ -238,6 +283,20 @@ public class PaperServiceImpl implements PaperService {
     public void deletePaperById(String uuid) {
         Paper paper = paperRepository.findByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
         paper.setIsDeleted(true);
+        paperRepository.save(paper);
+    }
+
+    @Override
+    public void updatePaperByAdmin(String uuid, AdminPaperRequest paperRequest) {
+        Paper paper = paperRepository.findByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+        paper.setTitle(paper.getTitle());
+        paper.setAbstractText(paperRequest.abstractText());
+        paper.setFileUrl(paperRequest.fileUrl());
+        paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+        // Find category by name and get its UUID
+        String categoryName = paperRequest.category().getFirst();
+        Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
+        paper.setCategory(category);
         paperRepository.save(paper);
     }
 }

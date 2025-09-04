@@ -1,6 +1,8 @@
 package com.istad.docuhub.feature.paper;
 
 import com.istad.docuhub.feature.paper.dto.PaperRequest;
+import com.istad.docuhub.feature.paper.dto.PaperResponse;
+import jakarta.ws.rs.PUT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,5 +67,15 @@ public class PaperController {
     public ResponseEntity<?> deletePaperByAuthor(@PathVariable String uuid) {
         paperService.deletePaperByAuthor(uuid);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Paper deleted successfully");
+    }
+
+    @PutMapping("/author/{uuid}")
+    public ResponseEntity<?> updatePaperByAuthor(@PathVariable String uuid, @RequestBody PaperRequest paperRequest) {
+        return new ResponseEntity<>(
+                Map.of(
+                        "paper", paperService.updatePaperByAuthor(uuid, paperRequest),
+                        "message", "Paper updated successfully"
+                ), HttpStatus.OK
+        );
     }
 }
