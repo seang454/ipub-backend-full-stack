@@ -47,7 +47,7 @@ public class KeyCloakSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens").permitAll()
-                        .requestMatchers(HttpMethod.GET,"api/v1/auth/refreshTokens").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
@@ -67,25 +67,38 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/v1/papers/pending").hasAnyRole("ADMIN")
 
 
-                        .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADVISER", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+
+                        // --- admin endpoints (all you listed) ---
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                        // thong admin approve or reject paper endpoint
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/assign-adviser").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reassign-adviser").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reject").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
 
-                        // thong
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-student").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/create-adviser").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/approve-student-detail").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/reject-student-detail").hasAnyRole("ADMIN")
+                        // by thong ( admin -create student, adviser, reject-user-reqeust-to-student and approve
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/create-student").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/adviser/create-adviser").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/approve-student-detail").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/reject-student-detail").hasAnyRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
+
+                        // by thong user create requetform to promote to be a student need approve from admin
+                        .requestMatchers(HttpMethod.POST, "/api/v1/user-promote/create-student-detail").hasAnyRole("USER")
+
+
                         .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/api/v1/auth/login") do not // user Spring automatically redirects to Keycloak login page.
+                      // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                                 .successHandler((request, response, authentication) -> {
                                 HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
@@ -125,7 +138,6 @@ public class KeyCloakSecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 );
-
 
         return http.build();
     }
@@ -182,6 +194,5 @@ public class KeyCloakSecurityConfig {
 
         return manager;
     }
-
 
 }

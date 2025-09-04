@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/paper")
+@RequestMapping("/api/v1/paper")
 public class AdviserAssignmentController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
     @PostMapping("/assign-adviser")
@@ -47,4 +47,13 @@ public class AdviserAssignmentController {
         AdviserAssignmentResponse response = adviserAssignmentService.reviewPaperByAdviser(reviewRequest);
         return ResponseEntity.ok(response);
     }
+
+    // Get all assignments of a specific adviser
+    @GetMapping("/adviser/{adviserUuid}")
+    public ResponseEntity<?> getAssignmentsByAdviser(@PathVariable String adviserUuid) {
+        return ResponseEntity.ok(
+                adviserAssignmentService.getAssignmentsByAdviserUuid(adviserUuid)
+        );
+    }
+
 }

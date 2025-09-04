@@ -21,17 +21,22 @@ public class AdviserDetail {
     @Column(nullable = false, unique = true)
     private String uuid;
 
+    @Column(nullable = false)
     private Integer experienceYears;
 
+    @Column(nullable = false)
     private String linkedinUrl;
 
+    @Column(nullable = false)
     private String publication;
 
+    @Column(nullable = false)
     private String socialLinks;
 
     @Column(nullable = false)
     private String status;
 
+    @Column(nullable = false)
     private Boolean isDeleted;
 
     // AdviserDetail → User (One-to-One via uuid)
