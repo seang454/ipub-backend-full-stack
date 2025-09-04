@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/paper")
 public class AdviserAssignmentController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
-    private final AssignmentService assignmentService;
-
     @PostMapping("/assign-adviser")
     public ResponseEntity<AdviserAssignmentResponse> assignAdviser(
             @RequestBody AdviserAssignmentRequest request

@@ -17,6 +17,7 @@ import com.istad.docuhub.feature.studentDetail.dto.StudentApproveRequest;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -109,7 +110,7 @@ public class AdminController {
     // adviser assignment
     @PostMapping("/paper/assign-adviser")
     public ResponseEntity<AdviserAssignmentResponse> assignAdviser(
-            @RequestBody AdviserAssignmentRequest request
+            @Valid @RequestBody AdviserAssignmentRequest request
     ) {
         AdviserAssignmentResponse response = adviserAssignmentService.assignAdviserToPaper(request);
         return ResponseEntity.ok(response);
