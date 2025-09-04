@@ -44,6 +44,11 @@ public class AdminController {
         public List<UserResponse> getUsers(){
             return userService.getAllUsers();
         }
+
+        @GetMapping("/public/users")
+        public List<UserResponse> getAllPublicUsers(){
+            return userService.getAllPublicUser();
+        }
         @GetMapping("/user/{uuid}")
         public UserResponse getSingleUser(@PathVariable String uuid){
             return userService.getSingleUser(uuid);
@@ -167,6 +172,8 @@ public class AdminController {
         );
     }
 
+
+
     // paper management
     @GetMapping("/papers")
     public List<PaperResponse> getAllPapers() {
@@ -193,17 +200,16 @@ public class AdminController {
         );
     }
 
-    @GetMapping("/paper/author")
-    public ResponseEntity<?> getPapersByAuthor() {
-        return new ResponseEntity<>(
-                Map.of(
-                        "papers", paperService.getPapersByAuthor(),
-                        "message", "Papers by author retrieved successfully"
-                ), HttpStatus.OK
-        );
+    @GetMapping("papers/approved")
+    public List<PaperResponse> getAllPapersIsApproved(){
+           return  paperService.getAllPapersIsApproved();
     }
 
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("paper/{uuid}")
+    public void deletePaperById(String uuid) {
+            paperService.deletePaperById(uuid);
+    }
 
     // category management
     @PostMapping("/categories")
