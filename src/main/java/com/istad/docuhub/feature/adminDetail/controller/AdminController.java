@@ -10,6 +10,7 @@ import com.istad.docuhub.feature.category.CategoryService;
 import com.istad.docuhub.feature.category.dto.CategoryRequest;
 import com.istad.docuhub.feature.category.dto.CategoryResponse;
 import com.istad.docuhub.feature.paper.PaperService;
+import com.istad.docuhub.feature.paper.dto.AdminPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.studentDetail.StudentService;
 import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
@@ -173,7 +174,6 @@ public class AdminController {
     }
 
 
-
     // paper management
     @GetMapping("/papers")
     public List<PaperResponse> getAllPapers() {
@@ -209,6 +209,15 @@ public class AdminController {
     @DeleteMapping("paper/{uuid}")
     public void deletePaperById(String uuid) {
             paperService.deletePaperById(uuid);
+    }
+
+    @PutMapping("/paper/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204: success, no response body
+    public void updatePaperByAdmin(
+            @PathVariable String uuid,
+            @Valid @RequestBody AdminPaperRequest paperRequest
+    ) {
+        paperService.updatePaperByAdmin(uuid, paperRequest);
     }
 
     // category management
