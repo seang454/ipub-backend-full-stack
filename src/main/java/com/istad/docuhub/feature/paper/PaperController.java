@@ -21,16 +21,6 @@ public class PaperController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Paper created successfully");
     }
 
-    @GetMapping("/approved")
-    public ResponseEntity<?> getAllPapersIsApproved() {
-        return new ResponseEntity<>(
-                Map.of(
-                        "papers", paperService.getAllPapersIsApproved(),
-                        "message", "All papers retrieved successfully"
-                ), HttpStatus.OK
-        );
-    }
-
     @GetMapping("/published")
     public ResponseEntity<?> getAllPapersIsPublished() {
         return new ResponseEntity<>(
