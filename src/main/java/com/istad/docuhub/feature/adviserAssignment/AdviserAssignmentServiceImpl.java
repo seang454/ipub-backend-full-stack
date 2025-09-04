@@ -12,6 +12,8 @@ import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.sendMail.SendMailService;
 import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
 import com.istad.docuhub.feature.user.UserRepository;
+import com.istad.docuhub.feature.user.UserService;
+import com.istad.docuhub.feature.user.dto.CurrentUser;
 import com.istad.docuhub.utils.KeycloakUserDto;
 import com.istad.docuhub.utils.KeycloakUserService;
 import com.istad.docuhub.utils.PaperStatus;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -34,6 +37,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
     private final UserRepository userRepository;
     private final SendMailService sendMailService;
     private final KeycloakUserService keycloakUserService;
+    private final UserService userService;
 
     // assign adviesr
     @Override
@@ -46,7 +50,8 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         User adviser = userRepository.findByUuid(request.adviserUuid())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
         // fetch admin
-        User userAdmin = userRepository.findByUuid(request.adminUuid())
+        CurrentUser currentUser = userService.getCurrentUserSub();
+        User userAdmin = userRepository.findByUuid(currentUser.id())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
 
         // ✅ Update paper status
@@ -208,6 +213,26 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 .build();
     }
 
+    @Override
+    public List<AdviserAssignmentResponse> getAssignmentsByAdviserUuid(String adviserUuid) {
+        List<AdviserAssignment> assignments = adviserAssignmentRepository.findByAdvisorUuid(adviserUuid);
 
+        if (assignments.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No assignments found for this adviser");
+        }
+
+        return assignments.stream()
+                .map(assignment -> AdviserAssignmentResponse.builder()
+                        .uuid(assignment.getUuid())
+                        .paperUuid(assignment.getPaper().getUuid())
+                        .adviserUuid(assignment.getAdvisor().getUuid())
+                        .adminUuid(assignment.getAdmin().getUuid())
+                        .deadline(assignment.getDeadline())
+                        .status(assignment.getStatus())
+                        .assignedDate(assignment.getAssignedDate())
+                        .updateDate(assignment.getUpdateDate())
+                        .build()
+                ).toList();
+    }
 
 }

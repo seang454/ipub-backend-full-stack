@@ -11,6 +11,7 @@ public record PaperResponse(
         String title,
         String abstractText,
         String fileUrl,
+        String thumbnailUrl,
         String authorUuid,
         List<String> categoryNames,
         String status,

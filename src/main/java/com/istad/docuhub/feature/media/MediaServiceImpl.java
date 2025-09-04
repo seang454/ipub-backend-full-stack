@@ -69,11 +69,14 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public void deleteMedia(String fileName) {
+
+        String fileUrl = fileName.substring(fileName.lastIndexOf("/") + 1);
+
         try {
             minioClient.statObject(StatObjectArgs.builder()
                     .bucket(bucketName
                     )
-                    .object(fileName)
+                    .object(fileUrl)
                     .build()
             );
 
