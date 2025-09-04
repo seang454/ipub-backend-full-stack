@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/paper")
+@RequestMapping("/api/v1/paper")
 public class AdviserAssignmentController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
     private final AssignmentService assignmentService;
