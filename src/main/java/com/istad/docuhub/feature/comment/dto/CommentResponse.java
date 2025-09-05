@@ -1,14 +1,21 @@
 package com.istad.docuhub.feature.comment.dto;
 
+import lombok.Builder;
+
 import java.time.LocalDate;
 
+@Builder
 public record CommentResponse(
 
+
         Integer id,
-        Integer userId,
-        Integer paperId,
         String content,
-        LocalDate createdDate
+        LocalDate createdAt,
+        Integer paperId,
+        String paperTitle,
+        Integer userId,
+        String userFullName,
+        String userImageUrl
 
 ) {
 }

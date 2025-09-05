@@ -20,4 +20,6 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     List<Paper> findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(String authorUuid);
 
     Optional<Paper> findByUuidAndIsDeletedFalseAndIsApprovedFalse(String uuid);
+
+    boolean existsByIdAndIsPublishedTrue(Integer id); //added by Vannarith
 }
