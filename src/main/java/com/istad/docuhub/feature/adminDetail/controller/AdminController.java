@@ -270,9 +270,28 @@ public class AdminController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
-        List<CategoryResponse> categories = categoryService.getAllCategory();
+    public ResponseEntity<?> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CategoryResponse> categories = categoryService.getAllCategory(pageable);
         return ResponseEntity.ok(categories);
+    }
+
+    @DeleteMapping("/category/{uuid}")
+    public ResponseEntity<?> deleteCategory(@PathVariable String uuid) {
+        categoryService.deleteCategory(uuid);
+        return new ResponseEntity<>(
+                Map.of(
+                        "message", "Category deleted successfully"
+                ), HttpStatus.NO_CONTENT
+        );
     }
 }
 
