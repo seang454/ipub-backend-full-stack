@@ -2,6 +2,8 @@ package com.istad.docuhub.feature.paper;
 
 import com.istad.docuhub.domain.Paper;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,6 +13,10 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     boolean existsById(@NotNull Integer id);
 
     Optional<Paper> findByUuid(String uuid);
+
+    @NotNull
+    @Override
+    Page<Paper> findAll(@NotNull Pageable pageable);
 
     List<Paper> findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue();
     List<Paper> findByIsApprovedFalse();
