@@ -94,6 +94,7 @@ public class KeyCloakSecurityConfig {
 
 
                         .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/feedback").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
                         .anyRequest().authenticated()
                 )

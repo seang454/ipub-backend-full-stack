@@ -13,6 +13,7 @@ import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -291,7 +292,7 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
-    public void updatePaperByAdmin(String uuid, AdminPaperRequest paperRequest) {
+    public void updatePaperByAdmin(String uuid, @NotNull AdminPaperRequest paperRequest) {
         Paper paper = paperRepository.findByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
         paper.setTitle(paper.getTitle());
         paper.setAbstractText(paperRequest.abstractText());
