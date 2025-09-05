@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface PaperRepository extends JpaRepository<Paper, Integer> {
@@ -18,12 +17,12 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     @Override
     Page<Paper> findAll(@NotNull Pageable pageable);
 
-    List<Paper> findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue();
-    List<Paper> findByIsApprovedFalse();
-    List<Paper> findByIsDeletedIsFalseAndIsApprovedTrue();
-    List<Paper> findByAuthor_UuidAndIsDeletedFalse(String id);
+    Page<Paper> findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue(Pageable pageable);
+    Page<Paper> findByIsApprovedFalse(Pageable pageable);
+    Page<Paper> findByIsDeletedIsFalseAndIsApprovedTrue(Pageable pageable);
+    Page<Paper> findByAuthor_UuidAndIsDeletedFalse(String uuid, Pageable pageable);
 
-    List<Paper> findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(String authorUuid);
+    Page<Paper> findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(String uuid, Pageable pageable);
 
     Optional<Paper> findByUuidAndIsDeletedFalseAndIsApprovedFalse(String uuid);
 }

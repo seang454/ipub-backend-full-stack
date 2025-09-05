@@ -3,25 +3,25 @@ package com.istad.docuhub.feature.paper;
 import com.istad.docuhub.feature.paper.dto.AdminPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PaperService {
     //Admin
-    List<PaperResponse> getAllPapersIsApproved();
-    List<PaperResponse> getAllPapersIsPending();
-    List<PaperResponse> getAllPaper();
+    Page<PaperResponse> getAllPapersIsApproved(Pageable pageable);
+    Page<PaperResponse> getAllPapersIsPending(Pageable pageable);
+    Page<PaperResponse> getAllPaper(Pageable pageable);
     void deletePaperById(String uuid);
     void updatePaperByAdmin(String uuid, AdminPaperRequest paperRequest);
 
     //Public
     PaperResponse getPaperById(String Uuid);
-    List<PaperResponse> getAllPapersIsPublished();
+    Page<PaperResponse> getAllPapersIsPublished(Pageable pageable);
 
     //Author
-    List<PaperResponse> getPapersByAuthor();
+    Page<PaperResponse> getPapersByAuthor(Pageable pageable);
     void createPaper(PaperRequest paperRequest);
-    List<PaperResponse> getAllPapersIsApprovedForAuthor();
+    Page<PaperResponse> getAllPapersIsApprovedForAuthor(Pageable pageable);
     void deletePaperByAuthor(String uuid);
     PaperResponse updatePaperByAuthor(String uuid, PaperRequest paperRequest);
 }
