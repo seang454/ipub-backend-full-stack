@@ -111,7 +111,6 @@ public class KeyCloakSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
-                            // Always redirect to your frontend after successful login
                             response.sendRedirect("http://localhost:3000"); // <-- your frontend URL
                         })
                 )
