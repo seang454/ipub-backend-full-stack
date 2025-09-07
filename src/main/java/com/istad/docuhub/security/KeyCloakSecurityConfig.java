@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -45,73 +46,85 @@ public class KeyCloakSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/categories").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/auth/tokens").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/auth/refreshTokens").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
 
-                        //Paper Endpoints
-                        .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/author/**").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/published").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/approved").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/all").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/pending").hasAnyRole("ADMIN")
+                                // Category Endpoints
+                                .requestMatchers(HttpMethod.POST, "/api/v1/categories").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/categories/**").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/categories/**").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
 
+                                // Media Endpoints
+                                .requestMatchers(HttpMethod.GET, "/api/v1/media").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/media/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
 
-                        .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
-
-                        // --- admin endpoints (all you listed) ---
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-
-                        // thong admin approve or reject paper endpoint
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/assign-adviser").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reassign-adviser").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reject").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
-
-                        // by thong ( admin -create student, adviser, reject-user-reqeust-to-student and approve
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/create-student").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/adviser/create-adviser").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/approve-student-detail").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/reject-student-detail").hasAnyRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
-
-                        // by thong user create requetform to promote to be a student need approve from admin
-                        .requestMatchers(HttpMethod.POST, "/api/v1/user-promote/create-student-detail").hasAnyRole("USER")
+                                //Paper Endpoints
+                                .requestMatchers(HttpMethod.POST, "/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/author/**").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/published").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/approved").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/all").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
 
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
-                        .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/adviser_details").hasAnyRole("ADVISER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+
+                                // --- admin endpoints (all you listed) ---
+//                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                                // thong admin approve or reject paper endpoint
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/assign-adviser").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reassign-adviser").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reject").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
+
+                                // by thong ( admin -create student, adviser, reject-user-reqeust-to-student and approve
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/create-student").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/adviser/create-adviser").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/approve-student-detail").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/reject-student-detail").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/admin/student/").hasAnyRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
+
+                                // by thong user create requetform to promote to be a student need approve from admin
+                                .requestMatchers(HttpMethod.POST, "/api/v1/user-promote/create-student-detail").hasAnyRole("USER")
+
+
+                                .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/feedback").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
+                                .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                      // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
+                        // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
-                                .successHandler((request, response, authentication) -> {
-                                HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-                                SavedRequest savedRequest = requestCache.getRequest(request, response);
-                                    if (savedRequest != null) {
-                                        // Redirect to the URL user originally wanted
-                                        String targetUrl = savedRequest.getRedirectUrl();
-                                        response.sendRedirect(targetUrl);
-                                    } else {
-                                        // Default fallback if no original URL saved
-                                        response.sendRedirect("http://localhost:3000");
-                                    }
-                                })
+                        .successHandler((request, response, authentication) -> {
+                            HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+                            SavedRequest savedRequest = requestCache.getRequest(request, response);
+                            if (savedRequest != null) {
+                                // Redirect to the URL user originally wanted
+                                String targetUrl = savedRequest.getRedirectUrl();
+                                response.sendRedirect(targetUrl);
+                                response.sendRedirect("http://localhost:3000");
+                            } else {
+                                // Default fallback if no original URL saved
+                                response.sendRedirect("http://localhost:3000");
+                            }
+                        })
                 )
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
@@ -121,7 +134,8 @@ public class KeyCloakSecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
-                .csrf(csrf -> csrf.disable())
+//                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
@@ -141,6 +155,7 @@ public class KeyCloakSecurityConfig {
 
         return http.build();
     }
+
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
         Converter<Jwt, Collection<GrantedAuthority>> converter = jwt -> {

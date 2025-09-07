@@ -4,6 +4,8 @@ import com.istad.docuhub.domain.Category;
 import com.istad.docuhub.feature.category.dto.CategoryRequest;
 import com.istad.docuhub.feature.category.dto.CategoryResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -41,14 +43,28 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryResponse> getAllCategory() {
-        List<Category> categories = categoryRepository.findAll();
+    public Page<CategoryResponse> getAllCategory(Pageable pageable) {
+        Page<Category> categories = categoryRepository.findAll(pageable);
+        return categories.map(category -> new CategoryResponse(
+                category.getUuid(),
+                category.getName(),
+                category.getSlug()
+        ));
+    }
 
-        return categories.stream()
-                .map(category -> new CategoryResponse(
-                        category.getName(),
-                        category.getSlug()
-                ))
-                .toList();
+    @Override
+    public void updateCategory(String uuid, CategoryRequest request) {
+        Category category = categoryRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        category.setName(request.name());
+        category.setSlug(request.name().toLowerCase().replace(" ", "-"));
+        categoryRepository.save(category);
+    }
+
+    @Override
+    public void deleteCategory(String uuid) {
+        Category category = categoryRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        categoryRepository.delete(category);
     }
 }

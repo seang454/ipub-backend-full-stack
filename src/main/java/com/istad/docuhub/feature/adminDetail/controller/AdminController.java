@@ -10,15 +10,18 @@ import com.istad.docuhub.feature.category.CategoryService;
 import com.istad.docuhub.feature.category.dto.CategoryRequest;
 import com.istad.docuhub.feature.category.dto.CategoryResponse;
 import com.istad.docuhub.feature.paper.PaperService;
+import com.istad.docuhub.feature.paper.dto.AdminPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.studentDetail.StudentService;
 import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +60,6 @@ public class AdminController {
         @ResponseStatus(HttpStatus.NO_CONTENT)
         @DeleteMapping("/user/{uuid}")
         public void deleteUser(@PathVariable String uuid) {
-            log.info("User id controller {} ",uuid);
             userService.deleteUser(uuid);
         }
 
@@ -75,14 +77,13 @@ public class AdminController {
         return ResponseEntity.ok("Student created successfully");
     }
 
-    @PostMapping("/student/approve-student-detail")
-    public ResponseEntity<?> approveToStudent(@PathVariable String studentUuid ) {
-        // call pengseang service
-        userService.promoteAsStudent(studentUuid);
+    @PostMapping("/student/approve-student-detail/{userUuid}")
+    public ResponseEntity<?> approveToStudent(@PathVariable String userUuid ) {
+        adminService.promoteAsStudent(userUuid);
         return ResponseEntity.ok("Approve student detail successfully");
     }
 
-    @PostMapping("/student/promote")
+    @PostMapping("/student/promote/{userUuid}")
     public ResponseEntity<?> promoteByAdmin(@PathVariable String userUuid ) {
         // call pengseang service
         userService.promoteAsStudent(userUuid);
@@ -102,6 +103,22 @@ public class AdminController {
         userService.deleteUser(uuid);
     }
 
+    // find studentdetail by uuid
+    @GetMapping("/student/{userUuid}")
+    public StudentResponse findStudentDetailByUserUuid(@PathVariable String userUuid) {
+        return studentService.findStudentDetailByUserUuid(userUuid);
+    }
+
+    // find all pendings students in pagination
+    @GetMapping("student/pending")
+    public Page<StudentResponse> getPendingStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return studentService.findStudentPendingStudents(page, size);
+    }
+
+
 
     // adviser section
     @GetMapping ("/advisers")
@@ -118,7 +135,6 @@ public class AdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/adviser/{uuid}")
     public void deleteAdviserByUuid(@PathVariable String uuid) {
-        log.info("User id controller {} ",uuid);
         userService.deleteUser(uuid);
     }
 
@@ -173,7 +189,6 @@ public class AdminController {
     }
 
 
-
     // paper management
     @GetMapping("/papers")
     public List<PaperResponse> getAllPapers() {
@@ -209,6 +224,15 @@ public class AdminController {
     @DeleteMapping("paper/{uuid}")
     public void deletePaperById(String uuid) {
             paperService.deletePaperById(uuid);
+    }
+
+    @PutMapping("/paper/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204: success, no response body
+    public void updatePaperByAdmin(
+            @PathVariable String uuid,
+            @Valid @RequestBody AdminPaperRequest paperRequest
+    ) {
+        paperService.updatePaperByAdmin(uuid, paperRequest);
     }
 
     // category management

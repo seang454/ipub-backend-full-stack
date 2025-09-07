@@ -1,10 +1,13 @@
 package com.istad.docuhub.feature.user.contoller;
 
+import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -78,6 +81,10 @@ public class AuthRestController {
     @GetMapping("users")
     public List<UserResponse> getUsers(){
         return userService.getAllUsers();
+    }
+    @GetMapping("users/page")
+    Page<UserResponse> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllUsersByPage(page, size);
     }
     @GetMapping("user/{uuid}")
     public UserResponse getSingleUser(@PathVariable String uuid){

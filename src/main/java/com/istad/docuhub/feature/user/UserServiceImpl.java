@@ -15,6 +15,9 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -129,6 +132,36 @@ public class UserServiceImpl implements UserService {
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user Unauthorized");
     }
+
+    @Override
+    public Page<UserResponse> getAllUsersByPage(int page, int size) {
+        // 1️⃣ Fetch non-deleted users from DB with pagination
+        Page<User> usersPage = userRepository.findByIsDeletedFalse(PageRequest.of(page, size));
+        List<User> users = usersPage.getContent();
+
+        // 2️⃣ Fetch all Keycloak users (enabled only)
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<UserRepresentation> userRepresentations = realmResource.users().list()
+                .stream()
+                .filter(UserRepresentation::isEnabled)
+                .toList();
+
+        // 3️⃣ Map only users that exist in Keycloak
+        List<UserResponse> userResponses = users.stream()
+                .map(user -> {
+                    return userRepresentations.stream()
+                            .filter(ur -> ur.getId().equals(user.getUuid()))
+                            .findFirst()
+                            .map(ur -> UserMapperManual.mapUserToUserResponse(user, ur))
+                            .orElse(null);
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        // 4️⃣ Return as Page<UserResponse> with same pagination metadata
+        return new PageImpl<>(userResponses, usersPage.getPageable(), usersPage.getTotalElements());
+    }
+
     @Override
     public AuthResponse login(String username, String password) {
         return null;
