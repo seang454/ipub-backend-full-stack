@@ -1,0 +1,28 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches: ["main"]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: SSH into VM and deploy
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.GCE_VM_IP }}
+          username: ${{ secrets.GCE_VM_USER }}
+          key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/docuhub-api || git clone https://github.com/FSWD-GEN-01/ipub-engine-backend.git ~/docuhub-api
+            cd ~/docuhub-api
+            git pull origin main
+            ./gradlew build -x test   # build jar on VM
+            docker build -t docuhub-app .
+            docker stop docuhub-container || true
+            docker rm docuhub-container || true
+            docker run -d -p 8080:8080 --name docuhub-container docuhub-app
