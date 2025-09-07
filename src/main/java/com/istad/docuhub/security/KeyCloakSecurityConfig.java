@@ -114,8 +114,8 @@ public class KeyCloakSecurityConfig {
 //                                })
 //                )
                 .formLogin(login -> login
-                        .loginPage("/login")  // your backend login page
-                        .defaultSuccessUrl("http://localhost:3000/home", true) // redirect to frontend
+                        .loginPage("/api/v1/auth/login")  // your backend login page
+                        .defaultSuccessUrl("http://localhost:3000", true) // redirect to frontend
                 )
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
