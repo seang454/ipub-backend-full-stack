@@ -9,6 +9,7 @@ public record CommentResponse(
 
 
         Integer id,
+        String uuid,
         String content,
         LocalDate createdAt,
         Integer paperId,

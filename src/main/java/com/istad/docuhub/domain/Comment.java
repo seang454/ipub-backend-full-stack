@@ -19,6 +19,9 @@ public class Comment {
     private Integer id;
 
     @Column(nullable = false)
+    private String uuid;
+
+    @Column(nullable = false)
     private String content;
 
     @Column(nullable = false)

@@ -12,6 +12,8 @@ public interface CommentRepository {
 
     boolean existsById(Integer id);
 
+    boolean existsByUuid(String uuid);
+
     Optional<Comment> findById(Integer id);
 
     void delete(Comment comment);

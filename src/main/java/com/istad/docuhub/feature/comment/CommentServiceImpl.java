@@ -9,6 +9,8 @@ import com.istad.docuhub.feature.comment.dto.DeleteCommentRequest;
 import com.istad.docuhub.feature.comment.dto.EditCommentRequest;
 import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.user.UserRepository;
+import com.istad.docuhub.feature.user.UserService;
+import com.istad.docuhub.feature.user.dto.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -23,9 +26,7 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
 
 
-
-
-    private CurrentUserUtil currentUserUtil;
+    private final UserService userService;
     private PaperRepository paperRepository;
     private UserRepository userRepository;
     private CommentRepository commentRepository;
@@ -36,8 +37,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentResponse createComment(CreateCommentRequest createCommentRequest) {
 
-        // Get User ID
-        Integer userId = currentUserUtil.getCurrentUserId();
+        // Get user
+        CurrentUser userId = userService.getCurrentUserSub();
 
         // Validation Paper
         Paper paper = paperRepository.findById(createCommentRequest.paperId())
@@ -50,7 +51,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         // Validation User
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUuidAndIsDeletedFalse(userId.id())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "User does not exist"));
 
@@ -60,11 +61,27 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreatedAt(LocalDate.now());
         comment.setPaper(paper);
         comment.setUser(user);
+
+        // Set comment Id
+        Integer commentId;
+        do {
+            commentId = (int) (Math.random() * 1_000_000); // generates a number between 0 and 999999
+        } while (commentRepository.existsById(commentId));
+        comment.setId(commentId);
+
+        // Set comment uuid
+        String commentUuid;
+        do {
+            commentUuid = UUID.randomUUID().toString();
+        } while (commentRepository.existsByUuid(commentUuid));
+
+
         // Save the comment
         comment = commentRepository.save(comment);
 
         return CommentResponse.builder()
                 .id(comment.getId())
+                .uuid(comment.getUuid())
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .paperId(comment.getPaper().getId())
@@ -83,29 +100,25 @@ public class CommentServiceImpl implements CommentService {
     public CommentResponse editComment(EditCommentRequest editCommentRequest) {
 
         // Get User ID
-        Integer userId = currentUserUtil.getCurrentUserId();
-
+        CurrentUser userId = userService.getCurrentUserSub();
 
         // Validation Comment
         if(!commentRepository.existsById(editCommentRequest.commentId())){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found");
         }
 
-
         // Validation User
-        if(!userRepository.existsById(userId)){
+        if(!userRepository.existsByUuidAndIsDeletedFalse(userId.id())){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
         }
-
 
         // Get comment where user wants to edit
         Comment comment = commentRepository.findById(editCommentRequest.commentId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found")
         );
 
-
         // Check if user really own this comment or not
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!comment.getUser().getUuid().equals(userId.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this comment");
         }
 
@@ -116,6 +129,7 @@ public class CommentServiceImpl implements CommentService {
 
         return CommentResponse.builder()
                 .id(comment.getId())
+                .uuid(comment.getUuid())
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .paperId(comment.getPaper().getId())
@@ -134,8 +148,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(DeleteCommentRequest deleteCommentRequest) {
 
-        // Get current user ID
-        Integer userId = currentUserUtil.getCurrentUserId();
+        // Get User ID
+        CurrentUser userId = userService.getCurrentUserSub();
 
         // Fetch comment
         Comment comment = commentRepository.findById(deleteCommentRequest.commentId())
@@ -144,7 +158,7 @@ public class CommentServiceImpl implements CommentService {
                 ));
 
         // Check if user owns the comment
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!comment.getUser().getUuid().equals(userId.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this comment");
         }
 
@@ -181,6 +195,5 @@ public class CommentServiceImpl implements CommentService {
                         .build())
                 .toList();
     }
-
 
 }
