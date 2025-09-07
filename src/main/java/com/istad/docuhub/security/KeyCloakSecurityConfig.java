@@ -118,7 +118,6 @@ public class KeyCloakSecurityConfig {
                                         // Redirect to the URL user originally wanted
 //                                        String targetUrl = savedRequest.getRedirectUrl();
 //                                        response.sendRedirect(targetUrl);
-
                                         response.sendRedirect("http://localhost:3000");
                                     }
                                 })
