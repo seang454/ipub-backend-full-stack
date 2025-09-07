@@ -13,6 +13,8 @@ import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -56,47 +58,16 @@ public class PaperServiceImpl implements PaperService {
         Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
 
         // Create paper with auto-generated ID and category UUID
-        Paper paper = Paper.builder()
-                .id(id)
-                .uuid(UUID.randomUUID().toString())
-                .title(paperRequest.title())
-                .abstractText(paperRequest.abstractText())
-                .fileUrl(paperRequest.fileUrl())
-                .thumbnailUrl(paperRequest.thumbnailUrl())
-                .author(author)
-                .category(category)
-                .status("PENDING")
-                .submittedAt(LocalDate.now())
-                .createdAt(LocalDate.now())
-                .downloadCount(0)
-                .isApproved(false)
-                .isDeleted(false)
-                .isPublished(false)
-                .build();
+        Paper paper = Paper.builder().id(id).uuid(UUID.randomUUID().toString()).title(paperRequest.title()).abstractText(paperRequest.abstractText()).fileUrl(paperRequest.fileUrl()).thumbnailUrl(paperRequest.thumbnailUrl()).author(author).category(category).status("PENDING").submittedAt(LocalDate.now()).createdAt(LocalDate.now()).downloadCount(0).isApproved(false).isDeleted(false).isPublished(false).build();
 
         paperRepository.save(paper);
     }
 
     @Override
-    public List<PaperResponse> getAllPapersIsApprovedForAuthor() {
+    public Page<PaperResponse> getAllPapersIsApprovedForAuthor(Pageable pageable) {
         CurrentUser subId = userService.getCurrentUserSub();
-        List<Paper> papers = paperRepository.findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue((subId.id()));
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getThumbnailUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
-                )).toList();
+        Page<Paper> papers = paperRepository.findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(subId.id(), pageable);
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
     }
 
     @Override
@@ -135,152 +106,47 @@ public class PaperServiceImpl implements PaperService {
                 paper.setThumbnailUrl(paperRequest.thumbnailUrl());
             }
             paper.setCategory(category);
-            paper.setStatus("PENDING");
-            paper.setIsApproved(false);
             paperRepository.save(paper);
 
-            return new PaperResponse(
-                    paper.getUuid(),
-                    paper.getTitle(),
-                    paper.getAbstractText(),
-                    paper.getFileUrl(),
-                    paper.getThumbnailUrl(),
-                    paper.getAuthor().getUuid(),
-                    List.of(paper.getCategory().getName()),
-                    paper.getStatus(),
-                    paper.getIsApproved(),
-                    paper.getSubmittedAt(),
-                    paper.getCreatedAt(),
-                    paper.getIsPublished(),
-                    paper.getPublishedAt()
-            );
+            return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt());
         }
-    }
-
-    @Override
-    public List<PaperResponse> getAllPapersIsApproved() {
-        List<Paper> papers = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrue();
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getThumbnailUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
-                )).toList();
-    }
-
-    @Override
-    public List<PaperResponse> getAllPapersIsPublished() {
-        List<Paper> papers = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue();
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getThumbnailUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
-                )).toList();
-    }
-
-    @Override
-    public List<PaperResponse> getAllPapersIsPending() {
-        List<Paper> papers = paperRepository.findByIsApprovedFalse();
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getThumbnailUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
-                )).toList();
     }
 
     @Override
     public PaperResponse getPaperById(String Uuid) {
         Paper paper = paperRepository.findByUuid(Uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
-        return new PaperResponse(
-                paper.getUuid(),
-                paper.getTitle(),
-                paper.getAbstractText(),
-                paper.getFileUrl(),
-                paper.getThumbnailUrl(),
-                paper.getAuthor().getUuid(),
-                List.of(paper.getCategory().getName()),
-                paper.getStatus(),
-                paper.getIsApproved(),
-                paper.getSubmittedAt(),
-                paper.getCreatedAt(),
-                paper.getIsPublished(),
-                paper.getPublishedAt());
+        return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt());
     }
 
     @Override
-    public List<PaperResponse> getPapersByAuthor() {
+    public Page<PaperResponse> getAllPapersIsPublished(Pageable pageable) {
+        Page<Paper> paper = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue(pageable);
+        return paper.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+    }
+
+    @Override
+    public Page<PaperResponse> getPapersByAuthor(Pageable pageable) {
         CurrentUser subId = userService.getCurrentUserSub();
-        List<Paper> papers = paperRepository.findByAuthor_UuidAndIsDeletedFalse(subId.id());
-
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getThumbnailUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
-                )).toList();
+        Page<Paper> papers = paperRepository.findByAuthor_UuidAndIsDeletedFalse(subId.id(), pageable);
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
     }
 
     @Override
-    public List<PaperResponse> getAllPaper() {
-        List<Paper> papers = paperRepository.findAll();
-        return papers.stream()
-                .map(paper -> new PaperResponse(
-                        paper.getUuid(),
-                        paper.getTitle(),
-                        paper.getAbstractText(),
-                        paper.getFileUrl(),
-                        paper.getThumbnailUrl(),
-                        paper.getAuthor().getUuid(),
-                        List.of(paper.getCategory().getName()),
-                        paper.getStatus(),
-                        paper.getIsApproved(),
-                        paper.getSubmittedAt(),
-                        paper.getCreatedAt(),
-                        paper.getIsPublished(),
-                        paper.getPublishedAt()
-                )).toList();
+    public Page<PaperResponse> getAllPapersIsApproved(Pageable pageable) {
+        Page<Paper> papers = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrue(pageable);
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+    }
+
+    @Override
+    public Page<PaperResponse> getAllPapersIsPending(Pageable pageable) {
+        Page<Paper> papers = paperRepository.findByIsApprovedFalse(pageable);
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+    }
+
+    @Override
+    public Page<PaperResponse> getAllPaper(Pageable pageable) {
+        Page<Paper> papers = paperRepository.findAll(pageable);
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
     }
 
     @Override
@@ -293,21 +159,27 @@ public class PaperServiceImpl implements PaperService {
     @Override
     public void updatePaperByAdmin(String uuid, AdminPaperRequest paperRequest) {
         Paper paper = paperRepository.findByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
-        paper.setTitle(paper.getTitle());
-        paper.setAbstractText(paperRequest.abstractText());
-        String fileUrl = paper.getFileUrl();
-        mediaService.deleteMedia(fileUrl);
-        paper.setFileUrl(paperRequest.fileUrl());
-        if (paper.getThumbnailUrl() == null) {
-            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
-        } else {
-            String thumbnailUrl = paper.getThumbnailUrl();
-            mediaService.deleteMedia(thumbnailUrl);
-            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
-        }
+
         // Find category by name and get its UUID
         String categoryName = paperRequest.category().getFirst();
         Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
+
+        paper.setTitle(paperRequest.title());
+        paper.setAbstractText(paperRequest.abstractText());
+        if (paperRequest.fileUrl() != null && !paperRequest.fileUrl().isEmpty()) {
+            String fileUrl = paper.getFileUrl();
+            mediaService.deleteMedia(fileUrl);
+            paper.setFileUrl(paperRequest.fileUrl());
+        }
+        if (paperRequest.thumbnailUrl() != null && !paperRequest.thumbnailUrl().isEmpty()) {
+            if (paper.getThumbnailUrl() == null) {
+                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+            } else {
+                String thumbnailUrl = paper.getThumbnailUrl();
+                mediaService.deleteMedia(thumbnailUrl);
+                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+            }
+        }
         paper.setCategory(category);
         paperRepository.save(paper);
     }

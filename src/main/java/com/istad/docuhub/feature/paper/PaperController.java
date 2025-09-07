@@ -4,6 +4,9 @@ import com.istad.docuhub.feature.paper.dto.PaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import jakarta.ws.rs.PUT;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +27,20 @@ public class PaperController {
     }
 
     @GetMapping("/published")
-    public ResponseEntity<?> getAllPapersIsPublished() {
+    public ResponseEntity<?> getAllPapersIsPublished(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         return new ResponseEntity<>(
                 Map.of(
-                        "papers", paperService.getAllPapersIsPublished(),
+                        "papers", paperService.getAllPapersIsPublished(pageable),
                         "message", "All published papers retrieved successfully"
                 ), HttpStatus.OK
         );
@@ -44,20 +57,41 @@ public class PaperController {
     }
 
     @GetMapping("/author")
-    public ResponseEntity<?> getPapersByAuthor() {
+    public ResponseEntity<?> getPapersByAuthor(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         return new ResponseEntity<>(
                 Map.of(
-                        "papers", paperService.getPapersByAuthor(),
+                        "papers", paperService.getPapersByAuthor(pageable),
                         "message", "Papers by author retrieved successfully"
                 ), HttpStatus.OK
         );
     }
 
     @GetMapping("/author/approved")
-    public ResponseEntity<?> getAllPapersIsApprovedForAuthor() {
+    public ResponseEntity<?> getAllPapersIsApprovedForAuthor(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
         return new ResponseEntity<>(
                 Map.of(
-                        "papers", paperService.getAllPapersIsApprovedForAuthor(),
+                        "papers", paperService.getAllPapersIsApprovedForAuthor(pageable),
                         "message", "Approved papers by author retrieved successfully"
                 ), HttpStatus.OK
         );
