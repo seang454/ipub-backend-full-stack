@@ -33,7 +33,7 @@ jobs:
               git reset --hard origin/main
             else
               echo "📂 Cloning repo..."
-              git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/FSWD-GEN-01/ipub-engine-backend.git $HOME/docuhub-api
+              git clone https://x-access-token:${{ secrets.DEPLOY_PAT }}@github.com/FSWD-GEN-01/ipub-engine-backend.git ~/docuhub-api
               cd $HOME/docuhub-api
             fi
 
