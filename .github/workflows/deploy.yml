@@ -19,13 +19,33 @@ jobs:
           username: ${{ secrets.GCE_VM_USER }}
           key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
           script: |
-            cd ~/docuhub-api || git clone https://github.com/FSWD-GEN-01/ipub-engine-backend.git ~/docuhub-api
+            # If repo doesn't exist, clone it fresh
+            if [ ! -d "~/docuhub-api/.git" ]; then
+              rm -rf ~/docuhub-api
+              git clone https://github.com/FSWD-GEN-01/ipub-engine-backend.git ~/docuhub-api
+            fi
+
             cd ~/docuhub-api
-            git reset --hard origin/main      # make sure code is clean
-            git pull origin main
-            ./gradlew build -x test           # build new jar
+
+            # Ensure we’re on latest code
+            git fetch origin
+            git reset --hard origin/main
+
+            # Make gradlew executable
+            chmod +x gradlew
+
+            # Build JAR (skip tests for faster build)
+            ./gradlew clean build -x test
+
+            # Stop and remove old container (ignore errors if not exist)
             docker stop docuhub-container || true
             docker rm docuhub-container || true
-            docker rmi docuhub-app || true    # remove old image
+
+            # Remove old image (ignore errors if not exist)
+            docker rmi docuhub-app || true
+
+            # Build new Docker image (adjust Dockerfile path if not at repo root)
             docker build --no-cache -t docuhub-app .
+
+            # Run container
             docker run -d -p 8080:8080 --name docuhub-container docuhub-app
