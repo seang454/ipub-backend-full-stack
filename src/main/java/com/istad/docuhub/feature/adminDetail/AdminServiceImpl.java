@@ -1,13 +1,18 @@
 package com.istad.docuhub.feature.adminDetail;
 
+import com.istad.docuhub.domain.StudentDetail;
 import com.istad.docuhub.domain.User;
+import com.istad.docuhub.enums.STATUS;
+import com.istad.docuhub.feature.studentDetail.StudentDetailRepository;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.slugGeneration.SlugUtil;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -27,6 +32,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final Keycloak keycloak;
     private final UserRepository userRepository;
+    private final StudentDetailRepository studentDetailRepository;
 
     @Override
     public void createStudent(UserCreateDto userCreateDto) {
@@ -39,7 +45,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     // 🔁 reusable method
-    private void createUserWithRole(UserCreateDto userCreateDto, String roleName) {
+    @Override
+    public void createUserWithRole(UserCreateDto userCreateDto, String roleName) {
         if (!userCreateDto.password().equals(userCreateDto.confirmedPassword())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Passwords do not match");
         }
@@ -120,4 +127,74 @@ public class AdminServiceImpl implements AdminService {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, roleName + " creation failed");
     }
 
+    @Override
+    public void promoteAsStudent(String studentUuidOrUsername) {
+        RealmResource realmResource = keycloak.realm("docuapi");
+
+        UserResource userResource = null;
+        UserRepresentation userRepresentation = null;
+
+        try {
+            // 🔎 Try by UUID
+            userResource = realmResource.users().get(studentUuidOrUsername);
+            userRepresentation = userResource.toRepresentation();
+        } catch (NotFoundException e) {
+            // 🔎 Try by username/email exact match
+            List<UserRepresentation> foundUsers = realmResource.users().search(studentUuidOrUsername, true);
+            userRepresentation = foundUsers.stream()
+                    .filter(u -> studentUuidOrUsername.equalsIgnoreCase(u.getUsername()) ||
+                            studentUuidOrUsername.equalsIgnoreCase(u.getEmail()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (userRepresentation != null) {
+                userResource = realmResource.users().get(userRepresentation.getId());
+            }
+        }
+
+        if (userRepresentation == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in Keycloak");
+        }
+
+        // ✅ Local DB check
+        Optional<User> userOpt = userRepository
+                .getUserByUuidAndIsStudentIsFalseAndIsDeletedIsFalse(userRepresentation.getId());
+        if (userOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "User not found in local DB or already a student");
+        }
+
+        if (!Boolean.TRUE.equals(userRepresentation.isEnabled())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is disabled in Keycloak");
+        }
+
+        // ✅ Ensure role exists
+        RoleRepresentation roleRepresentation;
+        try {
+            roleRepresentation = realmResource.roles().get("STUDENT").toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "STUDENT role not found in Keycloak");
+        }
+
+        // ✅ Assign STUDENT role if missing
+        boolean hasStudentRole = userResource.roles().realmLevel().listAll().stream()
+                .anyMatch(r -> "STUDENT".equals(r.getName()));
+        if (!hasStudentRole) {
+            userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
+        }
+
+        // ✅ Update local DB
+        User user = userOpt.get();
+        user.setIsStudent(true);
+        userRepository.save(user);
+
+
+        // update student detail when apporve
+        StudentDetail stdt = studentDetailRepository.findByUser_Uuid(studentUuidOrUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found in Keycloak"));
+        stdt.setIsStudent(true);
+        stdt.setStatus(STATUS.APPROVED);
+        studentDetailRepository.save(stdt);
+
+    }
 }
