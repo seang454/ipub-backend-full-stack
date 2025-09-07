@@ -74,7 +74,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
 
                         // --- admin endpoints (all you listed) ---
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
                         // thong admin approve or reject paper endpoint
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/assign-adviser").hasAnyRole("ADMIN")
