@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,6 +63,9 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="31J2tkD7ZnYThORFeYFGgcSeKAN" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -78,7 +80,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DocuhubApplication.executor": "Run",
-    "git-widget-placeholder": "bothty",
+    "git-widget-placeholder": "Vannarith",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/CSTAD/finalproject/backend_final_project/ipub-engine-backend",
     "node.js.detected.package.eslint": "true",
