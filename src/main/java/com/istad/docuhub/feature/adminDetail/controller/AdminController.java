@@ -15,6 +15,7 @@ import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.studentDetail.StudentService;
 import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
+import com.istad.docuhub.feature.studentDetail.dto.UpdateStudentRequest;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
@@ -119,6 +120,15 @@ public class AdminController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return studentService.findStudentPendingStudents(page, size);
+    }
+
+    @PutMapping("student/{userUuid}")
+    public ResponseEntity<StudentResponse> updateStudentDetail(
+            @PathVariable String userUuid,
+            @Valid @RequestBody UpdateStudentRequest updateRequest
+    ) {
+        StudentResponse updatedStudent = studentService.updateStudentDetailByUserUuid(userUuid, updateRequest);
+        return ResponseEntity.ok(updatedStudent);
     }
 
 
