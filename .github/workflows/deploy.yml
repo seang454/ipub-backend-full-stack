@@ -3,6 +3,7 @@ name: Deploy to VM
 on:
   push:
     branches: ["main"]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,9 +21,11 @@ jobs:
           script: |
             cd ~/docuhub-api || git clone https://github.com/FSWD-GEN-01/ipub-engine-backend.git ~/docuhub-api
             cd ~/docuhub-api
+            git reset --hard origin/main      # make sure code is clean
             git pull origin main
-            ./gradlew build -x test   # build jar on VM
-            docker build -t docuhub-app .
+            ./gradlew build -x test           # build new jar
             docker stop docuhub-container || true
             docker rm docuhub-container || true
+            docker rmi docuhub-app || true    # remove old image
+            docker build --no-cache -t docuhub-app .
             docker run -d -p 8080:8080 --name docuhub-container docuhub-app
