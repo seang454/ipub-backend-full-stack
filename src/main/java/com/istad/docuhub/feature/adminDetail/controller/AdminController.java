@@ -22,6 +22,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,10 +45,10 @@ public class AdminController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
     private final CategoryService categoryService;
 
-        // normal users
+        // normal user pagination
         @GetMapping("users")
-        public List<UserResponse> getUsers(){
-            return userService.getAllUsers();
+        Page<UserResponse> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+            return userService.getAllUsersByPage(page, size);
         }
 
         @GetMapping("/public/users")
@@ -113,7 +116,7 @@ public class AdminController {
     @GetMapping("student/pending")
     public Page<StudentResponse> getPendingStudents(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "10") int size
     ) {
         return studentService.findStudentPendingStudents(page, size);
     }
@@ -191,15 +194,41 @@ public class AdminController {
 
     // paper management
     @GetMapping("/papers")
-    public List<PaperResponse> getAllPapers() {
-        return paperService.getAllPaper();
+    public ResponseEntity<?> getAllPapers(
+            @RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+            @RequestParam(defaultValue = "10") int size,  // default 10 items per page
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return new ResponseEntity<>(
+                Map.of(
+                        "papers", paperService.getAllPaper(pageable),
+                        "message", "All  papers retrieved successfully"
+                ), HttpStatus.OK
+        );
     }
 
     @GetMapping("/paper/pendings")
-    public ResponseEntity<?> getAllPapersIsPending() {
+    public ResponseEntity<?> getAllPapersIsPending(
+            @RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+            @RequestParam(defaultValue = "10") int size,  // default 10 items per page
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         return new ResponseEntity<>(
                 Map.of(
-                        "papers", paperService.getAllPapersIsPending(),
+                        "papers", paperService.getAllPapersIsPending(pageable),
                         "message", "All pending papers retrieved successfully"
                 ), HttpStatus.OK
         );
@@ -216,8 +245,23 @@ public class AdminController {
     }
 
     @GetMapping("papers/approved")
-    public List<PaperResponse> getAllPapersIsApproved(){
-           return  paperService.getAllPapersIsApproved();
+    public ResponseEntity<?> getAllPapersIsApproved(@RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+                                                    @RequestParam(defaultValue = "10") int size,  // default 10 items per page
+                                                    @RequestParam(defaultValue = "createdAt") String sortBy,
+                                                    @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return new ResponseEntity<>(
+                Map.of(
+                        "papers", paperService.getAllPapersIsApproved(pageable),
+                        "message", "All approved papers retrieved successfully"
+                ), HttpStatus.OK
+        );
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -247,8 +291,17 @@ public class AdminController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
-        List<CategoryResponse> categories = categoryService.getAllCategory();
+    public ResponseEntity<?> getAllCategories(@RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+                                                                   @RequestParam(defaultValue = "10") int size,  // default 10 items per page
+                                                                   @RequestParam(defaultValue = "createdAt") String sortBy,
+                                                                   @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CategoryResponse> categories = categoryService.getAllCategory(pageable);
         return ResponseEntity.ok(categories);
     }
 }
