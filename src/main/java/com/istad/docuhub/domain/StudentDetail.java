@@ -1,5 +1,6 @@
 package com.istad.docuhub.domain;
 
+import com.istad.docuhub.enums.STATUS;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,6 @@ import java.time.LocalDate;
 public class StudentDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Just added by Vannarith
     private Integer id;
 
     @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
@@ -33,6 +33,8 @@ public class StudentDetail {
     private Integer yearsOfStudy;
 
     private Boolean isStudent;
+
+    STATUS status;
 
     // one to one user
     @OneToOne
