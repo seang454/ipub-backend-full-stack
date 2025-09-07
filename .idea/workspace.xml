@@ -5,17 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/enums/STATUS.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/StudentDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/StudentDetail.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/exception/GlobalException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/exception/GlobalException.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserAssignment/AdviserAssignmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserAssignment/AdviserAssignmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/utils/PaperStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/dto/AdminResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/dto/UserCreateDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/dto/UserCreateDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -253,11 +250,6 @@
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java</url>
-          <line>242</line>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java</url>
           <line>161</line>
           <option name="timeStamp" value="14" />
@@ -304,15 +296,6 @@
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java</url>
-          <line>241</line>
-          <properties class="com.istad.docuhub.feature.adminDetail.controller.AdminController" method="createCategory">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java</url>
           <line>160</line>
           <properties class="com.istad.docuhub.feature.paper.PaperServiceImpl">
@@ -323,25 +306,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java</url>
-          <line>200</line>
-          <properties class="com.istad.docuhub.feature.adminDetail.controller.AdminController" method="getAllPapersIsPending">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java</url>
-          <line>81</line>
-          <properties class="com.istad.docuhub.feature.adminDetail.controller.AdminController" method="approveToStudent">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java</url>
-          <line>182</line>
+          <line>180</line>
           <properties class="com.istad.docuhub.feature.adminDetail.controller.AdminController" method="getAssignmentCount">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />

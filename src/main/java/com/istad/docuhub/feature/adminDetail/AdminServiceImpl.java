@@ -45,8 +45,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     // 🔁 reusable method
-    @Override
-    public void createUserWithRole(UserCreateDto userCreateDto, String roleName) {
+    private void createUserWithRole(UserCreateDto userCreateDto, String roleName) {
         if (!userCreateDto.password().equals(userCreateDto.confirmedPassword())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Passwords do not match");
         }
@@ -197,4 +196,6 @@ public class AdminServiceImpl implements AdminService {
         studentDetailRepository.save(stdt);
 
     }
+
+
 }

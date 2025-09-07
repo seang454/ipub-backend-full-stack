@@ -104,7 +104,7 @@ public class AdminController {
     }
 
     // find studentdetail by uuid
-    @GetMapping("/user/{userUuid}")
+    @GetMapping("/student/{userUuid}")
     public StudentResponse findStudentDetailByUserUuid(@PathVariable String userUuid) {
         return studentService.findStudentDetailByUserUuid(userUuid);
     }
