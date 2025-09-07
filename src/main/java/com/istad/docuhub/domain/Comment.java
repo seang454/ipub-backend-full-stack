@@ -1,6 +1,7 @@
 package com.istad.docuhub.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,9 @@ public class Comment {
 
     @Id
     private Integer id;
+
+    @Column(nullable = false)
+    private String uuid;
 
     @Column(nullable = false)
     private String content;
