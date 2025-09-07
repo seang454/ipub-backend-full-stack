@@ -5,10 +5,7 @@ import com.istad.docuhub.domain.User;
 import com.istad.docuhub.enums.STATUS;
 import com.istad.docuhub.feature.sendMail.SendMailService;
 import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
-import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
-import com.istad.docuhub.feature.studentDetail.dto.StudentApproveRequest;
-import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
-import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
+import com.istad.docuhub.feature.studentDetail.dto.*;
 import com.istad.docuhub.feature.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -142,6 +139,43 @@ public class StudentServiceImpl implements StudentService {
                 detail.getIsStudent(),
                 detail.getUser() != null ? detail.getUser().getUuid() : null
         ));
+    }
+
+    @Override
+    public StudentResponse updateStudentDetailByUserUuid(String userUuid, UpdateStudentRequest updateRequest)
+     {
+        StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(userUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
+
+        // Update only fields that are not null or empty
+        if (updateRequest.studentCardUrl() != null && !updateRequest.studentCardUrl().isEmpty()) {
+            studentDetail.setStudentCardUrl(updateRequest.studentCardUrl());
+        }
+        if (updateRequest.university() != null && !updateRequest.university().isEmpty()) {
+            studentDetail.setUniversity(updateRequest.university());
+        }
+        if (updateRequest.major() != null && !updateRequest.major().isEmpty()) {
+            studentDetail.setMajor(updateRequest.major());
+        }
+        if (updateRequest.yearsOfStudy() != null && !updateRequest.yearsOfStudy().isEmpty()) {
+            try {
+                studentDetail.setYearsOfStudy(Integer.parseInt(updateRequest.yearsOfStudy()));
+            } catch (NumberFormatException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Years of study must be a number");
+            }
+        }
+
+        studentDetailRepository.save(studentDetail);
+
+        return new StudentResponse(
+                studentDetail.getUuid(),
+                studentDetail.getStudentCardUrl(),
+                studentDetail.getUniversity(),
+                studentDetail.getMajor(),
+                studentDetail.getYearsOfStudy(),
+                studentDetail.getIsStudent(),
+                studentDetail.getUser().getUuid()
+        );
     }
 
 }
