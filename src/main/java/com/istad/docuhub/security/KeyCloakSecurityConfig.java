@@ -108,12 +108,11 @@ public class KeyCloakSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/api/v1/auth/login/keycloak") // <-- map your login URL
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
-                            HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-                            SavedRequest savedRequest = requestCache.getRequest(request, response);
-                            // Redirect to frontend after login
-                            response.sendRedirect("http://localhost:3000/");
+                            // Redirect to frontend after successful login
+                            response.sendRedirect("http://localhost:3000");
                         })
                 )
                 // JSON response for unauthenticated API requests
