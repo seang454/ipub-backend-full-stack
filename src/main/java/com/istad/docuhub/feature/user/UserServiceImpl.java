@@ -132,6 +132,7 @@ public class UserServiceImpl implements UserService {
                             .build();
                 }
             }else {
+
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Something went wrong or user already exited");
             }
         }
