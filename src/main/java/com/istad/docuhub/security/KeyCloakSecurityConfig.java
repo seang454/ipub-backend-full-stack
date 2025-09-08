@@ -115,9 +115,6 @@ public class KeyCloakSecurityConfig {
                                 HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
                                 SavedRequest savedRequest = requestCache.getRequest(request, response);
                                     if (savedRequest != null) {
-                                        // Redirect to the URL user originally wanted
-//                                        String targetUrl = savedRequest.getRedirectUrl();
-//                                        response.sendRedirect(targetUrl);
                                         response.sendRedirect("http://localhost:3000");
                                     }
                                 })
