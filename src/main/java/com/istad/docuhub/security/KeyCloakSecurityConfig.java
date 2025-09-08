@@ -167,7 +167,7 @@ public class KeyCloakSecurityConfig {
                                 idCookie.setHttpOnly(true);
                                 idCookie.setSecure(true);
                                 idCookie.setPath("/");
-                                idCookie.setMaxAge(3600); // 1 hour
+                                idCookie.setMaxAge(3600); // 1 hour //the cookie is deleted and the user may need to refresh or log in again
                                 response.addCookie(idCookie);
 
                                 // Refresh Token Cookie (if available)
