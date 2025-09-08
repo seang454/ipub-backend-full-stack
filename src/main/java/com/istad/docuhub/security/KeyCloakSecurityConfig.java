@@ -135,7 +135,7 @@ public class KeyCloakSecurityConfig {
                             // Keycloak logout endpoint
                             String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
                             // Redirect back to your backend endpoint after logout
-                            String redirectAfterLogout = backendEndpoint + "/api/v1/auth/tokens";
+                            String redirectAfterLogout = "http://localhost:3000";
                             // Full logout URL
                             String logoutUrl = keycloakLogoutUrl + "?redirect_uri=" + redirectAfterLogout;
                             // Redirect browser to Keycloak logout
