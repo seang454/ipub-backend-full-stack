@@ -62,7 +62,6 @@ public class KeyCloakSecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers("/favicon.ico", "/health").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
@@ -141,22 +140,11 @@ public class KeyCloakSecurityConfig {
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
-                                String refreshToken = authorizedClient.getRefreshToken() != null
-                                        ? authorizedClient.getRefreshToken().getTokenValue()
-                                        : null;
 
                                 // Example: send token back as cookie
                                 response.addHeader("Set-Cookie",
                                         "access_token=" + accessToken +
                                                 "; Path=/; HttpOnly; SameSite=None; Secure");
-                                response.addHeader("Set-Cookie",
-                                        "id_token=" + idToken +
-                                                "; Path=/; HttpOnly; SameSite=None; Secure");
-                                if (refreshToken != null) {
-                                    response.addHeader("Set-Cookie",
-                                            "refresh_token=" + refreshToken +
-                                                    "; Path=/; HttpOnly; SameSite=None; Secure");
-                                }
 
                                 // Or for dev only: redirect with token in URL
                                 // response.sendRedirect("http://localhost:3000?token=" + accessToken);
