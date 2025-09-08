@@ -2,6 +2,7 @@ package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,15 +14,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -38,7 +37,9 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class KeyCloakSecurityConfig {
+    private final OAuth2AuthorizedClientService authorizedClientService;
 
     @Value("${backend.endpoint}")
     private String backendEndpoint;
@@ -127,10 +128,31 @@ public class KeyCloakSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
-                            // Redirect back to frontend after successful login
+                            OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+
+                            // ✅ load authorized client
+                            OAuth2AuthorizedClient authorizedClient =
+                                    authorizedClientService.loadAuthorizedClient(
+                                            "keycloak",
+                                            authentication.getName()
+                                    );
+
+                            if (authorizedClient != null) {
+                                String accessToken = authorizedClient.getAccessToken().getTokenValue();
+                                String idToken = oidcUser.getIdToken().getTokenValue();
+
+                                // Example: send token back as cookie
+                                response.addHeader("Set-Cookie",
+                                        "access_token=" + accessToken +
+                                                "; Path=/; HttpOnly; SameSite=None; Secure");
+
+                                // Or for dev only: redirect with token in URL
+                                // response.sendRedirect("http://localhost:3000?token=" + accessToken);
+                            }
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
+
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint())
