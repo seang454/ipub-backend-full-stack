@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
                         .build();
             }
         }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user Unauthorized");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not register user");
     }
 
     @Override
