@@ -1,6 +1,7 @@
 package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,8 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -131,28 +134,50 @@ public class KeyCloakSecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
-                            // ✅ load authorized client
                             OAuth2AuthorizedClient authorizedClient =
-                                    authorizedClientService.loadAuthorizedClient(
-                                            "keycloak",
-                                            authentication.getName()
-                                    );
+                                    authorizedClientService.loadAuthorizedClient("keycloak", authentication.getName());
 
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
+                                String refreshToken = authorizedClient.getRefreshToken() != null
+                                        ? authorizedClient.getRefreshToken().getTokenValue()
+                                        : null;
 
-                                // Example: send token back as cookie
-                                response.addHeader("Set-Cookie",
-                                        "access_token=" + accessToken +
-                                                "; Path=/; HttpOnly; SameSite=None; Secure");
+                                // ✅ Access Token Cookie
+                                Cookie accessCookie = new Cookie("access_token", accessToken);
+                                accessCookie.setHttpOnly(true);
+                                accessCookie.setSecure(true);
+                                accessCookie.setPath("/");
+                                accessCookie.setMaxAge((int) Duration.between(
+                                        Instant.now(),
+                                        authorizedClient.getAccessToken().getExpiresAt()
+                                ).getSeconds());
+                                response.addCookie(accessCookie);
 
-                                // Or for dev only: redirect with token in URL
-                                // response.sendRedirect("http://localhost:3000?token=" + accessToken);
+                                // ✅ ID Token Cookie
+                                Cookie idCookie = new Cookie("id_token", idToken);
+                                idCookie.setHttpOnly(true);
+                                idCookie.setSecure(true);
+                                idCookie.setPath("/");
+                                idCookie.setMaxAge(3600); // or match Keycloak ID token expiry
+                                response.addCookie(idCookie);
+
+                                // ✅ Refresh Token Cookie
+                                if (refreshToken != null) {
+                                    Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+                                    refreshCookie.setHttpOnly(true);
+                                    refreshCookie.setSecure(true);
+                                    refreshCookie.setPath("/");
+                                    refreshCookie.setMaxAge(86400); // or match Keycloak refresh token expiry
+                                    response.addCookie(refreshCookie);
+                                }
                             }
+                            // ✅ Redirect to frontend after setting cookies
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
+
 
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
