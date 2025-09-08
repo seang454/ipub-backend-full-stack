@@ -25,6 +25,22 @@ jobs:
             set -o pipefail
             echo "🚀 Starting deployment of docuhub-app..."
 
+            # 0️⃣ Install Java 21 (Temurin JDK) if not installed
+            if ! java -version 2>/dev/null | grep -q "21"; then
+              echo "☕ Installing JDK 21..."
+              sudo apt-get update -y
+              sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+
+              # Add Adoptium (Temurin) repo for JDK 21
+              wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo apt-key add -
+              echo "deb [arch=amd64] https://packages.adoptium.net/artifactory/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
+
+              sudo apt-get update -y
+              sudo apt-get install -y temurin-21-jdk
+            fi
+
+            java -version
+
             # 1️⃣ Clone or update repo
             if [ -d "$HOME/docuhub-api" ]; then
               echo "📂 Repo exists, updating..."
@@ -33,7 +49,7 @@ jobs:
               git reset --hard origin/main
             else
               echo "📂 Cloning repo..."
-              git clone https://x-access-token:${{ secrets.GCE_GITHUB_TOKEN }}@github.com/FSWD-GEN-01/ipub-engine-backend.git ~/docuhub-api
+              git clone https://${{ secrets.PAT_TOKEN }}@github.com/FSWD-GEN-01/ipub-engine-backend.git $HOME/docuhub-api
               cd $HOME/docuhub-api
             fi
 
