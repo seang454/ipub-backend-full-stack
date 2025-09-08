@@ -46,7 +46,6 @@ public class KeyCloakSecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
@@ -109,15 +108,13 @@ public class KeyCloakSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                      // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
                             HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
                             SavedRequest savedRequest = requestCache.getRequest(request, response);
-                            // Redirect to local frontend after login
-                            response.sendRedirect("http://localhost:3000");
+                            // Redirect to frontend after login
+                            response.sendRedirect("http://localhost:3000/");
                         })
-
                 )
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
