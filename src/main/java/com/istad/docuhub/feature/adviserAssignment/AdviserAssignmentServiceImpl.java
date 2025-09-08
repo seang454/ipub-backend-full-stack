@@ -3,6 +3,7 @@ package com.istad.docuhub.feature.adviserAssignment;
 import com.istad.docuhub.domain.AdviserAssignment;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
+import com.istad.docuhub.enums.STATUS;
 import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentRequest;
 import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
 import com.istad.docuhub.feature.adviserAssignment.dto.AdviserReviewRequest;
@@ -14,9 +15,7 @@ import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
-import com.istad.docuhub.utils.KeycloakUserDto;
 import com.istad.docuhub.utils.KeycloakUserService;
-import com.istad.docuhub.utils.PaperStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,7 +35,6 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
     private final PaperRepository paperRepository;
     private final UserRepository userRepository;
     private final SendMailService sendMailService;
-    private final KeycloakUserService keycloakUserService;
     private final UserService userService;
 
     // assign adviesr
@@ -192,7 +190,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
 
         // Update paper status
-        paper.setStatus(PaperStatus.ADMIN_REJECTED.name());
+        paper.setStatus(STATUS.ADMIN_REJECTED.name());
         paper.setIsApproved(false);
         paperRepository.save(paper);
 

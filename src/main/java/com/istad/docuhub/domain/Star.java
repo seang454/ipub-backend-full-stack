@@ -15,7 +15,6 @@ import java.time.LocalDate;
 public class Star {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Just added by Vannarith
     private Integer id;
 
     @Column(nullable = false, unique = true)

@@ -14,6 +14,8 @@ import com.istad.docuhub.feature.paper.dto.AdminPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.studentDetail.StudentService;
 import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
+import com.istad.docuhub.feature.studentDetail.dto.UpdateStudentRequest;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
@@ -44,33 +46,31 @@ public class AdminController {
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
     private final CategoryService categoryService;
 
-    // normal users
-    @GetMapping("users")
-    public List<UserResponse> getUsers() {
-        return userService.getAllUsers();
-    }
+        // normal user pagination
+        @GetMapping("users")
+        Page<UserResponse> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+            return userService.getAllUsersByPage(page, size);
+        }
 
-    @GetMapping("/public/users")
-    public List<UserResponse> getAllPublicUsers() {
-        return userService.getAllPublicUser();
-    }
+        @GetMapping("/public/users")
+        public List<UserResponse> getAllPublicUsers(){
+            return userService.getAllPublicUser();
+        }
+        @GetMapping("/user/{uuid}")
+        public UserResponse getSingleUser(@PathVariable String uuid){
+            return userService.getSingleUser(uuid);
+        }
 
-    @GetMapping("/user/{uuid}")
-    public UserResponse getSingleUser(@PathVariable String uuid) {
-        return userService.getSingleUser(uuid);
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/user/{uuid}")
-    public void deleteUser(@PathVariable String uuid) {
-        log.info("User id controller {} ", uuid);
-        userService.deleteUser(uuid);
-    }
+        @ResponseStatus(HttpStatus.NO_CONTENT)
+        @DeleteMapping("/user/{uuid}")
+        public void deleteUser(@PathVariable String uuid) {
+            userService.deleteUser(uuid);
+        }
 
 
     // student sections
     @GetMapping("/students")
-    public List<UserResponse> getAllStudents() {
+    public List<UserResponse> getAllStudents(){
         return userService.getAllStudent();
     }
 
@@ -81,15 +81,14 @@ public class AdminController {
         return ResponseEntity.ok("Student created successfully");
     }
 
-    @PostMapping("/student/approve-student-detail")
-    public ResponseEntity<?> approveToStudent(@PathVariable String studentUuid) {
-        // call pengseang service
-        userService.promoteAsStudent(studentUuid);
+    @PostMapping("/student/approve-student-detail/{userUuid}")
+    public ResponseEntity<?> approveToStudent(@PathVariable String userUuid ) {
+        adminService.promoteAsStudent(userUuid);
         return ResponseEntity.ok("Approve student detail successfully");
     }
 
-    @PostMapping("/student/promote")
-    public ResponseEntity<?> promoteByAdmin(@PathVariable String userUuid) {
+    @PostMapping("/student/promote/{userUuid}")
+    public ResponseEntity<?> promoteByAdmin(@PathVariable String userUuid ) {
         // call pengseang service
         userService.promoteAsStudent(userUuid);
         return ResponseEntity.ok("Approve student detail successfully");
@@ -104,14 +103,39 @@ public class AdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/student/{uuid}")
     public void deleteStudentByUuid(@PathVariable String uuid) {
-        log.info("User id controller {} ", uuid);
+        log.info("User id controller {} ",uuid);
         userService.deleteUser(uuid);
     }
 
+    // find studentdetail by uuid
+    @GetMapping("/student/{userUuid}")
+    public StudentResponse findStudentDetailByUserUuid(@PathVariable String userUuid) {
+        return studentService.findStudentDetailByUserUuid(userUuid);
+    }
+
+    // find all pendings students in pagination
+    @GetMapping("student/pending")
+    public Page<StudentResponse> getPendingStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return studentService.findStudentPendingStudents(page, size);
+    }
+
+    @PutMapping("student/{userUuid}")
+    public ResponseEntity<StudentResponse> updateStudentDetail(
+            @PathVariable String userUuid,
+            @Valid @RequestBody UpdateStudentRequest updateRequest
+    ) {
+        StudentResponse updatedStudent = studentService.updateStudentDetailByUserUuid(userUuid, updateRequest);
+        return ResponseEntity.ok(updatedStudent);
+    }
+
+
 
     // adviser section
-    @GetMapping("/advisers")
-    public List<UserResponse> getAllMentors() {
+    @GetMapping ("/advisers")
+    public List<UserResponse> getAllMentors(){
         return userService.getAllMentor();
     }
 
@@ -124,9 +148,9 @@ public class AdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/adviser/{uuid}")
     public void deleteAdviserByUuid(@PathVariable String uuid) {
-        log.info("User id controller {} ", uuid);
         userService.deleteUser(uuid);
     }
+
 
 
     // adviser assignment
@@ -181,8 +205,8 @@ public class AdminController {
     // paper management
     @GetMapping("/papers")
     public ResponseEntity<?> getAllPapers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+            @RequestParam(defaultValue = "10") int size,  // default 10 items per page
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction
     ) {
@@ -191,18 +215,19 @@ public class AdminController {
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
+
         return new ResponseEntity<>(
                 Map.of(
                         "papers", paperService.getAllPaper(pageable),
-                        "message", "All papers retrieved successfully"
+                        "message", "All  papers retrieved successfully"
                 ), HttpStatus.OK
         );
     }
 
     @GetMapping("/paper/pendings")
     public ResponseEntity<?> getAllPapersIsPending(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+            @RequestParam(defaultValue = "10") int size,  // default 10 items per page
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction
     ) {
@@ -230,23 +255,29 @@ public class AdminController {
     }
 
     @GetMapping("papers/approved")
-    public Page<PaperResponse> getAllPapersIsApproved(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction
+    public ResponseEntity<?> getAllPapersIsApproved(@RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+                                                    @RequestParam(defaultValue = "10") int size,  // default 10 items per page
+                                                    @RequestParam(defaultValue = "createdAt") String sortBy,
+                                                    @RequestParam(defaultValue = "desc") String direction
     ) {
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
+
         Pageable pageable = PageRequest.of(page, size, sort);
-        return paperService.getAllPapersIsApproved(pageable);
+
+        return new ResponseEntity<>(
+                Map.of(
+                        "papers", paperService.getAllPapersIsApproved(pageable),
+                        "message", "All approved papers retrieved successfully"
+                ), HttpStatus.OK
+        );
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("paper/{uuid}")
     public void deletePaperById(String uuid) {
-        paperService.deletePaperById(uuid);
+            paperService.deletePaperById(uuid);
     }
 
     @PutMapping("/paper/{uuid}")
@@ -270,28 +301,18 @@ public class AdminController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<?> getAllCategories(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "name") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction
+    public ResponseEntity<?> getAllCategories(@RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
+                                                                   @RequestParam(defaultValue = "10") int size,  // default 10 items per page
+                                                                   @RequestParam(defaultValue = "createdAt") String sortBy,
+                                                                   @RequestParam(defaultValue = "desc") String direction
     ) {
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
+
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<CategoryResponse> categories = categoryService.getAllCategory(pageable);
         return ResponseEntity.ok(categories);
-    }
-
-    @DeleteMapping("/category/{uuid}")
-    public ResponseEntity<?> deleteCategory(@PathVariable String uuid) {
-        categoryService.deleteCategory(uuid);
-        return new ResponseEntity<>(
-                Map.of(
-                        "message", "Category deleted successfully"
-                ), HttpStatus.NO_CONTENT
-        );
     }
 }
 
