@@ -111,13 +111,13 @@ public class KeyCloakSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                       // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
-                                .successHandler((request, response, authentication) -> {
-                                HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-                                SavedRequest savedRequest = requestCache.getRequest(request, response);
-                                    if (savedRequest != null) {
-                                        response.sendRedirect("http://localhost:3000");
-                                    }
-                                })
+                        .successHandler((request, response, authentication) -> {
+                            HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+                            SavedRequest savedRequest = requestCache.getRequest(request, response);
+                            // Redirect to local frontend after login
+                            response.sendRedirect("http://localhost:3000");
+                        })
+
                 )
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
