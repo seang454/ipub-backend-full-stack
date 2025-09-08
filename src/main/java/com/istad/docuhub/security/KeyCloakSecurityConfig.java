@@ -62,8 +62,8 @@ public class KeyCloakSecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
+                        .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
@@ -125,18 +125,11 @@ public class KeyCloakSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                      // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
+                        .loginPage("/api/v1/auth/keycloak/login") // <-- map your login URL
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
-                                .successHandler((request, response, authentication) -> {
-                                HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-                                SavedRequest savedRequest = requestCache.getRequest(request, response);
-                                    if (savedRequest != null) {
-                                        // Redirect to the URL user originally wanted
-//                                        String targetUrl = savedRequest.getRedirectUrl();
-//                                        response.sendRedirect(targetUrl);
-                                        response.sendRedirect("http://localhost:3000");
-                                    }
-                                })
+                        .successHandler((request, response, authentication) -> {
+                            response.sendRedirect("http://localhost:3000");
+                        })
                 )
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
@@ -154,7 +147,7 @@ public class KeyCloakSecurityConfig {
                             // Keycloak logout endpoint
                             String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
                             // Redirect back to your backend endpoint after logout
-                            String redirectAfterLogout = backendEndpoint + "/api/v1/auth/tokens";
+                            String redirectAfterLogout = "http://localhost:3000";
                             // Full logout URL
                             String logoutUrl = keycloakLogoutUrl + "?redirect_uri=" + redirectAfterLogout;
                             // Redirect browser to Keycloak logout
