@@ -112,7 +112,6 @@ public class KeyCloakSecurityConfig {
                         .loginPage("/api/v1/auth/keycloak/login") // <-- map your login URL
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
-                            // Redirect to frontend after successful login
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
