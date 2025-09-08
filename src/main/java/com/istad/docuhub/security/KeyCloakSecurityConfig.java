@@ -125,12 +125,15 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
                         .anyRequest().authenticated()
                 )
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().authenticated()
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
-                            // ✅ load authorized client
+                            // ✅ get authorized client for current user
                             OAuth2AuthorizedClient authorizedClient =
                                     authorizedClientService.loadAuthorizedClient(
                                             "keycloak",
@@ -141,14 +144,35 @@ public class KeyCloakSecurityConfig {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
 
-                                // Example: send token back as cookie
+                                // refresh token may be null if client is not configured with "offline_access" scope
+                                String refreshToken = authorizedClient.getRefreshToken() != null
+                                        ? authorizedClient.getRefreshToken().getTokenValue()
+                                        : null;
+
+                                // ✅ Option 1: Set as HttpOnly cookies (secure in production)
                                 response.addHeader("Set-Cookie",
                                         "access_token=" + accessToken +
                                                 "; Path=/; HttpOnly; SameSite=None; Secure");
+                                response.addHeader("Set-Cookie",
+                                        "id_token=" + idToken +
+                                                "; Path=/; HttpOnly; SameSite=None; Secure");
+                                if (refreshToken != null) {
+                                    response.addHeader("Set-Cookie",
+                                            "refresh_token=" + refreshToken +
+                                                    "; Path=/; HttpOnly; SameSite=None; Secure");
+                                }
 
-                                // Or for dev only: redirect with token in URL
-                                // response.sendRedirect("http://localhost:3000?token=" + accessToken);
+                                // ✅ Option 2: (DEV ONLY) send tokens in redirect URL
+                                // String redirectUrl = String.format(
+                                //         "http://localhost:3000?access=%s&id=%s&refresh=%s",
+                                //         URLEncoder.encode(accessToken, StandardCharsets.UTF_8),
+                                //         URLEncoder.encode(idToken, StandardCharsets.UTF_8),
+                                //         refreshToken != null ? URLEncoder.encode(refreshToken, StandardCharsets.UTF_8) : ""
+                                // );
+                                // response.sendRedirect(redirectUrl);
                             }
+
+                            // redirect to frontend root
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
