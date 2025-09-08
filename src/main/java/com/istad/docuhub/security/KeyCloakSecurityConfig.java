@@ -47,6 +47,7 @@ public class KeyCloakSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
+                        .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
@@ -108,7 +109,7 @@ public class KeyCloakSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/auth/login/keycloak") // <-- map your login URL
+                        .loginPage("/api/v1/auth/keycloak/login") // <-- map your login URL
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
                             // Redirect to frontend after successful login
