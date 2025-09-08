@@ -62,6 +62,7 @@ public class KeyCloakSecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
+                        .requestMatchers("/favicon.ico", "/health").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
