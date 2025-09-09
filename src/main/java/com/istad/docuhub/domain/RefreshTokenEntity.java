@@ -18,7 +18,7 @@ public class RefreshTokenEntity {
 
     private String username;
 
-    @Lob
+    @Column(length = 2048)
     private String token;
 
     private Instant issuedAt;
