@@ -5,195 +5,106 @@ import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.comment.dto.CommentResponse;
 import com.istad.docuhub.feature.comment.dto.CreateCommentRequest;
-import com.istad.docuhub.feature.comment.dto.DeleteCommentRequest;
-import com.istad.docuhub.feature.comment.dto.EditCommentRequest;
+import com.istad.docuhub.feature.comment.dto.UpdateCommentRequest;
+import com.istad.docuhub.feature.comment.mapper.CommentMapper;
 import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.user.UserRepository;
-import com.istad.docuhub.feature.user.UserService;
-import com.istad.docuhub.feature.user.dto.CurrentUser;
-import lombok.RequiredArgsConstructor;
+import com.istad.docuhub.utils.CurrentUserV2;
+import com.istad.docuhub.utils.QuickService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
-
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
 
-    private final UserService userService;
-    private PaperRepository paperRepository;
-    private UserRepository userRepository;
-    private CommentRepository commentRepository;
-
-
-
+    private final UserRepository userRepository;
+    private final PaperRepository paperRepository;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
+    private QuickService quickService;
 
     @Override
-    public CommentResponse createComment(CreateCommentRequest createCommentRequest) {
+    public CommentResponse createComment(CreateCommentRequest commentRequest) {
 
-        // Get user
-        CurrentUser userId = userService.getCurrentUserSub();
+        User user = userRepository.findByUuidAndIsDeletedFalse(commentRequest.userUuid())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in System "));
 
-        // Validation Paper
-        Paper paper = paperRepository.findById(createCommentRequest.paperId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Paper not found with ID: " + createCommentRequest.paperId()
-                ));
-        if (!paper.getIsPublished()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper is not published yet");
-        }
+        Paper paper = paperRepository.findByUuid(commentRequest.paperUuid())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
 
-        // Validation User
-        User user = userRepository.findByUuidAndIsDeletedFalse(userId.id())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User does not exist"));
+        int id;
+        int retries = 0;
+        do {
+            if (retries++ > 50) {
+                throw new RuntimeException("Unable to generate unique ID after 50 attempts");
+            }
+            id = new Random().nextInt(Integer.parseInt("1000000"));
+        } while (commentRepository.existsById(id));
 
-        // Create Comment
+
         Comment comment = new Comment();
-        comment.setContent(createCommentRequest.content());
+        comment.setId(id);
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setContent(commentRequest.content());
         comment.setCreatedAt(LocalDate.now());
-        comment.setPaper(paper);
+        comment.setIsDeleted(false);
         comment.setUser(user);
+        comment.setPaper(paper);
 
-        // Set comment Id
-        Integer commentId;
-        do {
-            commentId = (int) (Math.random() * 1_000_000); // generates a number between 0 and 999999
-        } while (commentRepository.existsById(commentId));
-        comment.setId(commentId);
+        Comment saved = commentRepository.save(comment);
 
-        // Set comment uuid
-        String commentUuid;
-        do {
-            commentUuid = UUID.randomUUID().toString();
-        } while (commentRepository.existsByUuid(commentUuid));
-
-
-        // Save the comment
-        comment = commentRepository.save(comment);
-
-        return CommentResponse.builder()
-                .id(comment.getId())
-                .uuid(comment.getUuid())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .paperId(comment.getPaper().getId())
-                .paperTitle(comment.getPaper().getTitle())
-                .userId(comment.getUser().getId())
-                .userFullName(comment.getUser().getFullName())
-                .userImageUrl(comment.getUser().getImageUrl())
-                .build();
+        return commentMapper.toCommentResponse(saved);
     }
 
 
-
-
-
+    // allow to edit only user owner and admin
     @Override
-    public CommentResponse editComment(EditCommentRequest editCommentRequest) {
+    public CommentResponse editComment(UpdateCommentRequest updateCommentRequest) {
+        Comment comment = commentRepository.findByUuid(updateCommentRequest.commentUuid())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Comment not found"));
 
-        // Get User ID
-        CurrentUser userId = userService.getCurrentUserSub();
+        CurrentUserV2 currentUser = quickService.currentUserInfor();
 
-        // Validation Comment
-        if(!commentRepository.existsById(editCommentRequest.commentId())){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found");
+        boolean isAdmin = currentUser.getRoles().contains("ADMIN");
+        boolean isOwner = comment.getUser().getUuid().equals(currentUser.getUuid());
+
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException("You are not allowed to edit this comment");
         }
 
-        // Validation User
-        if(!userRepository.existsByUuidAndIsDeletedFalse(userId.id())){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
-        }
-
-        // Get comment where user wants to edit
-        Comment comment = commentRepository.findById(editCommentRequest.commentId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found")
-        );
-
-        // Check if user really own this comment or not
-        if (!comment.getUser().getUuid().equals(userId.id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this comment");
-        }
-
-        comment.setContent(editCommentRequest.content());
+        comment.setContent(updateCommentRequest.content());
         comment.setCreatedAt(LocalDate.now());
-        commentRepository.save(comment);
-
-
-        return CommentResponse.builder()
-                .id(comment.getId())
-                .uuid(comment.getUuid())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .paperId(comment.getPaper().getId())
-                .paperTitle(comment.getPaper().getTitle())
-                .userId(comment.getUser().getId())
-                .userFullName(comment.getUser().getFullName())
-                .userImageUrl(comment.getUser().getImageUrl())
-                .build();
+        Comment commentSaved = commentRepository.save(comment);
+        return commentMapper.toCommentResponse(commentSaved);
     }
 
 
-
-
-
-
+    // allow to delete only user owner and admin
     @Override
-    public void deleteComment(DeleteCommentRequest deleteCommentRequest) {
+    public void deleteCommentByUuid(String commentUuid) {
+        CurrentUserV2 currentUser = quickService.currentUserInfor();
 
-        // Get User ID
-        CurrentUser userId = userService.getCurrentUserSub();
+        Comment comment = commentRepository.findByUuid(commentUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Comment not found"));
 
-        // Fetch comment
-        Comment comment = commentRepository.findById(deleteCommentRequest.commentId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Comment not found"
-                ));
+        boolean isAdmin = currentUser.getRoles().contains("ADMIN");
+        boolean isOwner = comment.getUser().getUuid().equals(currentUser.getUuid());
 
-        // Check if user owns the comment
-        if (!comment.getUser().getUuid().equals(userId.id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this comment");
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException("You are not allowed to delete this comment");
         }
 
-        // Delete comment
         commentRepository.delete(comment);
     }
 
-
-
-
-    @Override
-    public long countByPaperId(Integer paperId) {
-        return commentRepository.countByPaperId(paperId);
-    }
-
-
-
-
-    @Override
-    public List<CommentResponse> getCommentsByPaperId(Integer paperId) {
-        List<Comment> comments = commentRepository.findByPaperId(paperId);
-
-
-        return comments.stream()
-                .map(comment -> CommentResponse.builder()
-                        .id(comment.getId())
-                        .content(comment.getContent())
-                        .createdAt(comment.getCreatedAt())
-                        .paperId(comment.getPaper().getId())
-                        .paperTitle(comment.getPaper().getTitle())
-                        .userId(comment.getUser().getId())
-                        .userFullName(comment.getUser().getFullName())
-                        .userImageUrl(comment.getUser().getImageUrl())
-                        .build())
-                .toList();
-    }
 
 }

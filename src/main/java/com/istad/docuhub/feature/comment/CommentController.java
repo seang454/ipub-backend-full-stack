@@ -2,61 +2,66 @@ package com.istad.docuhub.feature.comment;
 
 import com.istad.docuhub.feature.comment.dto.CommentResponse;
 import com.istad.docuhub.feature.comment.dto.CreateCommentRequest;
-import com.istad.docuhub.feature.comment.dto.DeleteCommentRequest;
-import com.istad.docuhub.feature.comment.dto.EditCommentRequest;
+import com.istad.docuhub.feature.comment.dto.UpdateCommentRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
+//import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
-import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/v1/comments")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/comments")
+@Validated
 public class CommentController {
 
-    private CommentService commentService;
+    private final CommentService commentService;
 
-
-    // Create a comment
+    // -------------------
+    // Create Comment
+    // -------------------
     @PostMapping
-    public ResponseEntity<CommentResponse> createComment(@RequestBody CreateCommentRequest request) {
+    public ResponseEntity<CommentResponse> createComment(
+            @RequestBody @Valid CreateCommentRequest request) {
+
         CommentResponse response = commentService.createComment(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // -------------------
+    // Edit Comment
+    // -------------------
+    @PutMapping("/{uuid}")
+    public ResponseEntity<CommentResponse> editComment(
+            @PathVariable("uuid") String uuid,
+            @RequestBody @Valid UpdateCommentRequest request) {
 
-    // Edit a comment
-    @PutMapping
-    public ResponseEntity<CommentResponse> editComment(@RequestBody EditCommentRequest request) {
+        // Optional: ensure path UUID and body UUID match
+        if (!uuid.equals(request.commentUuid())) {
+            return ResponseEntity.badRequest()
+                    .body(null);
+        }
+
         CommentResponse response = commentService.editComment(request);
         return ResponseEntity.ok(response);
     }
 
 
-    // Delete a comment
-    @DeleteMapping
-    public ResponseEntity<Void> deleteComment(@RequestBody DeleteCommentRequest request) {
-        commentService.deleteComment(request);
-        return ResponseEntity.noContent().build(); // HTTP 204
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<?> deleteComment(@PathVariable String uuid) {
+        commentService.deleteCommentByUuid(uuid);
+        return ResponseEntity.ok(Map.of(
+                "uuid", uuid,
+                "message", "Comment deleted successfully"
+        ));
     }
-
-
-    // Get all comments for a specific paper
-    @GetMapping("/paper/{paperId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByPaperId(@PathVariable Integer paperId) {
-        List<CommentResponse> comments = commentService.getCommentsByPaperId(paperId);
-        return ResponseEntity.ok(comments);
-    }
-
-
-    // Get number of comments for a specific paper
-    @GetMapping("/paper/{paperId}/count")
-    public ResponseEntity<Long> countCommentsByPaperId(@PathVariable Integer paperId) {
-        long count = commentService.countByPaperId(paperId);
-        return ResponseEntity.ok(count);
-    }
-
 
 }
