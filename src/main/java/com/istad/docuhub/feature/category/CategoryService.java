@@ -13,5 +13,5 @@ public interface CategoryService {
     Page<CategoryResponse> getAllCategory(Pageable pageable);
     void updateCategory(String uuid, CategoryRequest request);
     void deleteCategory(String uuid);
-    List<CategoryResponse> searchCategoryBySlug(String slug);
+    Page<CategoryResponse> searchCategoryBySlug(String slug, Pageable pageable);
 }

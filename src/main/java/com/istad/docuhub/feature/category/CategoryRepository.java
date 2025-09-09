@@ -17,5 +17,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Page<Category> findAll(@NotNull Pageable pageable);
     Optional<Category> findByUuid(String uuid);
 
-    List<Category> findBySlugContaining(String slug);
+    Page<Category> findBySlugContaining(String slug, Pageable pageable);
 }

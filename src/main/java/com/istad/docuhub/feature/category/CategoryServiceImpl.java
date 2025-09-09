@@ -72,10 +72,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryResponse> searchCategoryBySlug(String slug) {
-        List<Category> category = categoryRepository.findBySlugContaining(slug);
-        List<CategoryResponse> categoryResponses = new ArrayList<>();
-        category.forEach(categoryResponse -> categoryResponses.add(categoryMapper.toCategoryResponse(categoryResponse)));
-        return categoryResponses;
+    public Page<CategoryResponse> searchCategoryBySlug(String slug, Pageable pageable) {
+        Page<Category> categories = categoryRepository.findBySlugContaining(slug, pageable);
+        return categories.map(categoryMapper::toCategoryResponse);
     }
 }
