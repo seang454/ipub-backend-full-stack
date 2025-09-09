@@ -132,39 +132,38 @@ public class KeyCloakSecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-
-                            // Load authorized client
-                            OAuth2AuthorizedClient authorizedClient =
-                                    authorizedClientService.loadAuthorizedClient("keycloak", authentication.getName());
+                            OAuth2AuthorizedClient authorizedClient = authorizedClientService
+                                    .loadAuthorizedClient("keycloak", authentication.getName());
 
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
-                                String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
+                                String refreshToken = authorizedClient.getRefreshToken() != null
+                                        ? authorizedClient.getRefreshToken().getTokenValue()
+                                        : null;
 
-                                // ✅ Send short-lived access token to frontend cookie
+                                // Cookie settings for local dev
                                 Cookie accessCookie = new Cookie("access_token", accessToken);
-                                accessCookie.setHttpOnly(true);
-                                accessCookie.setSecure(true);
+                                accessCookie.setHttpOnly(true); // secure from JS
+                                accessCookie.setSecure(false); // allow HTTP localhost
                                 accessCookie.setPath("/");
                                 accessCookie.setMaxAge(3600); // 1 hour
+                                accessCookie.setDomain("localhost");
                                 response.addCookie(accessCookie);
 
-                                // Optional: send id_token if frontend needs claims
                                 Cookie idCookie = new Cookie("id_token", idToken);
                                 idCookie.setHttpOnly(true);
-                                idCookie.setSecure(true);
+                                idCookie.setSecure(false);
                                 idCookie.setPath("/");
                                 idCookie.setMaxAge(3600);
+                                idCookie.setDomain("localhost");
                                 response.addCookie(idCookie);
 
-                                // ✅ Store refresh token server-side (database preferred)
                                 if (refreshToken != null) {
-                                    refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400); // 1 day TTL
+                                    refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400);
                                 }
                             }
 
-                            // Redirect to frontend
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
