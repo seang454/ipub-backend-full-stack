@@ -130,13 +130,12 @@ public class KeyCloakSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
+
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
+                            // Load authorized client
                             OAuth2AuthorizedClient authorizedClient =
-                                    authorizedClientService.loadAuthorizedClient(
-                                            "keycloak",
-                                            authentication.getName()
-                                    );
+                                    authorizedClientService.loadAuthorizedClient("keycloak", authentication.getName());
 
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
@@ -145,7 +144,7 @@ public class KeyCloakSecurityConfig {
                                         ? authorizedClient.getRefreshToken().getTokenValue()
                                         : null;
 
-                                // ✅ Send access token as HttpOnly cookie
+                                // ✅ Send short-lived access token to frontend cookie
                                 Cookie accessCookie = new Cookie("access_token", accessToken);
                                 accessCookie.setHttpOnly(true);
                                 accessCookie.setSecure(true);
@@ -153,7 +152,7 @@ public class KeyCloakSecurityConfig {
                                 accessCookie.setMaxAge(3600); // 1 hour
                                 response.addCookie(accessCookie);
 
-                                // (Optional) ID token for frontend claims
+                                // Optional: send id_token if frontend needs claims
                                 Cookie idCookie = new Cookie("id_token", idToken);
                                 idCookie.setHttpOnly(true);
                                 idCookie.setSecure(true);
@@ -161,15 +160,17 @@ public class KeyCloakSecurityConfig {
                                 idCookie.setMaxAge(3600);
                                 response.addCookie(idCookie);
 
-                                // ✅ Store refresh token securely server-side
+                                // ✅ Store refresh token server-side (database preferred)
                                 if (refreshToken != null) {
-                                    refreshTokenService.storeToken(authentication.getName(), refreshToken);
+                                    refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400); // 1 day TTL
                                 }
                             }
 
+                            // Redirect to frontend
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
+
 
 
                 // JSON response for unauthenticated API requests
