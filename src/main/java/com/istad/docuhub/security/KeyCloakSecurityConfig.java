@@ -131,7 +131,7 @@ public class KeyCloakSecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
-                            // ✅ load authorized client
+                            // Load authorized client
                             OAuth2AuthorizedClient authorizedClient =
                                     authorizedClientService.loadAuthorizedClient(
                                             "keycloak",
@@ -141,15 +141,36 @@ public class KeyCloakSecurityConfig {
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
+                                String refreshToken = authorizedClient.getRefreshToken() != null
+                                        ? authorizedClient.getRefreshToken().getTokenValue()
+                                        : null;
 
-                                // Example: send token back as cookie
+                                // ✅ Access token cookie
                                 response.addHeader("Set-Cookie",
                                         "access_token=" + accessToken +
                                                 "; Path=/; HttpOnly; SameSite=None; Secure");
 
-                                // Or for dev only: redirect with token in URL
-                                // response.sendRedirect("http://localhost:3000?token=" + accessToken);
+                                // ✅ ID token cookie
+                                response.addHeader("Set-Cookie",
+                                        "id_token=" + idToken +
+                                                "; Path=/; HttpOnly; SameSite=None; Secure");
+
+                                // ✅ Refresh token cookie (⚠️ can be very large!)
+                                if (refreshToken != null) {
+                                    response.addHeader("Set-Cookie",
+                                            "refresh_token=" + refreshToken +
+                                                    "; Path=/; HttpOnly; SameSite=None; Secure");
+                                }
+
+                                // For debugging: send tokens in response body instead (optional)
+                                // response.setContentType("application/json");
+                                // response.getWriter().write("{\"access_token\":\"" + accessToken +
+                                //         "\",\"id_token\":\"" + idToken +
+                                //         "\",\"refresh_token\":\"" + refreshToken + "\"}");
+                                // return;
                             }
+
+                            // Redirect to frontend after login
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
