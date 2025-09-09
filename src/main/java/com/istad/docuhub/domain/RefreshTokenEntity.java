@@ -18,8 +18,8 @@ public class RefreshTokenEntity {
 
     private String username;
 
-    @Lob
-    private String token;
+    @Column(nullable = false, length = 2048)
+    private String refreshToken;
 
     private Instant issuedAt;
     private Instant expiresAt;

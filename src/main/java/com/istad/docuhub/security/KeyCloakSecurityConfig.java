@@ -141,9 +141,7 @@ public class KeyCloakSecurityConfig {
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
-                                String refreshToken = authorizedClient.getRefreshToken() != null
-                                        ? authorizedClient.getRefreshToken().getTokenValue()
-                                        : null;
+                                String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
 
                                 // ✅ Send short-lived access token to frontend cookie
                                 Cookie accessCookie = new Cookie("access_token", accessToken);
