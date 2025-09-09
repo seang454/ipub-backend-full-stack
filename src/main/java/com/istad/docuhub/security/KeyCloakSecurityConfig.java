@@ -131,7 +131,6 @@ public class KeyCloakSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
-
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
                             // Load authorized client
