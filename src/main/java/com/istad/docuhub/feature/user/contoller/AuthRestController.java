@@ -22,6 +22,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,9 @@ public class AuthRestController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(Authentication authentication, HttpServletResponse response) {
         String username = authentication.getName();
-        log.info("Refreshing user {}", username);
+        if (username == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found" + username);
+        }
 
         String storedRefreshToken = refreshTokenService.getToken(username);
         if (storedRefreshToken == null) {
