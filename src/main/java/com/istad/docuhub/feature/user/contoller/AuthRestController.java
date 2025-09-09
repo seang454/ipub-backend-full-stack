@@ -73,6 +73,29 @@ public class AuthRestController {
     }
 
     @GetMapping("/refreshTokens")
+    public ResponseEntity<TokenResponseRecord> refreshTokens(
+            @RegisteredOAuth2AuthorizedClient("keycloak") OAuth2AuthorizedClient client,
+            @AuthenticationPrincipal OidcUser oidcUser
+    ) {
+        if (client == null || oidcUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        Map<String, Object> tokens = userService.getValidTokens(client, oidcUser);
+        if (tokens.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        TokenResponseRecord tokenResponse = new TokenResponseRecord(
+                (String) tokens.get("accessToken"),
+                (String) tokens.get("refreshToken"),
+                (String) tokens.get("idToken"),
+                (Map<String, Object>) tokens.get("claims")
+        );
+
+        return ResponseEntity.ok(tokenResponse);
+    }
+    @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(Authentication authentication, HttpServletResponse response) {
         String username = authentication.getName();
 
