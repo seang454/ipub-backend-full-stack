@@ -97,10 +97,9 @@ public class AuthRestController {
         return ResponseEntity.ok(tokenResponse);
     }
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(Authentication authentication, HttpServletResponse response) {
-        String username = authentication.getName();
-        if (username == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found" + username);
+    public ResponseEntity<?> refreshToken(@RequestParam String username, HttpServletResponse response) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
 
         String storedRefreshToken = refreshTokenService.getToken(username);
@@ -161,6 +160,7 @@ public class AuthRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh failed: " + e.getMessage());
         }
     }
+
 
     @GetMapping("users")
     public List<UserResponse> getUsers(){
