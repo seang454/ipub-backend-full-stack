@@ -66,4 +66,9 @@ public class CategoryController {
                 ), HttpStatus.NO_CONTENT
         );
     }
+
+    @GetMapping("/slug")
+    public List<CategoryResponse> getAllCategories(@RequestParam String slug){
+        return categoryService.searchCategoryBySlug(slug);
+    }
 }

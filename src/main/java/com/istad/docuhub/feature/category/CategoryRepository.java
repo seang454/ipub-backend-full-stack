@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
@@ -15,4 +16,6 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     @Override
     Page<Category> findAll(@NotNull Pageable pageable);
     Optional<Category> findByUuid(String uuid);
+
+    List<Category> findBySlugContaining(String slug);
 }

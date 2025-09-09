@@ -3,12 +3,14 @@ package com.istad.docuhub.feature.category;
 import com.istad.docuhub.domain.Category;
 import com.istad.docuhub.feature.category.dto.CategoryRequest;
 import com.istad.docuhub.feature.category.dto.CategoryResponse;
+import com.istad.docuhub.feature.category.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public void createCategory(CategoryRequest categoryRequest) {
@@ -66,5 +69,13 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         categoryRepository.delete(category);
+    }
+
+    @Override
+    public List<CategoryResponse> searchCategoryBySlug(String slug) {
+        List<Category> category = categoryRepository.findBySlugContaining(slug);
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        category.forEach(categoryResponse -> categoryResponses.add(categoryMapper.toCategoryResponse(categoryResponse)));
+        return categoryResponses;
     }
 }
