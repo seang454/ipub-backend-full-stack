@@ -30,8 +30,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -144,41 +142,32 @@ public class KeyCloakSecurityConfig {
                                 String idToken = oidcUser.getIdToken().getTokenValue();
                                 String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
 
-                                // ✅ Send short-lived access token as HttpOnly cookie (safe)
-                                response.addHeader("Set-Cookie",
-                                        "access_token=" + accessToken +
-                                                "; Max-Age=3600" +
-                                                "; Path=/" +
-                                                "; Secure" +
-                                                "; HttpOnly" +
-                                                "; SameSite=None");
+                                // ✅ Send short-lived access token to frontend cookie
+                                Cookie accessCookie = new Cookie("access_token", accessToken);
+                                accessCookie.setHttpOnly(true);
+                                accessCookie.setSecure(true);
+                                accessCookie.setPath("/");
+                                accessCookie.setMaxAge(3600); // 1 hour
+                                response.addCookie(accessCookie);
 
-                                // ✅ Send ID token as cookie
-                                response.addHeader("Set-Cookie",
-                                        "id_token=" + idToken +
-                                                "; Max-Age=3600" +
-                                                "; Path=/" +
-                                                "; Secure" +
-                                                "; HttpOnly" +
-                                                "; SameSite=None");
+                                // Optional: send id_token if frontend needs claims
+                                Cookie idCookie = new Cookie("id_token", idToken);
+                                idCookie.setHttpOnly(true);
+                                idCookie.setSecure(true);
+                                idCookie.setPath("/");
+                                idCookie.setMaxAge(3600);
+                                response.addCookie(idCookie);
 
-                                // ✅ Store refresh token server-side
+                                // ✅ Store refresh token server-side (database preferred)
                                 if (refreshToken != null) {
                                     refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400); // 1 day TTL
                                 }
-
-                                // ✅ Redirect to frontend with id_token for claims
-                                String redirectUrl = "http://localhost:3000/login-success" +
-                                        "?id_token=" + URLEncoder.encode(idToken, StandardCharsets.UTF_8);
-
-                                response.sendRedirect(redirectUrl);
-                            } else {
-                                response.sendRedirect("http://localhost:3000/login-failed");
                             }
+
+                            // Redirect to frontend
+                            response.sendRedirect("http://localhost:3000");
                         })
                 )
-
-
 
 
 
