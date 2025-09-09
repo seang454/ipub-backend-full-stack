@@ -3,7 +3,9 @@ package com.istad.docuhub.feature.user;
 import com.istad.docuhub.domain.RefreshTokenEntity;
 import com.istad.docuhub.feature.user.mapper.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 
@@ -23,6 +25,9 @@ public class RefreshTokenService {
     }
 
     public String getToken(String username) {
+        if (username==null || username.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Username is required");
+        }
         return repository.findByUsername(username)
                 .filter(token -> token.getExpiresAt().isAfter(Instant.now()))
                 .map(RefreshTokenEntity::getToken)
