@@ -70,25 +70,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentResponse approveStudentDetail(StudentApproveRequest approvRequest) {
-        StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(approvRequest.userUuid())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
-
-        studentDetail.setIsStudent(true);
-        studentDetailRepository.save(studentDetail);
-
-        return new StudentResponse(
-                studentDetail.getUuid(),
-                studentDetail.getStudentCardUrl(),
-                studentDetail.getUniversity(),
-                studentDetail.getMajor(),
-                studentDetail.getYearsOfStudy(),
-                studentDetail.getIsStudent(),
-                studentDetail.getUser().getUuid()
-        );
-    }
-
-    @Override
     public void rejectStudentDetail(RejectStudentRequest rejectRequest) {
         StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(rejectRequest.userUuid())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));

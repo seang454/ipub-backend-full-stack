@@ -2,15 +2,12 @@ package com.istad.docuhub.feature.comment.service;
 
 import com.istad.docuhub.feature.comment.dto.CommentResponse;
 import com.istad.docuhub.feature.comment.dto.CreateCommentRequest;
-import com.istad.docuhub.feature.comment.dto.DeleteCommentRequest;
-import com.istad.docuhub.feature.comment.dto.EditCommentRequest;
+import com.istad.docuhub.feature.comment.dto.UpdateCommentRequest;
 
 public interface CommentService {
 
-    CommentResponse comment(CreateCommentRequest createCommentRequest);
-
-    CommentResponse editComment(EditCommentRequest editCommentRequest);
-
-    void deleteCommentByUserIdAndCommentId(DeleteCommentRequest deleteCommentRequest);
+    CommentResponse createComment(CreateCommentRequest createCommentRequest);
+    CommentResponse editComment(UpdateCommentRequest editCommentRequest);
+    void deleteCommentByUuid(String userUuid );
 
 }

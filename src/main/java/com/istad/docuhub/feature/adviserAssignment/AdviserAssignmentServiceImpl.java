@@ -15,7 +15,6 @@ import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
-import com.istad.docuhub.utils.KeycloakUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,7 @@
 package com.istad.docuhub.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +16,10 @@ import java.time.LocalDate;
 public class Comment {
 
     @Id
-    private Integer id;
+    private  Integer id;
+
+    @Column(nullable = false, unique = true)
+    private String uuid; // add by thong
 
     @Column(nullable = false)
     private String content;
@@ -30,6 +34,9 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_uuid", referencedColumnName = "id", nullable = false)
     private User user;
+
+    // add by seavthong
+    private Boolean isDeleted;
 
 
 }

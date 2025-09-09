@@ -3,12 +3,12 @@ package com.istad.docuhub.feature.comment.dto;
 import java.time.LocalDate;
 
 public record CommentResponse(
-
-        Integer id,
-        Integer userId,
-        Integer paperId,
+        String uuid,
         String content,
-        LocalDate createdDate
-
+        LocalDate createdAt,
+        String userUuid,
+        String userName,
+        String paperUuid,
+        String paperTitle
 ) {
 }

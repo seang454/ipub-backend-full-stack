@@ -19,8 +19,8 @@ public interface CommentMapper {
 
 
     // Map from Comment -> CommentResponse
-    @Mapping(source = "user.id", target = "userId")
-    @Mapping(source = "paper.id", target = "paperId")
+    @Mapping(source = "user.uuid", target = "userUuid")
+    @Mapping(source = "paper.uuid", target = "paperUuid")
     CommentResponse toCommentResponse(Comment comment);
 
 

@@ -107,6 +107,9 @@ public class KeyCloakSecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
                                 .requestMatchers(HttpMethod.GET, "/api/v1/feedback").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
+
+                                .requestMatchers("/api/v1/comments/**").permitAll()
+
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
