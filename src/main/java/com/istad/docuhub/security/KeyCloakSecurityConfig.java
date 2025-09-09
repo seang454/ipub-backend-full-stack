@@ -142,32 +142,31 @@ public class KeyCloakSecurityConfig {
                                 String idToken = oidcUser.getIdToken().getTokenValue();
                                 String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
 
-                                // ✅ Send short-lived access token to frontend cookie
-                                Cookie accessCookie = new Cookie("access_token", accessToken);
-                                accessCookie.setHttpOnly(true);
-                                accessCookie.setSecure(true);
-                                accessCookie.setPath("/");
-                                accessCookie.setMaxAge(3600); // 1 hour
-                                response.addCookie(accessCookie);
+                                // ✅ Send short-lived access token as cookie
+                                response.addHeader("Set-Cookie",
+                                        "access_token=" + accessToken +
+                                                "; Max-Age=3600" +
+                                                "; Path=/" +
+                                                "; Secure" +
+                                                "; HttpOnly" +
+                                                "; SameSite=None");
 
-                                // Optional: send id_token if frontend needs claims
-                                Cookie idCookie = new Cookie("id_token", idToken);
-                                idCookie.setHttpOnly(true);
-                                idCookie.setSecure(true);
-                                idCookie.setPath("/");
-                                idCookie.setMaxAge(3600);
-                                response.addCookie(idCookie);
+                                // ✅ Send ID token as cookie if frontend needs claims
+                                response.addHeader("Set-Cookie",
+                                        "id_token=" + idToken +
+                                                "; Max-Age=3600" +
+                                                "; Path=/" +
+                                                "; Secure" +
+                                                "; HttpOnly" +
+                                                "; SameSite=None");
 
-                                // ✅ Store refresh token server-side (database preferred)
-                                if (refreshToken != null) {
-                                    refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400); // 1 day TTL
-                                }
                             }
 
                             // Redirect to frontend
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
+
 
 
 
