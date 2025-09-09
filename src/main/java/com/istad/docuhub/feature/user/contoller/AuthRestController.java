@@ -98,6 +98,7 @@ public class AuthRestController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(Authentication authentication, HttpServletResponse response) {
         String username = authentication.getName();
+        log.info("Refreshing user {}", username);
 
         String storedRefreshToken = refreshTokenService.getToken(username);
         if (storedRefreshToken == null) {
