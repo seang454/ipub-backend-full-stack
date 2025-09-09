@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,6 +109,9 @@
     <key name="CreateClassDialog.RecentsKey">
       <recent name="com.istad.docuhub.feature.user" />
     </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.istad.docuhub.feature.user" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="DocuhubApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
@@ -191,7 +195,7 @@
       <workItem from="1757037368762" duration="30000" />
       <workItem from="1757263752871" duration="84000" />
       <workItem from="1757352143090" duration="8741000" />
-      <workItem from="1757381445866" duration="705000" />
+      <workItem from="1757381445866" duration="1879000" />
     </task>
     <servers />
   </component>

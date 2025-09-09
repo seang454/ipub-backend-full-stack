@@ -1,6 +1,8 @@
 package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.istad.docuhub.feature.user.RefreshTokenService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +27,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KeyCloakSecurityConfig {
     private final OAuth2AuthorizedClientService authorizedClientService;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${backend.endpoint}")
     private String backendEndpoint;
@@ -131,7 +132,6 @@ public class KeyCloakSecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
-                            // Load authorized client
                             OAuth2AuthorizedClient authorizedClient =
                                     authorizedClientService.loadAuthorizedClient(
                                             "keycloak",
@@ -145,35 +145,32 @@ public class KeyCloakSecurityConfig {
                                         ? authorizedClient.getRefreshToken().getTokenValue()
                                         : null;
 
-                                // ✅ Access token cookie
-                                response.addHeader("Set-Cookie",
-                                        "access_token=" + accessToken +
-                                                "; Path=/; HttpOnly; SameSite=None; Secure");
+                                // ✅ Send access token as HttpOnly cookie
+                                Cookie accessCookie = new Cookie("access_token", accessToken);
+                                accessCookie.setHttpOnly(true);
+                                accessCookie.setSecure(true);
+                                accessCookie.setPath("/");
+                                accessCookie.setMaxAge(3600); // 1 hour
+                                response.addCookie(accessCookie);
 
-                                // ✅ ID token cookie
-                                response.addHeader("Set-Cookie",
-                                        "id_token=" + idToken +
-                                                "; Path=/; HttpOnly; SameSite=None; Secure");
+                                // (Optional) ID token for frontend claims
+                                Cookie idCookie = new Cookie("id_token", idToken);
+                                idCookie.setHttpOnly(true);
+                                idCookie.setSecure(true);
+                                idCookie.setPath("/");
+                                idCookie.setMaxAge(3600);
+                                response.addCookie(idCookie);
 
-                                // ✅ Refresh token cookie (⚠️ can be very large!)
+                                // ✅ Store refresh token securely server-side
                                 if (refreshToken != null) {
-                                    response.addHeader("Set-Cookie",
-                                            "refresh_token=" + refreshToken +
-                                                    "; Path=/; HttpOnly; SameSite=None; Secure");
+                                    refreshTokenService.storeToken(authentication.getName(), refreshToken);
                                 }
-
-                                // For debugging: send tokens in response body instead (optional)
-                                // response.setContentType("application/json");
-                                // response.getWriter().write("{\"access_token\":\"" + accessToken +
-                                //         "\",\"id_token\":\"" + idToken +
-                                //         "\",\"refresh_token\":\"" + refreshToken + "\"}");
-                                // return;
                             }
 
-                            // Redirect to frontend after login
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
+
 
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
