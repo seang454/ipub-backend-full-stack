@@ -2,6 +2,7 @@ package com.istad.docuhub.domain;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,5 +36,7 @@ public class Comment {
     @JoinColumn(name = "user_uuid", referencedColumnName = "id", nullable = false)
     private User user;
 
+    // add by seavthong
+    private Boolean isDeleted;
 
 }
