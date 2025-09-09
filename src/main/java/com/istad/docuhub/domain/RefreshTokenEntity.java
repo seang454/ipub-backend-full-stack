@@ -8,8 +8,8 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "refresh_tokens")
-@Getter
 @Setter
+@Getter
 public class RefreshTokenEntity {
 
     @Id
@@ -18,8 +18,8 @@ public class RefreshTokenEntity {
 
     private String username;
 
-    @Column(nullable = false, length = 2048)
-    private String refreshToken;
+    @Lob
+    private String token;
 
     private Instant issuedAt;
     private Instant expiresAt;

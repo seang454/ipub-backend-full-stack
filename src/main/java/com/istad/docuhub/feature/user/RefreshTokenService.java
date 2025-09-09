@@ -18,7 +18,7 @@ public class RefreshTokenService {
     public void storeToken(String username, String refreshToken, long ttlSeconds) {
         RefreshTokenEntity entity = new RefreshTokenEntity();
         entity.setUsername(username);
-        entity.setRefreshToken(refreshToken);
+        entity.setToken(refreshToken);
         entity.setIssuedAt(Instant.now());
         entity.setExpiresAt(Instant.now().plusSeconds(ttlSeconds));
         repository.save(entity);
@@ -30,7 +30,7 @@ public class RefreshTokenService {
         }
         return repository.findByUsername(username)
                 .filter(token -> token.getExpiresAt().isAfter(Instant.now()))
-                .map(RefreshTokenEntity::getRefreshToken)
+                .map(RefreshTokenEntity::getToken)
                 .orElse(null);
     }
 
