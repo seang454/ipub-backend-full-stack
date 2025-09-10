@@ -99,29 +99,23 @@ public class AuthRestController {
         return ResponseEntity.ok(tokenResponse);
     }
     @GetMapping("/protected-endpoint")
-    public ResponseEntity<Map<String, Object>> protectedEndpoint(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("access_token".equals(cookie.getName())) {
-                    String token = cookie.getValue();
+    public ResponseEntity<Map<String, Object>> protectedEndpoint(
+            @CookieValue(name = "access_token", required = false) String token) {
 
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("status", "success");
-                    response.put("message", "Protected data accessed");
-                    response.put("token", token);
-
-                    return ResponseEntity.ok(response);
-                }
-            }
+        if (token != null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Protected data accessed");
+            response.put("token", token);
+            return ResponseEntity.ok(response);
         }
 
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("status", "error");
         errorResponse.put("message", "No valid token");
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam String username, HttpServletResponse response) {
