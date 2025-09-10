@@ -161,7 +161,7 @@ public class KeyCloakSecurityConfig {
                                 response.addHeader("Set-Cookie", idCookie.toString());
                             }
                             // Redirect to local frontend for testing
-                            response.sendRedirect("http://localhost:3000");
+                            response.sendRedirect("http://localhost:3000/docuhub");
                         })
                 )
                 // JSON response for unauthenticated API requests
