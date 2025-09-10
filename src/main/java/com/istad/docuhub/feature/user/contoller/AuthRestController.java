@@ -120,7 +120,7 @@ public class AuthRestController {
         errorResponse.put("status", "error");
         errorResponse.put("message", "No valid token");
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @PostMapping("/refresh")
