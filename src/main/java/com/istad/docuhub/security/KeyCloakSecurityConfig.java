@@ -197,7 +197,7 @@ public class KeyCloakSecurityConfig {
                             // Delete cookies safely
                             deleteCookie(response, "access_token", request.getServerName(), request.isSecure());
                             deleteCookie(response, "id_token", request.getServerName(), request.isSecure());
-                            deleteCookie(response, "JSESSIONID", request.getServerName(), request.isSecure());
+
                         })
                         .logoutSuccessHandler((request, response, authentication) -> {
                             // Redirect to frontend
