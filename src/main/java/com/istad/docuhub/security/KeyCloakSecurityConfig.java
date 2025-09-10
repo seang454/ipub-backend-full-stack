@@ -169,7 +169,7 @@ public class KeyCloakSecurityConfig {
                             }
 
                             // Redirect to frontend
-                            String frontendUrl = request.getServerName().contains("localhost")
+                            String frontendUrl = !request.getServerName().contains("localhost")
                                     ? "http://localhost:3000"
                                     : "https://new-add-to-card-hw-v1ia.vercel.app";
                             response.sendRedirect(frontendUrl);
