@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -142,34 +143,47 @@ public class KeyCloakSecurityConfig {
                                         ? authorizedClient.getRefreshToken().getTokenValue()
                                         : null;
 
+                                // Determine local vs production
+                                boolean isLocalhost = request.getServerName().contains("localhost");
+                                boolean secureFlag = !isLocalhost;
+
                                 // --- ACCESS TOKEN COOKIE ---
-                                Cookie accessCookie = new Cookie("access_token", accessToken);
-                                accessCookie.setHttpOnly(true);
-                                accessCookie.setSecure(true);              // required for cross-site
-                                accessCookie.setPath("/");
-                                accessCookie.setMaxAge(3600);
-                                accessCookie.setDomain("api.docuhub.me");  // backend domain// allow frontend on Vercel
-                                response.addCookie(accessCookie);
+                                ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
+                                        .httpOnly(true)
+                                        .secure(secureFlag)
+                                        .path("/")
+                                        .maxAge(3600)
+                                        .sameSite("None") // cross-site
+                                        .build();
 
                                 // --- ID TOKEN COOKIE ---
-                                Cookie idCookie = new Cookie("id_token", idToken);
-                                idCookie.setHttpOnly(true);
-                                idCookie.setSecure(true);
-                                idCookie.setPath("/");
-                                idCookie.setMaxAge(3600);
-                                idCookie.setDomain("api.docuhub.me");
-                                response.addCookie(idCookie);
+                                ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
+                                        .httpOnly(true)
+                                        .secure(secureFlag)
+                                        .path("/")
+                                        .maxAge(3600)
+                                        .sameSite("None")
+                                        .build();
 
-                                // --- REFRESH TOKEN STORAGE ---
+                                // Add cookies to response headers
+                                response.addHeader("Set-Cookie", accessCookie.toString());
+                                response.addHeader("Set-Cookie", idCookie.toString());
+
+                                // --- Refresh token storage ---
                                 if (refreshToken != null) {
                                     refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400);
                                 }
                             }
 
-                            // --- Redirect to frontend ---
-                            response.sendRedirect("http://localhost:3000");
+                            // Redirect to frontend
+                            String frontendUrl = request.getServerName().contains("localhost")
+                                    ? "http://localhost:3000"
+                                    : "https://new-add-to-card-hw-v1ia.vercel.app";
+                            response.sendRedirect(frontendUrl);
                         })
                 )
+
+
 
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
