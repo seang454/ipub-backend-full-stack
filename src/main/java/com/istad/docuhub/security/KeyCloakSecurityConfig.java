@@ -143,7 +143,7 @@ public class KeyCloakSecurityConfig {
                                 // --- ACCESS TOKEN COOKIE ---
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                                         .httpOnly(true)
-                                        .secure(false)                   // ✅ required with SameSite=None
+                                        .secure(true)                   // ✅ required with SameSite=None
                                         .path("/")
                                         .maxAge(3600)
                                         .sameSite("None")               // ✅ cross-site allowed
@@ -153,7 +153,7 @@ public class KeyCloakSecurityConfig {
                                 // --- ID TOKEN COOKIE ---
                                 ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
                                         .httpOnly(true)
-                                        .secure(false)
+                                        .secure(true)
                                         .path("/")
                                         .maxAge(3600)
                                         .sameSite("None")
