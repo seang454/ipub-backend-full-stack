@@ -101,7 +101,7 @@ public class AuthRestController {
     @GetMapping("/protected-endpoint")
     public ResponseEntity<Map<String, Object>> protectedEndpoint(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
+        if (cookies == null) {
             for (Cookie cookie : cookies) {
                 if ("access_token".equals(cookie.getName())) {
                     String token = cookie.getValue();
