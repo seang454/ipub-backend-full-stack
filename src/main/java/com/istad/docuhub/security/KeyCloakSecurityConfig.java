@@ -50,7 +50,7 @@ public class KeyCloakSecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000","https://new-add-to-card-hw-v1ia.vercel.app")
+                        .allowedOrigins("http://localhost:3000")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
@@ -63,7 +63,7 @@ public class KeyCloakSecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens").permitAll()
+                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","api/v1/auth/protected-endpoint").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh/**").permitAll()
                         .requestMatchers("/favicon.ico", "/health").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
@@ -142,22 +142,30 @@ public class KeyCloakSecurityConfig {
                                         ? authorizedClient.getRefreshToken().getTokenValue()
                                         : null;
 
-                                // Use headers for cross-domain cookies
-                                response.setHeader("Set-Cookie",
-                                        "access_token=" + accessToken + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=new-add-to-card-hw-v1ia.vercel.app; Max-Age=3600");
+                                // Cookie settings for local dev
+                                Cookie accessCookie = new Cookie("access_token", accessToken);
+                                accessCookie.setHttpOnly(true); // secure from JS
+                                accessCookie.setSecure(false); // allow HTTP localhost
+                                accessCookie.setPath("/");
+                                accessCookie.setMaxAge(3600); // 1 hour
+                                accessCookie.setDomain("localhost");
+                                response.addCookie(accessCookie);
 
-                                response.addHeader("Set-Cookie",
-                                        "id_token=" + idToken + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=new-add-to-card-hw-v1ia.vercel.app; Max-Age=3600");
+                                Cookie idCookie = new Cookie("id_token", idToken);
+                                idCookie.setHttpOnly(true);
+                                idCookie.setSecure(false);
+                                idCookie.setPath("/");
+                                idCookie.setMaxAge(3600);
+                                idCookie.setDomain("localhost");
+                                response.addCookie(idCookie);
 
                                 if (refreshToken != null) {
                                     refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400);
                                 }
                             }
 
-                            // Redirect after cookie is set
-                            response.sendRedirect("https://new-add-to-card-hw-v1ia.vercel.app");
+                            response.sendRedirect("http://localhost:3000");
                         })
-
                 )
 
 

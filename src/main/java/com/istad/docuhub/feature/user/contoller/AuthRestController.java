@@ -6,6 +6,7 @@ import com.istad.docuhub.feature.user.RefreshTokenService;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.*;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +96,22 @@ public class AuthRestController {
         );
 
         return ResponseEntity.ok(tokenResponse);
+    }
+    @GetMapping("/protected-endpoint")
+    public ResponseEntity<String> protectedEndpoint(HttpServletRequest request) {
+        // Read cookie manually (optional)
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    String token = cookie.getValue();
+                    // ✅ Here you could validate the JWT
+                    return ResponseEntity.ok("Protected data, token = " + token);
+                }
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No valid token");
     }
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam String username, HttpServletResponse response) {
