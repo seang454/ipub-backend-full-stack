@@ -133,37 +133,44 @@ public class KeyCloakSecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-                            OAuth2AuthorizedClient authorizedClient = authorizedClientService
-                                    .loadAuthorizedClient("keycloak", authentication.getName());
+                            OAuth2AuthorizedClient authorizedClient =
+                                    authorizedClientService.loadAuthorizedClient("keycloak", authentication.getName());
 
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
-                                // Always Secure=true because backend is HTTPS
+
                                 // --- ACCESS TOKEN COOKIE ---
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                                         .httpOnly(true)
-                                        .secure(true)             // required with SameSite=None
+                                        .secure(true)                   // ✅ required with SameSite=None
                                         .path("/")
                                         .maxAge(3600)
-                                        .sameSite("None")
+                                        .sameSite("None")               // ✅ cross-site allowed
+                                        .domain(".docuhub.me")          // ✅ share across subdomains
                                         .build();
 
+                                // --- ID TOKEN COOKIE ---
                                 ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
                                         .httpOnly(true)
                                         .secure(true)
                                         .path("/")
                                         .maxAge(3600)
                                         .sameSite("None")
+                                        .domain(".docuhub.me")
                                         .build();
 
+                                // ✅ add cookies safely
                                 response.addHeader("Set-Cookie", accessCookie.toString());
                                 response.addHeader("Set-Cookie", idCookie.toString());
                             }
-                            // Redirect to local frontend for testing
+
+                            // ✅ Redirect to frontend (can be localhost for dev)
+                            // In production: "https://frontend.docuhub.me"
                             response.sendRedirect("http://localhost:3000/docuhub");
                         })
                 )
+
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint())
