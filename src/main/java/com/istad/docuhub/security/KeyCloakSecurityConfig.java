@@ -32,6 +32,7 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class KeyCloakSecurityConfig {
 
     @Value("${backend.endpoint}")
     private String backendEndpoint;
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -61,8 +63,8 @@ public class KeyCloakSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
@@ -76,26 +78,26 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
 
                         // Media Endpoints
-                        .requestMatchers(HttpMethod.GET,"/api/v1/media").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/media").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/media/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
 
                         //Paper Endpoints
-                        .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/author/**").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/published").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/approved").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/all").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/pending").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/published").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/approved").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/all").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
 
 
-                        .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/adviser_details").hasAnyRole("ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
 
                         // --- admin endpoints (all you listed) ---
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN")
@@ -112,6 +114,8 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/approve-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/reject-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/student/").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/users").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/public/users").hasAnyRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
 
@@ -119,13 +123,13 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/user-promote/create-student-detail").hasAnyRole("USER")
 
 
-                                .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/feedback").hasAnyRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/feedback").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
 
-                                .requestMatchers("/api/v1/comments/**").permitAll()
+                        .requestMatchers("/api/v1/comments/**").permitAll()
 
-                                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
@@ -163,21 +167,29 @@ public class KeyCloakSecurityConfig {
 
         return http.build();
     }
+
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        Converter<Jwt, Collection<GrantedAuthority>> converter = jwt -> {
-            Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access");
-            Collection<String> roles = realmAccess != null
-                    ? realmAccess.getOrDefault("roles", List.of())
-                    : List.of();
-            return roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                    .collect(Collectors.toList());
-        };
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-        jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
+
+        jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            List<GrantedAuthority> authorities = new ArrayList<>();
+
+            // Get "realm_access" claim as a Map
+            Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+            if (realmAccess != null && realmAccess.containsKey("roles")) {
+                List<String> roles = (List<String>) realmAccess.get("roles");
+                for (String role : roles) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + role)); // Keycloak roles are already uppercase
+                }
+            }
+
+            return authorities;
+        });
+
         return jwtConverter;
     }
+
 
     // JSON AuthenticationEntryPoint for APIs
     @Bean
