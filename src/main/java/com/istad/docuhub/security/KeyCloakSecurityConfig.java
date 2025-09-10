@@ -193,36 +193,19 @@ public class KeyCloakSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
-                        .addLogoutHandler((request, response, authentication) -> {
-                            // Delete cookies safely
-                            deleteCookie(response, "access_token", request.getServerName(), request.isSecure());
-                            deleteCookie(response, "id_token", request.getServerName(), request.isSecure());
-
-                        })
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            // Redirect to frontend
-                            String frontendRedirect = "http://localhost:3000";
-                            response.sendRedirect(frontendRedirect);
+                            String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
+                            String frontendRedirect = "http://localhost:3000"; // must match Keycloak redirect URI
+
+                            response.sendRedirect(keycloakLogoutUrl + "?redirect_uri=" + frontendRedirect);
                         })
                         .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID", "access_token", "id_token")
                 );
 
 
         return http.build();
     }
-
-    //delected cookie when logout
-    private void deleteCookie(HttpServletResponse response, String name, String domain, boolean secure) {
-        Cookie cookie = new Cookie(name, null);
-        cookie.setPath("/");
-        cookie.setDomain(domain); // set to request.getServerName() for safety
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secure); // only set Secure if request is HTTPS
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-    }
-
-
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
         Converter<Jwt, Collection<GrantedAuthority>> converter = jwt -> {
