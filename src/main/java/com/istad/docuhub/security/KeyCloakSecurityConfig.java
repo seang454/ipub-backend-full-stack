@@ -55,7 +55,7 @@ public class KeyCloakSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Allow localhost for dev
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("*"));
 
         // Allow credentials (cookies, Authorization headers)
         configuration.setAllowCredentials(true);
