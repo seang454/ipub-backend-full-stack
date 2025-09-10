@@ -51,10 +51,10 @@ public class KeyCloakSecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000",
-                                "https://new-add-to-card-hw-v1ia.vercel.app")
-                        .allowCredentials(true)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+                        .allowedOrigins("http://localhost:3000") // local frontend
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true); // must allow credentials f
             }
         };
     }
@@ -64,7 +64,7 @@ public class KeyCloakSecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","api/v1/auth/protected-endpoint").permitAll()
+                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","/api/v1/auth/protected-endpoint").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh/**").permitAll()
                         .requestMatchers("/favicon.ico", "/health").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
@@ -140,9 +140,8 @@ public class KeyCloakSecurityConfig {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
 
-                                // --- Declare isLocalhost here ---
-                                boolean isLocalhost = !request.getServerName().contains("localhost");
-                                boolean secureFlag = isLocalhost;
+                                // Always Secure=true because backend is HTTPS
+                                boolean secureFlag = true;
 
                                 // --- ACCESS TOKEN COOKIE ---
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
@@ -150,8 +149,8 @@ public class KeyCloakSecurityConfig {
                                         .secure(secureFlag)
                                         .path("/")
                                         .maxAge(3600)
-                                        .sameSite(isLocalhost ? "Lax" : "None")
-                                        .domain(isLocalhost ? null : "api.docuhub.me")
+                                        .sameSite("None")  // cross-site required
+                                        .domain("keycloak.docuhub.me") // backend domain
                                         .build();
 
                                 // --- ID TOKEN COOKIE ---
@@ -160,21 +159,21 @@ public class KeyCloakSecurityConfig {
                                         .secure(secureFlag)
                                         .path("/")
                                         .maxAge(3600)
-                                        .sameSite(isLocalhost ? "Lax" : "None")
-                                        .domain(isLocalhost ? null : "api.docuhub.me")
+                                        .sameSite("None")
+                                        .domain("keycloak.docuhub.me")
                                         .build();
 
+                                // Add cookies to response
                                 response.addHeader("Set-Cookie", accessCookie.toString());
                                 response.addHeader("Set-Cookie", idCookie.toString());
                             }
 
-                            // Redirect to frontend
-                            String frontendUrl = request.getServerName().contains("localhost")
-                                    ? "http://localhost:3000"
-                                    : "https://new-add-to-card-hw-v1ia.vercel.app";
-                            response.sendRedirect(frontendUrl);
+                            // Redirect to local frontend for testing
+                            response.sendRedirect("http://localhost:3000");
                         })
                 )
+
+
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint())

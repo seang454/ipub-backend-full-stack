@@ -122,6 +122,7 @@ public class AuthRestController {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
+
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam String username, HttpServletResponse response) {
         if (username == null || username.isBlank()) {
