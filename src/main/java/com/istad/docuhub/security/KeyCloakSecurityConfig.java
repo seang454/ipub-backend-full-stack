@@ -194,18 +194,33 @@ public class KeyCloakSecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
-                            String frontendRedirect = "http://localhost:3000"; // must match Keycloak redirect URI
+                            // Delete access_token and id_token cookies
+                            deleteCookie(response, "access_token");
+                            deleteCookie(response, "id_token");
+                            deleteCookie(response, "JSESSIONID"); // optional
 
-                            response.sendRedirect(keycloakLogoutUrl + "?redirect_uri=" + frontendRedirect);
+                            // Redirect to frontend or Keycloak logout
+                            String frontendRedirect = "http://localhost:3000";
+                            response.sendRedirect(frontendRedirect);
                         })
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID", "access_token", "id_token")
                 );
-
-
         return http.build();
     }
+
+    private void deleteCookie(HttpServletResponse response, String name) {
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(true)           // must match original cookie
+                .path("/")
+                .domain(".docuhub.me")  // must match original domain
+                .maxAge(0)
+                .sameSite("None")       // must match original SameSite
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
         Converter<Jwt, Collection<GrantedAuthority>> converter = jwt -> {
