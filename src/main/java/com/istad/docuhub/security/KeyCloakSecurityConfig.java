@@ -135,7 +135,6 @@ public class KeyCloakSecurityConfig {
                             OAuth2AuthorizedClient authorizedClient = authorizedClientService
                                     .loadAuthorizedClient("keycloak", authentication.getName());
 
-                            boolean isProd = true;
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
@@ -143,28 +142,22 @@ public class KeyCloakSecurityConfig {
                                         ? authorizedClient.getRefreshToken().getTokenValue()
                                         : null;
 
-                                isProd = !request.getServerName().equals("localhost");
-
                                 // --- ACCESS TOKEN COOKIE ---
                                 Cookie accessCookie = new Cookie("access_token", accessToken);
                                 accessCookie.setHttpOnly(true);
-                                accessCookie.setSecure(isProd); // HTTPS only in production
+                                accessCookie.setSecure(true);              // required for cross-site
                                 accessCookie.setPath("/");
-                                accessCookie.setMaxAge(3600); // 1 hour
-                                if (isProd) {
-                                    accessCookie.setDomain("your-production-domain.com"); // set your prod domain
-                                }
+                                accessCookie.setMaxAge(3600);
+                                accessCookie.setDomain("api.docuhub.me");  // backend domain// allow frontend on Vercel
                                 response.addCookie(accessCookie);
 
                                 // --- ID TOKEN COOKIE ---
                                 Cookie idCookie = new Cookie("id_token", idToken);
                                 idCookie.setHttpOnly(true);
-                                idCookie.setSecure(isProd);
+                                idCookie.setSecure(true);
                                 idCookie.setPath("/");
                                 idCookie.setMaxAge(3600);
-                                if (isProd) {
-                                    idCookie.setDomain("your-production-domain.com");
-                                }
+                                idCookie.setDomain("api.docuhub.me");
                                 response.addCookie(idCookie);
 
                                 // --- REFRESH TOKEN STORAGE ---
@@ -174,13 +167,9 @@ public class KeyCloakSecurityConfig {
                             }
 
                             // --- Redirect to frontend ---
-                            String frontendUrl = isProd ? "https://your-production-frontend.com" : "http://localhost:3000";
-                            response.sendRedirect(frontendUrl);
+                            response.sendRedirect("http://localhost:3000");
                         })
                 )
-
-
-
 
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
