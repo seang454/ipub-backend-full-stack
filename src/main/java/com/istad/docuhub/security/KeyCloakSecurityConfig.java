@@ -198,10 +198,11 @@ public class KeyCloakSecurityConfig {
                             deleteCookie(response, "access_token");
                             deleteCookie(response, "id_token");
                             deleteCookie(response, "JSESSIONID"); // optional
-
                             // Redirect to frontend or Keycloak logout
-                            String frontendRedirect = "http://localhost:3000";
-                            response.sendRedirect(frontendRedirect);
+                            String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
+                            String frontendRedirect = "http://localhost:3000"; // must match Keycloak redirect URI
+
+                            response.sendRedirect(keycloakLogoutUrl + "?redirect_uri=" + frontendRedirect);
                         })
                         .invalidateHttpSession(true)
                 );
@@ -219,7 +220,6 @@ public class KeyCloakSecurityConfig {
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
-
 
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
