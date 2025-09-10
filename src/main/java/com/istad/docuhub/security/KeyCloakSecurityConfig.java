@@ -135,7 +135,7 @@ public class KeyCloakSecurityConfig {
                             OAuth2AuthorizedClient authorizedClient = authorizedClientService
                                     .loadAuthorizedClient("keycloak", authentication.getName());
 
-                            boolean isProd = false;
+                            boolean isProd = true;
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
