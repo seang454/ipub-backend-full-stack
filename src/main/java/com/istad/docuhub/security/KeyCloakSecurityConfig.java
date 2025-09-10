@@ -141,8 +141,8 @@ public class KeyCloakSecurityConfig {
                                 String idToken = oidcUser.getIdToken().getTokenValue();
 
                                 // --- Declare isLocalhost here ---
-                                boolean isLocalhost = request.getServerName().contains("localhost");
-                                boolean secureFlag = !isLocalhost;
+                                boolean isLocalhost = !request.getServerName().contains("localhost");
+                                boolean secureFlag = isLocalhost;
 
                                 // --- ACCESS TOKEN COOKIE ---
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
@@ -169,14 +169,12 @@ public class KeyCloakSecurityConfig {
                             }
 
                             // Redirect to frontend
-                            String frontendUrl = !request.getServerName().contains("localhost")
+                            String frontendUrl = request.getServerName().contains("localhost")
                                     ? "http://localhost:3000"
                                     : "https://new-add-to-card-hw-v1ia.vercel.app";
                             response.sendRedirect(frontendUrl);
                         })
                 )
-
-
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint())
