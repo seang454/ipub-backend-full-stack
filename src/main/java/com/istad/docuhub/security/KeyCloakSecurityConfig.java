@@ -50,7 +50,7 @@ public class KeyCloakSecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")
+                        .allowedOrigins("http://localhost:3000","https://new-add-to-card-hw-v1ia.vercel.app/")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
@@ -148,7 +148,7 @@ public class KeyCloakSecurityConfig {
                                 accessCookie.setSecure(false); // allow HTTP localhost
                                 accessCookie.setPath("/");
                                 accessCookie.setMaxAge(3600); // 1 hour
-                                accessCookie.setDomain("localhost");
+                                accessCookie.setDomain("https://new-add-to-card-hw-v1ia.vercel.app");
                                 response.addCookie(accessCookie);
 
                                 Cookie idCookie = new Cookie("id_token", idToken);
@@ -156,7 +156,7 @@ public class KeyCloakSecurityConfig {
                                 idCookie.setSecure(false);
                                 idCookie.setPath("/");
                                 idCookie.setMaxAge(3600);
-                                idCookie.setDomain("localhost");
+                                idCookie.setDomain("https://new-add-to-card-hw-v1ia.vercel.app");
                                 response.addCookie(idCookie);
 
                                 if (refreshToken != null) {
@@ -164,7 +164,7 @@ public class KeyCloakSecurityConfig {
                                 }
                             }
 
-                            response.sendRedirect("http://localhost:3000");
+                            response.sendRedirect("https://new-add-to-card-hw-v1ia.vercel.app");
                         })
                 )
 
