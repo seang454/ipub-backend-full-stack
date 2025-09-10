@@ -51,10 +51,10 @@ public class KeyCloakSecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowedOrigins("http://localhost:3000",
+                                "https://new-add-to-card-hw-v1ia.vercel.app")
+                        .allowCredentials(true)
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
             }
         };
     }
@@ -139,11 +139,8 @@ public class KeyCloakSecurityConfig {
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
-                                String refreshToken = authorizedClient.getRefreshToken() != null
-                                        ? authorizedClient.getRefreshToken().getTokenValue()
-                                        : null;
 
-                                // Determine local vs production
+                                // --- Declare isLocalhost here ---
                                 boolean isLocalhost = request.getServerName().contains("localhost");
                                 boolean secureFlag = !isLocalhost;
 
@@ -153,7 +150,8 @@ public class KeyCloakSecurityConfig {
                                         .secure(secureFlag)
                                         .path("/")
                                         .maxAge(3600)
-                                        .sameSite("None") // cross-site
+                                        .sameSite(isLocalhost ? "Lax" : "None")
+                                        .domain(isLocalhost ? null : "api.docuhub.me")
                                         .build();
 
                                 // --- ID TOKEN COOKIE ---
@@ -162,17 +160,12 @@ public class KeyCloakSecurityConfig {
                                         .secure(secureFlag)
                                         .path("/")
                                         .maxAge(3600)
-                                        .sameSite("None")
+                                        .sameSite(isLocalhost ? "Lax" : "None")
+                                        .domain(isLocalhost ? null : "api.docuhub.me")
                                         .build();
 
-                                // Add cookies to response headers
                                 response.addHeader("Set-Cookie", accessCookie.toString());
                                 response.addHeader("Set-Cookie", idCookie.toString());
-
-                                // --- Refresh token storage ---
-                                if (refreshToken != null) {
-                                    refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400);
-                                }
                             }
 
                             // Redirect to frontend
@@ -182,7 +175,6 @@ public class KeyCloakSecurityConfig {
                             response.sendRedirect(frontendUrl);
                         })
                 )
-
 
 
                 // JSON response for unauthenticated API requests
