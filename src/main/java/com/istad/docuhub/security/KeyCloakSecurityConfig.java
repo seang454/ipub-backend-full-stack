@@ -141,7 +141,7 @@ public class KeyCloakSecurityConfig {
                                 String idToken = oidcUser.getIdToken().getTokenValue();
 
                                 // Always Secure=true because backend is HTTPS
-                                boolean secureFlag = true;
+                                boolean secureFlag = false;
 
                                 // --- ACCESS TOKEN COOKIE ---
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
