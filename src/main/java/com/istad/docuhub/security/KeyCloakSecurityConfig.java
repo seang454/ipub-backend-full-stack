@@ -54,17 +54,12 @@ public class KeyCloakSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow localhost for dev
-        configuration.setAllowedOrigins(List.of("*"));
-
-        // Allow credentials (cookies, Authorization headers)
-        configuration.setAllowCredentials(true);
-
-        // Allowed methods
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // Allowed headers
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        // Frontend origin
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // dev frontend
+        configuration.setAllowCredentials(true); // must allow credentials (cookies)
+        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
+        configuration.setExposedHeaders(List.of("Set-Cookie")); // optional, for debugging cookies
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -72,9 +67,11 @@ public class KeyCloakSecurityConfig {
     }
 
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults()) // enable CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","/api/v1/auth/protected-endpoint").permitAll()
