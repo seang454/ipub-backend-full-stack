@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="279643d3-4394-4bc8-8023-d749c3e55b71" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
-    </list>
+    <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,7 +20,12 @@
       <state>
         <projects_view>
           <tree_state>
-            <expand />
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="docuhub" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
             <select />
           </tree_state>
         </projects_view>
@@ -34,9 +36,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Enum" />
-        <option value="Interface" />
-        <option value="Class" />
         <option value="Record" />
+        <option value="Class" />
+        <option value="Interface" />
       </list>
     </option>
   </component>
@@ -69,24 +71,43 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Gradle.Build ipub-engine-backend.executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found": "New/updated database configurations found",
+    "Notification.DoNotAsk-DatabaseConfigFileWatcher.found": "true",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DocuhubApplication.executor": "Run",
-    "git-widget-placeholder": "bothty",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/CSTAD/finalproject/backend_final_project/ipub-engine-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Global Libraries",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "advanced.settings",
+    "settings.editor.splitter.proportion": "0.4352227",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.istad.docuhub.feature.user" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="com.istad.docuhub.feature.user" />
     </key>
   </component>
@@ -102,15 +123,15 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26574.91" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26574.91" />
       </set>
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="279643d3-4394-4bc8-8023-d749c3e55b71" name="Changes" comment="" />
+      <changelist id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="" />
       <created>1755228072125</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -170,13 +191,15 @@
       <workItem from="1756995118956" duration="3984000" />
       <workItem from="1757037138601" duration="177000" />
       <workItem from="1757037368762" duration="30000" />
-      <workItem from="1757312143674" duration="604000" />
-      <workItem from="1757382505006" duration="12398000" />
-      <workItem from="1757426946589" duration="4783000" />
       <workItem from="1757263752871" duration="84000" />
-      <workItem from="1757329117708" duration="560000" />
-      <workItem from="1757430314654" duration="1364000" />
-      <workItem from="1757500115895" duration="715000" />
+      <workItem from="1757352143090" duration="8741000" />
+      <workItem from="1757381445866" duration="12800000" />
+      <workItem from="1757400064163" duration="8040000" />
+      <workItem from="1757431961692" duration="1072000" />
+      <workItem from="1757434110249" duration="7266000" />
+      <workItem from="1757474632039" duration="656000" />
+      <workItem from="1757476365970" duration="8825000" />
+      <workItem from="1757515079006" duration="1777000" />
     </task>
     <servers />
   </component>
@@ -219,9 +242,37 @@
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java</url>
-          <line>126</line>
-          <option name="timeStamp" value="22" />
+          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserAssignment/AdviserAssignmentServiceImpl.java</url>
+          <line>44</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/dto/StudentRequest.java</url>
+          <line>6</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java</url>
+          <line>311</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java</url>
+          <line>118</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserAssignment/AdviserAssignmentServiceImpl.java</url>
+          <line>147</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java</url>
+          <line>222</line>
+          <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailImpl.java</url>
@@ -234,7 +285,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java</url>
-          <line>192</line>
+          <line>193</line>
           <properties class="com.istad.docuhub.feature.user.UserServiceImpl" method="searchUserByUsername">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
@@ -243,7 +294,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java</url>
-          <line>209</line>
+          <line>210</line>
           <properties class="com.istad.docuhub.feature.user.UserServiceImpl" method="deleteUser">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
@@ -252,7 +303,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java</url>
-          <line>348</line>
+          <line>349</line>
           <properties class="com.istad.docuhub.feature.user.UserServiceImpl" method="promoteAsStudent">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
@@ -279,9 +330,5 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
   </component>
 </project>

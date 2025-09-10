@@ -66,4 +66,9 @@ public class CategoryController {
                 ), HttpStatus.NO_CONTENT
         );
     }
+
+    @GetMapping("/slug")
+    public Page<CategoryResponse> getAllCategories(@RequestParam String slug, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return categoryService.searchCategoryBySlug(slug, PageRequest.of(page, size, Sort.by("name")));
+    }
 }

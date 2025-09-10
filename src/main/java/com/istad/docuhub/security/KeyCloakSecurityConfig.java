@@ -1,12 +1,16 @@
 package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.istad.docuhub.feature.user.RefreshTokenService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,21 +18,17 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -40,7 +40,10 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class KeyCloakSecurityConfig {
+    private final OAuth2AuthorizedClientService authorizedClientService;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${backend.endpoint}")
     private String backendEndpoint;
@@ -51,10 +54,10 @@ public class KeyCloakSecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")
+                        .allowedOrigins("http://localhost:3000") // local frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(true); // must allow credentials f
             }
         };
     }
@@ -63,6 +66,11 @@ public class KeyCloakSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","/api/v1/auth/protected-endpoint").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh/**").permitAll()
+                        .requestMatchers("/favicon.ico", "/health").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
@@ -132,10 +140,38 @@ public class KeyCloakSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        // .loginPage("/api/v1/auth/login")  do not // user Spring automatically redirects to Keycloak login page.
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
-                            response.sendRedirect("http://localhost:3000");
+                            OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+                            OAuth2AuthorizedClient authorizedClient = authorizedClientService
+                                    .loadAuthorizedClient("keycloak", authentication.getName());
+
+                            if (authorizedClient != null) {
+                                String accessToken = authorizedClient.getAccessToken().getTokenValue();
+                                String idToken = oidcUser.getIdToken().getTokenValue();
+                                // Always Secure=true because backend is HTTPS
+                                // --- ACCESS TOKEN COOKIE ---
+                                ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
+                                        .httpOnly(true)
+                                        .secure(true)             // required with SameSite=None
+                                        .path("/")
+                                        .maxAge(3600)
+                                        .sameSite("None")
+                                        .build();
+
+                                ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
+                                        .httpOnly(true)
+                                        .secure(true)
+                                        .path("/")
+                                        .maxAge(3600)
+                                        .sameSite("None")
+                                        .build();
+
+                                response.addHeader("Set-Cookie", accessCookie.toString());
+                                response.addHeader("Set-Cookie", idCookie.toString());
+                            }
+                            // Redirect to local frontend for testing
+                            response.sendRedirect("http://localhost:3000/docuhub");
                         })
                 )
                 // JSON response for unauthenticated API requests
