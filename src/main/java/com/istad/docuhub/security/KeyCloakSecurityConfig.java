@@ -193,19 +193,33 @@ public class KeyCloakSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            // Delete cookies
+                            deleteCookie(response, "access_token");
+                            deleteCookie(response, "id_token");
+                            deleteCookie(response, "JSESSIONID"); // optional
+                        })
                         .logoutSuccessHandler((request, response, authentication) -> {
-//                            String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
-                            String frontendRedirect = "http://localhost:3000"; // must match Keycloak redirect URI
+                            // Redirect to frontend
+                            String frontendRedirect = "http://localhost:3000";
                             response.sendRedirect(frontendRedirect);
-//                            response.sendRedirect(keycloakLogoutUrl + "?redirect_uri=" + frontendRedirect);
                         })
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID", "access_token", "id_token")
                 );
 
 
         return http.build();
     }
+
+    //delected cookie when logout
+    private void deleteCookie(HttpServletResponse response, String name) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
         Converter<Jwt, Collection<GrantedAuthority>> converter = jwt -> {
