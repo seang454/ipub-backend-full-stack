@@ -194,18 +194,15 @@ public class KeyCloakSecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            // Keycloak logout endpoint
                             String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
-                            // Redirect back to your backend endpoint after logout
-                            String redirectAfterLogout = "http://localhost:3000";
-                            // Full logout URL
-                            String logoutUrl = keycloakLogoutUrl + "?redirect_uri=" + redirectAfterLogout;
-                            // Redirect browser to Keycloak logout
-                            response.sendRedirect(logoutUrl);
+                            String frontendRedirect = "http://localhost:3000"; // must match Keycloak redirect URI
+
+                            response.sendRedirect(keycloakLogoutUrl + "?redirect_uri=" + frontendRedirect);
                         })
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "access_token", "id_token")
                 );
+
 
         return http.build();
     }
