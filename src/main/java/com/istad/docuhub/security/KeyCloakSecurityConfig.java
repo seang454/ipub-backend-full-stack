@@ -148,7 +148,7 @@ public class KeyCloakSecurityConfig {
                                 accessCookie.setSecure(false); // allow HTTP localhost
                                 accessCookie.setPath("/");
                                 accessCookie.setMaxAge(3600); // 1 hour
-                                accessCookie.setDomain("https://new-add-to-card-hw-v1ia.vercel.app");
+                                accessCookie.setDomain("new-add-to-card-hw-v1ia.vercel.app");
                                 response.addCookie(accessCookie);
 
                                 Cookie idCookie = new Cookie("id_token", idToken);
@@ -156,7 +156,7 @@ public class KeyCloakSecurityConfig {
                                 idCookie.setSecure(false);
                                 idCookie.setPath("/");
                                 idCookie.setMaxAge(3600);
-                                idCookie.setDomain("https://new-add-to-card-hw-v1ia.vercel.app");
+                                idCookie.setDomain("new-add-to-card-hw-v1ia.vercel.app");
                                 response.addCookie(idCookie);
 
                                 if (refreshToken != null) {
