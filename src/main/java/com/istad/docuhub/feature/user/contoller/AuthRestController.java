@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -98,20 +99,28 @@ public class AuthRestController {
         return ResponseEntity.ok(tokenResponse);
     }
     @GetMapping("/protected-endpoint")
-    public ResponseEntity<String> protectedEndpoint(HttpServletRequest request) {
-        // Read cookie manually (optional)
+    public ResponseEntity<Map<String, Object>> protectedEndpoint(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("access_token".equals(cookie.getName())) {
                     String token = cookie.getValue();
-                    // ✅ Here you could validate the JWT
-                    return ResponseEntity.ok("Protected data, token = " + token);
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("status", "success");
+                    response.put("message", "Protected data accessed");
+                    response.put("token", token);
+
+                    return ResponseEntity.ok(response);
                 }
             }
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No valid token");
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("status", "error");
+        errorResponse.put("message", "No valid token");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam String username, HttpServletResponse response) {

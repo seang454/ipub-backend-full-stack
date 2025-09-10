@@ -135,6 +135,7 @@ public class KeyCloakSecurityConfig {
                             OAuth2AuthorizedClient authorizedClient = authorizedClientService
                                     .loadAuthorizedClient("keycloak", authentication.getName());
 
+                            boolean isProd = false;
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
@@ -142,31 +143,42 @@ public class KeyCloakSecurityConfig {
                                         ? authorizedClient.getRefreshToken().getTokenValue()
                                         : null;
 
-                                // Cookie settings for local dev
+                                isProd = !request.getServerName().equals("localhost");
+
+                                // --- ACCESS TOKEN COOKIE ---
                                 Cookie accessCookie = new Cookie("access_token", accessToken);
-                                accessCookie.setHttpOnly(true); // secure from JS
-                                accessCookie.setSecure(false); // allow HTTP localhost
+                                accessCookie.setHttpOnly(true);
+                                accessCookie.setSecure(isProd); // HTTPS only in production
                                 accessCookie.setPath("/");
                                 accessCookie.setMaxAge(3600); // 1 hour
-                                accessCookie.setDomain("localhost");
+                                if (isProd) {
+                                    accessCookie.setDomain("your-production-domain.com"); // set your prod domain
+                                }
                                 response.addCookie(accessCookie);
 
+                                // --- ID TOKEN COOKIE ---
                                 Cookie idCookie = new Cookie("id_token", idToken);
                                 idCookie.setHttpOnly(true);
-                                idCookie.setSecure(false);
+                                idCookie.setSecure(isProd);
                                 idCookie.setPath("/");
                                 idCookie.setMaxAge(3600);
-                                idCookie.setDomain("localhost");
+                                if (isProd) {
+                                    idCookie.setDomain("your-production-domain.com");
+                                }
                                 response.addCookie(idCookie);
 
+                                // --- REFRESH TOKEN STORAGE ---
                                 if (refreshToken != null) {
                                     refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400);
                                 }
                             }
 
-                            response.sendRedirect("http://localhost:3000");
+                            // --- Redirect to frontend ---
+                            String frontendUrl = isProd ? "https://your-production-frontend.com" : "http://localhost:3000";
+                            response.sendRedirect(frontendUrl);
                         })
                 )
+
 
 
 
