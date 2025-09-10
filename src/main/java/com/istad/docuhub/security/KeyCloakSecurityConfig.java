@@ -215,10 +215,13 @@ public class KeyCloakSecurityConfig {
     private void deleteCookie(HttpServletResponse response, String name) {
         Cookie cookie = new Cookie(name, null);
         cookie.setPath("/");
+        cookie.setDomain(".docuhub.me"); // must match original cookie domain
         cookie.setHttpOnly(true);
+        cookie.setSecure(true); // if original cookie is Secure
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
+
 
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
