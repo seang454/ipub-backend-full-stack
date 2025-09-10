@@ -177,7 +177,7 @@ public class KeyCloakSecurityConfig {
 
                             // ✅ Redirect to frontend (can be localhost for dev)
                             // In production: "https://frontend.docuhub.me"
-                            response.sendRedirect("http://localhost:3000/docuhub");
+                            response.sendRedirect("http://localhost:3000");
                         })
                 )
 
