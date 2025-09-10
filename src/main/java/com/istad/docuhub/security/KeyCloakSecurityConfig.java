@@ -142,30 +142,22 @@ public class KeyCloakSecurityConfig {
                                         ? authorizedClient.getRefreshToken().getTokenValue()
                                         : null;
 
-                                // Cookie settings for local dev
-                                Cookie accessCookie = new Cookie("access_token", accessToken);
-                                accessCookie.setHttpOnly(true); // secure from JS
-                                accessCookie.setSecure(false); // allow HTTP localhost
-                                accessCookie.setPath("/");
-                                accessCookie.setMaxAge(3600); // 1 hour
-                                accessCookie.setDomain("new-add-to-card-hw-v1ia.vercel.app");
-                                response.addCookie(accessCookie);
+                                // Use headers for cross-domain cookies
+                                response.setHeader("Set-Cookie",
+                                        "access_token=" + accessToken + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=new-add-to-card-hw-v1ia.vercel.app; Max-Age=3600");
 
-                                Cookie idCookie = new Cookie("id_token", idToken);
-                                idCookie.setHttpOnly(true);
-                                idCookie.setSecure(false);
-                                idCookie.setPath("/");
-                                idCookie.setMaxAge(3600);
-                                idCookie.setDomain("new-add-to-card-hw-v1ia.vercel.app");
-                                response.addCookie(idCookie);
+                                response.addHeader("Set-Cookie",
+                                        "id_token=" + idToken + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=new-add-to-card-hw-v1ia.vercel.app; Max-Age=3600");
 
                                 if (refreshToken != null) {
                                     refreshTokenService.storeToken(authentication.getName(), refreshToken, 86400);
                                 }
                             }
 
+                            // Redirect after cookie is set
                             response.sendRedirect("https://new-add-to-card-hw-v1ia.vercel.app");
                         })
+
                 )
 
 
