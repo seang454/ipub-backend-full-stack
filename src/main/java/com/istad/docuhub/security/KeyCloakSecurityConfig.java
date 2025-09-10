@@ -194,10 +194,10 @@ public class KeyCloakSecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .addLogoutHandler((request, response, authentication) -> {
-                            // Delete cookies
-                            deleteCookie(response, "access_token");
-                            deleteCookie(response, "id_token");
-                            deleteCookie(response, "JSESSIONID"); // optional
+                            // Delete cookies safely
+                            deleteCookie(response, "access_token", request.getServerName(), request.isSecure());
+                            deleteCookie(response, "id_token", request.getServerName(), request.isSecure());
+                            deleteCookie(response, "JSESSIONID", request.getServerName(), request.isSecure());
                         })
                         .logoutSuccessHandler((request, response, authentication) -> {
                             // Redirect to frontend
@@ -212,12 +212,12 @@ public class KeyCloakSecurityConfig {
     }
 
     //delected cookie when logout
-    private void deleteCookie(HttpServletResponse response, String name) {
+    private void deleteCookie(HttpServletResponse response, String name, String domain, boolean secure) {
         Cookie cookie = new Cookie(name, null);
         cookie.setPath("/");
-        cookie.setDomain(".docuhub.me"); // must match original cookie domain
+        cookie.setDomain(domain); // set to request.getServerName() for safety
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // if original cookie is Secure
+        cookie.setSecure(secure); // only set Secure if request is HTTPS
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
