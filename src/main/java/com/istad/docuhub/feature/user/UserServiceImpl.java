@@ -1,6 +1,12 @@
 package com.istad.docuhub.feature.user;
 
 import com.istad.docuhub.domain.User;
+import com.istad.docuhub.feature.adviserDetail.AdviserDetailRepository;
+import com.istad.docuhub.feature.adviserDetail.AdviserService;
+import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
+import com.istad.docuhub.feature.studentDetail.StudentDetailRepository;
+import com.istad.docuhub.feature.studentDetail.StudentService;
+import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
 import com.istad.docuhub.feature.user.dto.*;
 import com.istad.docuhub.feature.user.mapper.UseMapper;
 import com.istad.docuhub.feature.user.mapper.UserMapperManual;
@@ -43,6 +49,12 @@ public class UserServiceImpl implements UserService {
     private final UseMapper useMapper;
     private final PasswordEncoder passwordEncoder;
     private final OAuth2AuthorizedClientManager authorizedClientManager;
+    private final UserService userService;
+    private final StudentDetailRepository studentDetailRepository;
+    private final StudentService studentService;
+    private final AdviserDetailRepository adviserDetailRepository;
+    private final AdviserService adviserService;
+
     @Override
     public UserResponse register(UserCreateDto userCreateDto) {
         log.info("Registering user in service {}", userCreateDto);
@@ -190,6 +202,9 @@ public class UserServiceImpl implements UserService {
         }
         return userResponses;
     }
+
+
+
     @Override
     public UserResponse getSingleUser(String uuid) {
         UserResponse userResponse = getAllUsers().stream().filter(user -> uuid.equals(user.uuid()) ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -471,5 +486,29 @@ public class UserServiceImpl implements UserService {
         return CurrentUser.builder()
                 .id(authentication.getToken().getClaimAsString("sub"))
                 .build();
+    }
+
+    @Override
+    public UserProfileResponse getUserProfile() {
+        CurrentUser subId = userService.getCurrentUserSub();
+        if (subId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unauthorized or invalid user");
+        }
+        User user = userRepository.findByUuidAndIsDeletedFalse(subId.id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in System "));
+        UserResponse userResponse = userService.getSingleUser(subId.id());
+        StudentResponse studentResponse = null;
+        AdviserDetailResponse adviserDetailResponse = null;
+        if(user.getStatus() != null && user.getStatus()){
+            studentResponse = studentService.findStudentDetailByUserUuid(user.getUuid());
+        }
+        if (user.getIsAdvisor() != null && user.getIsAdvisor()) {
+            adviserDetailResponse = adviserService.getAdviserDetailByUuid(user.getUuid());
+        }
+        return new UserProfileResponse(
+                userResponse,
+                studentResponse,
+                adviserDetailResponse
+        );
     }
 }

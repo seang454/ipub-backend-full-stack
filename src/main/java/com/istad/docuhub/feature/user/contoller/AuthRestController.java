@@ -249,4 +249,10 @@ public class AuthRestController {
     public CurrentUser getCurrentUser() {
         return userService.getCurrentUserSub();
     }
+
+    @GetMapping("/user/profile")
+    public ResponseEntity<?> getUserProfile(){
+        UserProfileResponse userProfile = userService.getUserProfile();
+        return ResponseEntity.ok(userProfile);
+    }
 }
