@@ -10,4 +10,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
 
     @Override
     Page<Feedback> findAll(@NotNull Pageable pageable);
+
+    Feedback findByPaper_Uuid(String paperUuid);
 }

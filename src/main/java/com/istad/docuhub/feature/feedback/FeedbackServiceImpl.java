@@ -3,6 +3,7 @@ package com.istad.docuhub.feature.feedback;
 import com.istad.docuhub.domain.Feedback;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
+import com.istad.docuhub.feature.feedback.dto.FeedBackUpdate;
 import com.istad.docuhub.feature.feedback.dto.FeedbackRequest;
 import com.istad.docuhub.feature.feedback.dto.FeedbackResponse;
 import com.istad.docuhub.feature.paper.PaperRepository;
@@ -46,7 +47,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor not found")
         );
 
-        Paper paper = paperRepository.findByUuid(feedbackRequest.paperUuid()).orElseThrow(
+        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedFalse(feedbackRequest.paperUuid()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper not found")
         );
 
@@ -111,5 +112,27 @@ public class FeedbackServiceImpl implements FeedbackService {
                         feedback.getUpdatedAt()
                 )
         );
+    }
+
+    @Override
+    public void updateFeedbackStatus(String paperUuid, FeedBackUpdate feedBackUpdate) {
+        CurrentUser subId = userService.getCurrentUserSub();
+        if (subId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+        User advisor = userRepository.findByUuidAndIsDeletedFalse(subId.id()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor not found")
+        );
+        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedFalse(paperUuid).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper not found")
+        );
+        Feedback feedback = feedbackRepository.findByPaper_Uuid(paperUuid);
+        if (!Objects.equals(paper.getAssignedId().getAdvisor().getUuid(), advisor.getUuid())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor is not assigned to the paper");
+        }
+        feedback.setFeedbackText(feedback.getFeedbackText());
+        feedback.setStatus(feedback.getStatus());
+        feedback.setUpdatedAt(LocalDate.now());
+        feedbackRepository.save(feedback);
     }
 }
