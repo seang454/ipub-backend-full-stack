@@ -1,17 +1,14 @@
 package com.istad.docuhub.feature.comment.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
 
 public record CreateCommentRequest(
+        @NotBlank(message = "Content is required")
+        String content,
 
-        @NotNull(message = "User UUID is required")
-         String userUuid,
+        @NotBlank(message = "Paper UUID is required")
+        String paperUuid,
 
-        @NotNull(message = "Paper UUID is required")
-        String  paperUuid,
-
-        @NotBlank(message = "Content cannot be empty")
-        String content
-) {
-}
+        String parentUuid  // Optional: if null, it's a root comment; if provided, it's a reply
+) {}

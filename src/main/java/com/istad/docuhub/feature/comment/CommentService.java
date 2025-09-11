@@ -1,13 +1,11 @@
 package com.istad.docuhub.feature.comment;
 
-import com.istad.docuhub.feature.comment.dto.CommentResponse;
-import com.istad.docuhub.feature.comment.dto.CreateCommentRequest;
-import com.istad.docuhub.feature.comment.dto.UpdateCommentRequest;
+import com.istad.docuhub.feature.comment.dto.*;
 
 public interface CommentService {
-
     CommentResponse createComment(CreateCommentRequest createCommentRequest);
     CommentResponse editComment(UpdateCommentRequest editCommentRequest);
-    void deleteCommentByUuid(String userUuid );
-
+    void deleteCommentByUuid(String commentUuid);
+    CommentResponse getCommentByUuid(String commentUuid);
+    CommentTreeResponse getCommentsForPaper(String paperUuid);
 }
