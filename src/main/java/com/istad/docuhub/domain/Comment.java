@@ -28,11 +28,11 @@ public class Comment {
     private LocalDate createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "paper_uuid", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "paper_uuid", referencedColumnName = "uuid", nullable = false)
     private Paper paper;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_uuid", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_uuid", referencedColumnName = "uuid", nullable = false)
     private User user;
 
 
