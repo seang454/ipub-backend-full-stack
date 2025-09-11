@@ -33,10 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -125,26 +122,17 @@ public class AuthRestController {
         }
 
         try {
-            // Parse header to get kid
-            String kid = Jwts.parserBuilder().build().parseClaimsJws(token).getHeader().getKeyId();
-
-            // Fetch JWKS from Keycloak
-            JWKSet jwkSet = JWKSet.load(new URL(JWKS_URL));
-            JWK jwk = jwkSet.getKeyByKeyId(kid);
-
-            if (jwk == null) {
-                throw new JwtException("No key found for kid: " + kid);
+            // Decode payload without verifying signature
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) {
+                throw new JwtException("Invalid JWT format");
             }
 
-            RSAPublicKey publicKey = jwk.toRSAKey().toRSAPublicKey();
-
-            // Verify token
-            Jws<Claims> jwsClaims = Jwts.parserBuilder()
-                    .setSigningKey(publicKey)
+            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+            Claims claims = Jwts.parserBuilder()
                     .build()
-                    .parseClaimsJws(token);
-
-            Claims claims = jwsClaims.getBody();
+                    .parseClaimsJwt(parts[0] + "." + parts[1] + ".") // parseClaimsJwt ignores signature
+                    .getBody();
 
             // Check expiration
             Date expiration = claims.getExpiration();
@@ -152,31 +140,25 @@ public class AuthRestController {
                 response.put("status", "unauthenticated");
                 response.put("no", HttpStatus.UNAUTHORIZED.value());
                 response.put("message", "Token expired");
-                response.put("token", null);
+                response.put("token", token);
+                response.put("claims", claims);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
 
-            // If valid
+            // Token is not expired
             response.put("status", "authenticated");
             response.put("no", HttpStatus.OK.value());
-            response.put("message", "Protected data accessed");
+            response.put("message", "Token is valid (not expired)");
             response.put("token", token);
             response.put("claims", claims);
-
             return ResponseEntity.ok(response);
 
-        } catch (JwtException e) {
+        } catch (Exception e) {
             response.put("status", "unauthenticated");
             response.put("no", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "Invalid token: " + e.getMessage());
             response.put("token", null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        } catch (Exception e) {
-            response.put("status", "error");
-            response.put("no", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.put("message", "Unexpected error: " + e.getMessage());
-            response.put("token", null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
