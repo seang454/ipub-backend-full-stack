@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -251,8 +252,9 @@ public class AuthRestController {
     }
 
     @GetMapping("/user/profile")
-    public ResponseEntity<?> getUserProfile(){
-        UserProfileResponse userProfile = userService.getUserProfile();
+    public ResponseEntity<?> getUserProfile(@AuthenticationPrincipal Jwt jwt){
+        String uuid = jwt.getClaims().get("sub").toString();
+        UserProfileResponse userProfile = userService.getUserProfile(uuid);
         return ResponseEntity.ok(userProfile);
     }
 }

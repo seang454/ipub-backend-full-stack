@@ -1,11 +1,11 @@
 package com.istad.docuhub.feature.user;
 
+import com.istad.docuhub.domain.AdviserDetail;
+import com.istad.docuhub.domain.StudentDetail;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.adviserDetail.AdviserDetailRepository;
-import com.istad.docuhub.feature.adviserDetail.AdviserService;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
 import com.istad.docuhub.feature.studentDetail.StudentDetailRepository;
-import com.istad.docuhub.feature.studentDetail.StudentService;
 import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
 import com.istad.docuhub.feature.user.dto.*;
 import com.istad.docuhub.feature.user.mapper.UseMapper;
@@ -26,7 +26,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -47,18 +46,14 @@ public class UserServiceImpl implements UserService {
     private final Keycloak keycloak;
     private final UserRepository userRepository;
     private final UseMapper useMapper;
-    private final PasswordEncoder passwordEncoder;
     private final OAuth2AuthorizedClientManager authorizedClientManager;
-    private final UserService userService;
     private final StudentDetailRepository studentDetailRepository;
-    private final StudentService studentService;
     private final AdviserDetailRepository adviserDetailRepository;
-    private final AdviserService adviserService;
 
     @Override
     public UserResponse register(UserCreateDto userCreateDto) {
         log.info("Registering user in service {}", userCreateDto);
-        if (!userCreateDto.password().equals(userCreateDto.confirmedPassword())){
+        if (!userCreateDto.password().equals(userCreateDto.confirmedPassword())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Passwords do not match");
         }
         UserRepresentation user = new UserRepresentation();
@@ -77,9 +72,9 @@ public class UserServiceImpl implements UserService {
         user.setEnabled(true);
         log.info("Registering user in service {}", user);
 
-        try (Response response = keycloak.realm("docuapi").users().create(user)){
+        try (Response response = keycloak.realm("docuapi").users().create(user)) {
             log.info("Created user {}", response.getStatus());
-            if (response.getStatus() ==HttpStatus.CREATED.value()) {
+            if (response.getStatus() == HttpStatus.CREATED.value()) {
                 //example : http://localhost:9090/admin/realms/docuapi/users/414d407a-65a2-4814-b595-3759b64fc12b
                 AtomicReference<String> UserUuid = new AtomicReference<>("");
                 if (response.getStatus() == HttpStatus.CREATED.value()) {
@@ -143,7 +138,7 @@ public class UserServiceImpl implements UserService {
                             .slug(saveUser.getSlug())
                             .build();
                 }
-            }else {
+            } else {
 
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Something went wrong or user already exited");
             }
@@ -196,20 +191,19 @@ public class UserServiceImpl implements UserService {
             if (singleUser.isPresent()) {
                 User user = singleUser.get();
                 userResponses.add(
-                        UserMapperManual.mapUserToUserResponse(user,userRepresentation)
+                        UserMapperManual.mapUserToUserResponse(user, userRepresentation)
                 );
             }
         }
         return userResponses;
     }
 
-
-
     @Override
     public UserResponse getSingleUser(String uuid) {
-        UserResponse userResponse = getAllUsers().stream().filter(user -> uuid.equals(user.uuid()) ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        UserResponse userResponse = getAllUsers().stream().filter(user -> uuid.equals(user.uuid())).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return userResponse;
     }
+
     @Override
     public List<UserResponse> searchUserByUsername(String username) {
         RealmResource realmResource = keycloak.realm("docuapi");
@@ -220,7 +214,7 @@ public class UserServiceImpl implements UserService {
             Optional<User> singleUser = users.stream().filter(user -> user.getUuid().equals(userRepresentation.getId())).findFirst();
             if (singleUser.isPresent()) {
                 userResponses.add(
-                        UserMapperManual.mapUserToUserResponse(singleUser.get(),userRepresentation)
+                        UserMapperManual.mapUserToUserResponse(singleUser.get(), userRepresentation)
                 );
             }
         }
@@ -229,7 +223,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String userId) {
-        log.info("User id {} ",userId);
+        log.info("User id {} ", userId);
         // userId should be String, not Integer
         // Get the Keycloak user
         RealmResource realmResource = keycloak.realm("docuapi");
@@ -237,31 +231,31 @@ public class UserServiceImpl implements UserService {
         UserRepresentation userRep = userResource.toRepresentation();
         if (userRep != null && userRep.isEnabled()) {
             // Soft delete in local DB
-            User dbUser = userRepository.findByUuidAndIsDeletedFalse(userId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
+            User dbUser = userRepository.findByUuidAndIsDeletedFalse(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or already disabled"));
             dbUser.setIsDeleted(true);
-            log.info("dbUser {} ",dbUser);
+            log.info("dbUser {} ", dbUser);
             userRepository.save(dbUser);
             // Disable user in Keycloak
             userRep.setEnabled(false);
             userResource.update(userRep);
-        }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled");
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or already disabled");
         }
     }
 
     @Override
     public void updateUser(String userUuid, UpdateUserDto updateUserDto) {
         RealmResource realmResource = keycloak.realm("docuapi");
-        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
+        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or already disabled"));
         UserResource userResource = realmResource.users().get(user.getUuid());
         UserRepresentation userRep = userResource.toRepresentation();
         if (userRep == null || !userRep.isEnabled()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or already disabled");
         }
-        useMapper.updateUser(user,updateUserDto);
-        user.setSlug(SlugUtil.toSlug(updateUserDto.fullName(),updateUserDto.userName()));
+        useMapper.updateUser(user, updateUserDto);
+        user.setSlug(SlugUtil.toSlug(updateUserDto.fullName(), updateUserDto.userName()));
         user.setUpdateDate(LocalDate.now());
-        User user1= userRepository.save(user);
+        User user1 = userRepository.save(user);
 
         if (updateUserDto.firstName() != null) userRep.setFirstName(updateUserDto.firstName());
         if (updateUserDto.lastName() != null) userRep.setLastName(updateUserDto.lastName());
@@ -269,7 +263,7 @@ public class UserServiceImpl implements UserService {
         if (updateUserDto.userName() != null && !updateUserDto.userName().isBlank()) {
             userRep.setUsername(updateUserDto.userName()); // Only if allowed by Keycloak
         }
-        log.info("updateUser {} ",userRep);
+        log.info("updateUser {} ", userRep);
         userResource.update(userRep);
 
         UserResource updatedUserResource = realmResource.users().get(user.getUuid());
@@ -282,7 +276,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UpdateUserImageDto updateImageUrl(String imageUrl, String userUuid) {
         RealmResource realmResource = keycloak.realm("docuapi");
-        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found or already disabled"));
+        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or already disabled"));
         UserResource userResource = realmResource.users().get(user.getUuid());
         UserRepresentation userRep = userResource.toRepresentation();
         if (userRep == null || !userRep.isEnabled()) {
@@ -290,14 +284,15 @@ public class UserServiceImpl implements UserService {
         }
         if (imageUrl == null || imageUrl.isBlank() || imageUrl.isEmpty()) {
             user.setImageUrl(null);
-        }else {
+        } else {
             user.setImageUrl(imageUrl);
         }
-        User user1= userRepository.save(user);
+        User user1 = userRepository.save(user);
         return UpdateUserImageDto.builder()
                 .imageUrl(user1.getImageUrl())
                 .build();
     }
+
     public void verify(String userId) {
         log.info("Verifying user {}", userId);
         UserResource userResource = keycloak.realm("docuapi").users().get(userId);
@@ -334,7 +329,7 @@ public class UserServiceImpl implements UserService {
         List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
         List<UserResponse> userResponses = new ArrayList<>();
         for (User user1 : user) {
-            UserRepresentation userRepresentation =  userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
+            UserRepresentation userRepresentation = userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
             userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
         }
         return userResponses;
@@ -347,7 +342,7 @@ public class UserServiceImpl implements UserService {
         List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
         List<UserResponse> userResponses = new ArrayList<>();
         for (User user1 : user) {
-            UserRepresentation userRepresentation =  userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
+            UserRepresentation userRepresentation = userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
             userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
         }
         return userResponses;
@@ -360,7 +355,7 @@ public class UserServiceImpl implements UserService {
         List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
         List<UserResponse> userResponses = new ArrayList<>();
         for (User user1 : user) {
-            UserRepresentation userRepresentation =  userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
+            UserRepresentation userRepresentation = userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
             userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
         }
         return userResponses;
@@ -489,22 +484,52 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileResponse getUserProfile() {
-        CurrentUser subId = userService.getCurrentUserSub();
-        if (subId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unauthorized or invalid user");
-        }
-        User user = userRepository.findByUuidAndIsDeletedFalse(subId.id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in System "));
-        UserResponse userResponse = userService.getSingleUser(subId.id());
+    public UserProfileResponse getUserProfile(String uuid) {
+        RealmResource realmResource = keycloak.realm("docuapi");
+        List<UserRepresentation> userRepresentations = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
+        User user = userRepository.findByUuidAndIsDeletedFalse(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or is disabled"));
+        UserResponse userResponse = UserMapperManual.mapUserToUserResponse(user,
+                userRepresentations.stream()
+                        .filter(userRepresentation -> userRepresentation.getId().equals(user.getUuid()))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or is disabled"))
+        );
+
         StudentResponse studentResponse = null;
         AdviserDetailResponse adviserDetailResponse = null;
-        if(user.getStatus() != null && user.getStatus()){
-            studentResponse = studentService.findStudentDetailByUserUuid(user.getUuid());
+
+        // ✅ Check role flag, not "status"
+        if (Boolean.TRUE.equals(user.getIsStudent())) {
+            StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(user.getUuid())
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student details not found for user")
+                    );
+            studentResponse = StudentResponse.builder()
+                    .uuid(user.getUuid())
+                    .studentCardUrl(studentDetail.getStudentCardUrl())
+                    .university(studentDetail.getUniversity())
+                    .major(studentDetail.getMajor())
+                    .yearsOfStudy(studentDetail.getYearsOfStudy())
+                    .isStudent(studentDetail.getIsStudent())
+                    .userUuid(studentDetail.getUser().getUuid())
+                    .build();
         }
-        if (user.getIsAdvisor() != null && user.getIsAdvisor()) {
-            adviserDetailResponse = adviserService.getAdviserDetailByUuid(user.getUuid());
+
+        if (Boolean.TRUE.equals(user.getIsAdvisor())) {
+            AdviserDetail adviserDetail = adviserDetailRepository.findByUserUuid_Uuid(user.getUuid())
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser details not found for user")
+                    );
+            adviserDetailResponse = AdviserDetailResponse.builder()
+                    .yearsExperience(adviserDetail.getExperienceYears())
+                    .linkedinUrl(adviserDetail.getLinkedinUrl())
+                    .publication(adviserDetail.getPublication())
+                    .availability(adviserDetail.getStatus())
+                    .socialLinks(adviserDetail.getSocialLinks())
+                    .userUuid(adviserDetail.getUser().getUuid())
+                    .build();
         }
+
         return new UserProfileResponse(
                 userResponse,
                 studentResponse,

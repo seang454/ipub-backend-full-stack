@@ -26,7 +26,7 @@ public class AdviserDetailImpl implements AdviserService {
                 .publication(adviserDetail.getPublication())
                 .availability(adviserDetail.getStatus())
                 .socialLinks(adviserDetail.getSocialLinks())
-                .userUuid(adviserDetail.getUserUuid() != null ? adviserDetail.getUserUuid().getUuid() : null)
+                .userUuid(adviserDetail.getUser() != null ? adviserDetail.getUser().getUuid() : null)
                 .build();
     }
 
