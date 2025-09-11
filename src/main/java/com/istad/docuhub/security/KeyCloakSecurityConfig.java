@@ -14,7 +14,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,10 +28,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -49,30 +51,33 @@ public class KeyCloakSecurityConfig {
     private String backendEndpoint;
 
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // local frontend
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true); // must allow credentials f
-            }
-        };
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Frontend origin
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // dev frontend
+        configuration.setAllowCredentials(true); // must allow credentials (cookies)
+        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
+        configuration.setExposedHeaders(List.of("Set-Cookie")); // optional, for debugging cookies
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
+
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults()) // enable CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","/api/v1/auth/protected-endpoint").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh/**").permitAll()
                         .requestMatchers("/favicon.ico", "/health").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
@@ -86,26 +91,26 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
 
                         // Media Endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/v1/media").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/media/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/media").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
 
                         //Paper Endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/author").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/author/**").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/published").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/approved").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/all").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/published").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/approved").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/all").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/papers/pending").hasAnyRole("ADMIN")
 
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/adviser_details").hasAnyRole("ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/adviser_details").hasAnyRole("ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/adviser_details/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/adviser_details/**").hasAnyRole("ADMIN", "ADVISER")
 
                         // --- admin endpoints (all you listed) ---
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN")
@@ -122,8 +127,6 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/approve-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/reject-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/student/").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/users").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/public/users").hasAnyRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
 
@@ -134,46 +137,50 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/feedback").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
-
-                        .requestMatchers("/api/v1/comments/**").permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-                            OAuth2AuthorizedClient authorizedClient = authorizedClientService
-                                    .loadAuthorizedClient("keycloak", authentication.getName());
+                            OAuth2AuthorizedClient authorizedClient =
+                                    authorizedClientService.loadAuthorizedClient("keycloak", authentication.getName());
 
                             if (authorizedClient != null) {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 String idToken = oidcUser.getIdToken().getTokenValue();
-                                // Always Secure=true because backend is HTTPS
+
                                 // --- ACCESS TOKEN COOKIE ---
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                                         .httpOnly(true)
-                                        .secure(true)             // required with SameSite=None
+                                        .secure(true)                   // ✅ required with SameSite=None
                                         .path("/")
                                         .maxAge(3600)
-                                        .sameSite("None")
+                                        .sameSite("None")               // ✅ cross-site allowed
+                                        .domain(".docuhub.me")          // ✅ share across subdomains
                                         .build();
 
+                                // --- ID TOKEN COOKIE ---
                                 ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
                                         .httpOnly(true)
                                         .secure(true)
                                         .path("/")
                                         .maxAge(3600)
                                         .sameSite("None")
+                                        .domain(".docuhub.me")
                                         .build();
 
+                                // ✅ add cookies safely
                                 response.addHeader("Set-Cookie", accessCookie.toString());
                                 response.addHeader("Set-Cookie", idCookie.toString());
                             }
-                            // Redirect to local frontend for testing
-                            response.sendRedirect("http://localhost:3000/docuhub");
+
+                            // ✅ Redirect to frontend (can be localhost for dev)
+                            // In production: "https://frontend.docuhub.me"
+                            response.sendRedirect("http://localhost:3000");
                         })
                 )
+
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint())
@@ -182,50 +189,53 @@ public class KeyCloakSecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
-//                .csrf(csrf -> csrf.disable())
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            // Keycloak logout endpoint
+                            // Delete access_token and id_token cookies
+                            deleteCookie(response, "access_token");
+                            deleteCookie(response, "id_token");
+                            deleteCookie(response, "JSESSIONID"); // optional
+                            // Redirect to frontend or Keycloak logout
                             String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
-                            // Redirect back to your backend endpoint after logout
-                            String redirectAfterLogout = backendEndpoint + "/api/v1/auth/tokens";
-                            // Full logout URL
-                            String logoutUrl = keycloakLogoutUrl + "?redirect_uri=" + redirectAfterLogout;
-                            // Redirect browser to Keycloak logout
-                            response.sendRedirect(logoutUrl);
+                            String frontendRedirect = "http://localhost:3000"; // must match Keycloak redirect URI
+
+                            response.sendRedirect(keycloakLogoutUrl + "?redirect_uri=" + frontendRedirect);
                         })
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
                 );
-
         return http.build();
+    }
+
+    private void deleteCookie(HttpServletResponse response, String name) {
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(true)           // must match original cookie
+                .path("/")
+                .domain(".docuhub.me")  // must match original domain
+                .maxAge(0)
+                .sameSite("None")       // must match original SameSite
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     // JWT -> Spring roles converter
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
+        Converter<Jwt, Collection<GrantedAuthority>> converter = jwt -> {
+            Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access");
+            Collection<String> roles = realmAccess != null
+                    ? realmAccess.getOrDefault("roles", List.of())
+                    : List.of();
+            return roles.stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .collect(Collectors.toList());
+        };
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-
-        jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            List<GrantedAuthority> authorities = new ArrayList<>();
-
-            // Get "realm_access" claim as a Map
-            Map<String, Object> realmAccess = jwt.getClaim("realm_access");
-            if (realmAccess != null && realmAccess.containsKey("roles")) {
-                List<String> roles = (List<String>) realmAccess.get("roles");
-                for (String role : roles) {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + role)); // Keycloak roles are already uppercase
-                }
-            }
-
-            return authorities;
-        });
-
+        jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
         return jwtConverter;
     }
-
 
     // JSON AuthenticationEntryPoint for APIs
     @Bean
