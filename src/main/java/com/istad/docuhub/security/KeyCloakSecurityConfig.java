@@ -155,7 +155,7 @@ public class KeyCloakSecurityConfig {
                                         .httpOnly(true)
                                         .secure(true)                   // ✅ required with SameSite=None
                                         .path("/")
-                                        .maxAge(3600)
+                                        .maxAge(60)
                                         .sameSite("None")               // ✅ cross-site allowed
                                         .domain(".docuhub.me")          // ✅ share across subdomains
                                         .build();
