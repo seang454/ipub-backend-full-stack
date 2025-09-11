@@ -5,6 +5,9 @@ import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.RefreshTokenService;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,21 +106,48 @@ public class AuthRestController {
     public ResponseEntity<Map<String, Object>> protectedEndpoint(
             @CookieValue(name = "access_token", required = false) String token) {
 
+        Map<String, Object> response = new HashMap<>();
+
         if (token != null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "authenticated");
-            response.put("no",HttpStatus.OK.value());
-            response.put("message", "Protected data accessed");
-            response.put("token", token);
-            return ResponseEntity.ok(response);
+            try {
+                // Parse token without verifying signature (if using Keycloak's public key, you can verify)
+                Claims claims = Jwts.parserBuilder()
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody();
+
+                // Check expiration
+                Date expiration = claims.getExpiration();
+                if (expiration != null && expiration.before(new Date())) {
+                    response.put("status", "unauthenticated");
+                    response.put("no", HttpStatus.UNAUTHORIZED.value());
+                    response.put("message", "Token expired");
+                    response.put("token", null);
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+                }
+
+                // If valid
+                response.put("status", "authenticated");
+                response.put("no", HttpStatus.OK.value());
+                response.put("message", "Protected data accessed");
+                response.put("token", token);
+                response.put("claims", claims);
+                return ResponseEntity.ok(response);
+
+            } catch (JwtException e) {
+                response.put("status", "unauthenticated");
+                response.put("no", HttpStatus.UNAUTHORIZED.value());
+                response.put("message", "Invalid token: " + e.getMessage());
+                response.put("token", null);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
         }
 
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("status", "unauthenticated");
-        errorResponse.put("no",HttpStatus.UNAUTHORIZED.value());
-        errorResponse.put("message", "No valid token");
-        errorResponse.put("token", null);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        response.put("status", "unauthenticated");
+        response.put("no", HttpStatus.UNAUTHORIZED.value());
+        response.put("message", "No valid token");
+        response.put("token", null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
 
