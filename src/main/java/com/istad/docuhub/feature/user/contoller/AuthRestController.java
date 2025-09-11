@@ -104,15 +104,16 @@ public class AuthRestController {
 
         if (token != null) {
             Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
+            response.put("status", "authenticated");
             response.put("message", "Protected data accessed");
             response.put("token", token);
             return ResponseEntity.ok(response);
         }
 
         Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("status", "error");
+        errorResponse.put("status", "unauthenticated");
         errorResponse.put("message", "No valid token");
+        errorResponse.put("token", null);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
