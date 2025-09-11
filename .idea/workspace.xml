@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="" />
+    <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -82,7 +84,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DocuhubApplication.executor": "Run",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "bothty",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/CSTAD/finalproject/backend_final_project/ipub-engine-backend",
     "node.js.detected.package.eslint": "true",
@@ -286,7 +288,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java</url>
           <line>193</line>
-          <properties class="com.istad.docuhub.feature.user.UserServiceImpl" method="searchUserByUsername">
+          <properties class="com.istad.docuhub.feature.user.UserServiceImpl" method="getSingleUser">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
@@ -295,7 +297,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java</url>
           <line>210</line>
-          <properties class="com.istad.docuhub.feature.user.UserServiceImpl" method="deleteUser">
+          <properties class="com.istad.docuhub.feature.user.UserServiceImpl">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
@@ -304,7 +306,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java</url>
           <line>349</line>
-          <properties class="com.istad.docuhub.feature.user.UserServiceImpl" method="promoteAsStudent">
+          <properties class="com.istad.docuhub.feature.user.UserServiceImpl">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
