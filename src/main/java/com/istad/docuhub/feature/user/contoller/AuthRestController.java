@@ -5,7 +5,10 @@ import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.RefreshTokenService;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.*;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
@@ -28,6 +31,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URL;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +48,9 @@ public class AuthRestController {
     private final KeycloakAuthService keycloakAuthService;
     private final RefreshTokenService refreshTokenService;
     private final RestTemplate restTemplate = new RestTemplate();
+    // to verify token
+    private static final String JWKS_URL = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/certs";
+
 
     @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
     private String clientId;
@@ -108,46 +116,68 @@ public class AuthRestController {
 
         Map<String, Object> response = new HashMap<>();
 
-        if (token != null) {
-            try {
-                // Parse token without verifying signature (if using Keycloak's public key, you can verify)
-                Claims claims = Jwts.parserBuilder()
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody();
+        if (token == null) {
+            response.put("status", "unauthenticated");
+            response.put("no", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "No token provided");
+            response.put("token", null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
 
-                // Check expiration
-                Date expiration = claims.getExpiration();
-                if (expiration != null && expiration.before(new Date())) {
-                    response.put("status", "unauthenticated");
-                    response.put("no", HttpStatus.UNAUTHORIZED.value());
-                    response.put("message", "Token expired");
-                    response.put("token", null);
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-                }
+        try {
+            // Parse header to get kid
+            String kid = Jwts.parserBuilder().build().parseClaimsJws(token).getHeader().getKeyId();
 
-                // If valid
-                response.put("status", "authenticated");
-                response.put("no", HttpStatus.OK.value());
-                response.put("message", "Protected data accessed");
-                response.put("token", token);
-                response.put("claims", claims);
-                return ResponseEntity.ok(response);
+            // Fetch JWKS from Keycloak
+            JWKSet jwkSet = JWKSet.load(new URL(JWKS_URL));
+            JWK jwk = jwkSet.getKeyByKeyId(kid);
 
-            } catch (JwtException e) {
+            if (jwk == null) {
+                throw new JwtException("No key found for kid: " + kid);
+            }
+
+            RSAPublicKey publicKey = jwk.toRSAKey().toRSAPublicKey();
+
+            // Verify token
+            Jws<Claims> jwsClaims = Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(token);
+
+            Claims claims = jwsClaims.getBody();
+
+            // Check expiration
+            Date expiration = claims.getExpiration();
+            if (expiration != null && expiration.before(new Date())) {
                 response.put("status", "unauthenticated");
                 response.put("no", HttpStatus.UNAUTHORIZED.value());
-                response.put("message", "Invalid token: " + e.getMessage());
+                response.put("message", "Token expired");
                 response.put("token", null);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-        }
 
-        response.put("status", "unauthenticated");
-        response.put("no", HttpStatus.UNAUTHORIZED.value());
-        response.put("message", "No valid token");
-        response.put("token", null);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            // If valid
+            response.put("status", "authenticated");
+            response.put("no", HttpStatus.OK.value());
+            response.put("message", "Protected data accessed");
+            response.put("token", token);
+            response.put("claims", claims);
+
+            return ResponseEntity.ok(response);
+
+        } catch (JwtException e) {
+            response.put("status", "unauthenticated");
+            response.put("no", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "Invalid token: " + e.getMessage());
+            response.put("token", null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("no", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("message", "Unexpected error: " + e.getMessage());
+            response.put("token", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 
