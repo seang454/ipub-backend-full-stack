@@ -163,18 +163,31 @@ public class KeyCloakSecurityConfig {
                                         .build();
 
                                 // --- ID TOKEN COOKIE ---
-                                ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
-                                        .httpOnly(true)
-                                        .secure(true)
-                                        .path("/")
-                                        .maxAge(3600)
-                                        .sameSite("None")
-                                        .domain(".docuhub.me")
-                                        .build();
+//                                ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
+//                                        .httpOnly(true)
+//                                        .secure(true)
+//                                        .path("/")
+//                                        .maxAge(3600)
+//                                        .sameSite("None")
+//                                        .domain(".docuhub.me")
+//                                        .build();
+                                if (authorizedClient.getRefreshToken() != null) {
+                                    String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
+                                    ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
+                                            .httpOnly(true)
+                                            .secure(true)
+                                            .path("/api/v1/auth/refresh") // only accessible via refresh endpoint
+                                            .maxAge(30 * 24 * 3600)       // 30 days
+                                            .sameSite("None")
+                                            .domain(".docuhub.me")
+                                            .build();
+                                    response.addHeader("Set-Cookie", refreshCookie.toString());
+                                }
+
 
                                 // ✅ add cookies safely
                                 response.addHeader("Set-Cookie", accessCookie.toString());
-                                response.addHeader("Set-Cookie", idCookie.toString());
+//                                response.addHeader("Set-Cookie", idCookie.toString());
                             }
 
                             // ✅ Redirect to frontend (can be localhost for dev)
@@ -198,7 +211,8 @@ public class KeyCloakSecurityConfig {
                         .logoutSuccessHandler((request, response, authentication) -> {
                             // Delete access_token and id_token cookies
                             deleteCookie(response, "access_token");
-                            deleteCookie(response, "id_token");
+//                            deleteCookie(response, "id_token");
+                            deleteCookie(response, "refresh_token");
                             deleteCookie(response, "JSESSIONID"); // optional
                             // Redirect to frontend or Keycloak logout
                             String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
