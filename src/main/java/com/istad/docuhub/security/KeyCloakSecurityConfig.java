@@ -144,39 +144,31 @@ public class KeyCloakSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
+
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
                             OAuth2AuthorizedClient authorizedClient =
                                     authorizedClientService.loadAuthorizedClient("keycloak", authentication.getName());
 
                             if (authorizedClient != null) {
-                                String accessToken = authorizedClient.getAccessToken().getTokenValue();
-                                String idToken = oidcUser.getIdToken().getTokenValue();
-
                                 // --- ACCESS TOKEN COOKIE ---
+                                String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                                         .httpOnly(true)
-                                        .secure(true)                   // ✅ required with SameSite=None
+                                        .secure(true)                   // required with SameSite=None
                                         .path("/")
-                                        .maxAge(60)
-                                        .sameSite("None")               // ✅ cross-site allowed
-                                        .domain(".docuhub.me")          // ✅ share across subdomains
+                                        .maxAge(60)                     // short-lived
+                                        .sameSite("None")               // cross-site allowed
+                                        .domain(".docuhub.me")          // share across subdomains
                                         .build();
+                                response.addHeader("Set-Cookie", accessCookie.toString());
 
-                                // --- ID TOKEN COOKIE ---
-//                                ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
-//                                        .httpOnly(true)
-//                                        .secure(true)
-//                                        .path("/")
-//                                        .maxAge(3600)
-//                                        .sameSite("None")
-//                                        .domain(".docuhub.me")
-//                                        .build();
+                                // --- REFRESH TOKEN COOKIE ---
                                 if (authorizedClient.getRefreshToken() != null) {
                                     String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
                                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                                             .httpOnly(true)
                                             .secure(true)
-                                            .path("/api/v1/auth/refresh") // only accessible via refresh endpoint
+                                            .path("/") // restrict to refresh endpoint
                                             .maxAge(30 * 24 * 3600)       // 30 days
                                             .sameSite("None")
                                             .domain(".docuhub.me")
@@ -184,17 +176,25 @@ public class KeyCloakSecurityConfig {
                                     response.addHeader("Set-Cookie", refreshCookie.toString());
                                 }
 
-
-                                // ✅ add cookies safely
-                                response.addHeader("Set-Cookie", accessCookie.toString());
-//                                response.addHeader("Set-Cookie", idCookie.toString());
+                                // --- Optional: ID TOKEN COOKIE ---
+                                // Uncomment if needed
+                                // String idToken = oidcUser.getIdToken().getTokenValue();
+                                // ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
+                                //        .httpOnly(true)
+                                //        .secure(true)
+                                //        .path("/")
+                                //        .maxAge(3600)
+                                //        .sameSite("None")
+                                //        .domain(".docuhub.me")
+                                //        .build();
+                                // response.addHeader("Set-Cookie", idCookie.toString());
                             }
 
-                            // ✅ Redirect to frontend (can be localhost for dev)
-                            // In production: "https://frontend.docuhub.me"
+                            // Redirect to frontend (localhost for dev, your domain in production)
                             response.sendRedirect("http://localhost:3000");
                         })
                 )
+
 
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
