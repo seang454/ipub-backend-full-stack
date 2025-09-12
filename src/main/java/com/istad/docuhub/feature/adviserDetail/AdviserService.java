@@ -2,6 +2,7 @@ package com.istad.docuhub.feature.adviserDetail;
 
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
+import com.istad.docuhub.feature.adviserDetail.dto.UpdateAdviserDetailRequest;
 
 import java.util.List;
 
@@ -11,9 +12,11 @@ public interface AdviserService {
 
     AdviserDetailResponse getAdviserDetailByUuid(String uuid);
 
-    AdviserDetailResponse updateAdviserDetail(String uuid, AdviserDetailRequest adviserDetailRequest);
+    AdviserDetailResponse updateAdviserDetailByUuid(String uuid, UpdateAdviserDetailRequest updateRequest);
 
     void deleteAdviserDetail(String uuid);
 
     List<AdviserDetailResponse> getAllAdviserDetails();
+
+    AdviserDetailResponse updateByToken( UpdateAdviserDetailRequest updateRequest);
 }

@@ -1,8 +1,10 @@
 package com.istad.docuhub.feature.adminDetail;
 
+import com.istad.docuhub.domain.AdviserDetail;
 import com.istad.docuhub.domain.StudentDetail;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.enums.STATUS;
+import com.istad.docuhub.feature.adviserDetail.AdviserDetailRepository;
 import com.istad.docuhub.feature.studentDetail.StudentDetailRepository;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
@@ -33,6 +35,7 @@ public class AdminServiceImpl implements AdminService {
     private final Keycloak keycloak;
     private final UserRepository userRepository;
     private final StudentDetailRepository studentDetailRepository;
+    private final AdviserDetailRepository adviserDetailRepository;
 
     @Override
     public void createStudent(UserCreateDto userCreateDto) {
@@ -46,18 +49,33 @@ public class AdminServiceImpl implements AdminService {
 
     // 🔁 reusable method
     private void createUserWithRole(UserCreateDto userCreateDto, String roleName) {
+        // Validate passwords
         if (!userCreateDto.password().equals(userCreateDto.confirmedPassword())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Passwords do not match");
         }
 
+        if (userCreateDto.password().length() < 8) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Password must be at least 8 characters");
+        }
+
+        // Sanitize username
+        String safeUsername = userCreateDto.username()
+                .trim()
+                .toLowerCase()
+                .replaceAll("\\s+", ".")
+                .replaceAll("[^a-z0-9._-]", "");
+
+        if (safeUsername.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid username after sanitization");
+        }
+
         // Build Keycloak user
         UserRepresentation user = new UserRepresentation();
-        user.setUsername(userCreateDto.username());
+        user.setUsername(safeUsername);
         user.setEmail(userCreateDto.email());
         user.setFirstName(userCreateDto.firstname());
         user.setLastName(userCreateDto.lastname());
 
-        // Credentials
         CredentialRepresentation cred = new CredentialRepresentation();
         cred.setType(CredentialRepresentation.PASSWORD);
         cred.setValue(userCreateDto.password());
@@ -67,63 +85,111 @@ public class AdminServiceImpl implements AdminService {
         user.setEnabled(true);
 
         try (Response response = keycloak.realm("docuapi").users().create(user)) {
-            AtomicReference<String> userUuid = new AtomicReference<>("");
+            String respBody = response.readEntity(String.class);
+            log.info("Keycloak response status: {}", response.getStatus());
+            log.info("Keycloak response body: {}", respBody);
 
-            if (response.getStatus() == HttpStatus.CREATED.value()) {
-                // Fetch created user
-                List<UserRepresentation> foundUsers = keycloak.realm("docuapi")
-                        .users()
-                        .search(user.getUsername(), true);
-
-                foundUsers.stream()
-                        .filter(u -> !u.isEmailVerified())
-                        .findFirst()
-                        .ifPresent(u -> userUuid.set(u.getId()));
-
-                if (userUuid.get().isEmpty()) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                            "Cannot fetch created user with role: " + roleName);
-                }
-
-                // ✅ Assign role
-                UserResource userResource = keycloak.realm("docuapi").users().get(userUuid.get());
-                RoleRepresentation role = keycloak.realm("docuapi").roles().get(roleName).toRepresentation();
-                userResource.roles().realmLevel().add(Collections.singletonList(role));
-
-                // Generate unique ID for DB
-                Integer id;
-                int retries = 0;
-                do {
-                    if (retries++ > 50) {
-                        throw new RuntimeException("Unable to generate unique ID after 50 attempts");
-                    }
-                    id = new Random().nextInt(1_000_000);
-                } while (userRepository.existsByIdAndIsDeletedFalse(id));
-
-                String fullName = userCreateDto.firstname() + " " + userCreateDto.lastname();
-
-                // Save to DB with flags
-                User saveUser = User.builder()
-                        .id(id)
-                        .uuid(userUuid.get())
-                        .fullName(fullName)
-                        .isUser(false)
-                        .isAdmin(false)
-                        .isAdvisor("ADVISER".equals(roleName))
-                        .isStudent("STUDENT".equals(roleName))
-                        .isDeleted(false)
-                        .createDate(LocalDate.now())
-                        .updateDate(LocalDate.now())
-                        .slug(SlugUtil.toSlug(fullName, userCreateDto.username()))
-                        .build();
-
-                userRepository.save(saveUser);
-
-                log.info("{} created with ID: {} and UUID: {}", roleName, saveUser.getId(), saveUser.getUuid());
-                return;
+            if (response.getStatus() != HttpStatus.CREATED.value()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        roleName + " creation failed: " + respBody);
             }
+
+            // Fetch created user
+            AtomicReference<String> userUuid = new AtomicReference<>("");
+            List<UserRepresentation> foundUsers = keycloak.realm("docuapi")
+                    .users()
+                    .search(user.getUsername(), true);
+
+            foundUsers.stream()
+                    .filter(u -> !u.isEmailVerified())
+                    .findFirst()
+                    .ifPresent(u -> userUuid.set(u.getId()));
+
+            if (userUuid.get().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Cannot fetch created user with role: " + roleName);
+            }
+
+            // Assign role
+            UserResource userResource = keycloak.realm("docuapi").users().get(userUuid.get());
+            RoleRepresentation role = keycloak.realm("docuapi").roles().get(roleName).toRepresentation();
+            userResource.roles().realmLevel().add(Collections.singletonList(role));
+
+            // Generate unique DB ID
+            Integer id;
+            int retries = 0;
+            do {
+                if (retries++ > 50) throw new RuntimeException("Unable to generate unique ID after 50 attempts");
+                id = new Random().nextInt(1_000_000);
+            } while (userRepository.existsByIdAndIsDeletedFalse(id));
+
+            String fullName = userCreateDto.firstname() + " " + userCreateDto.lastname();
+
+            // Save User
+            User saveUser = User.builder()
+                    .id(id)
+                    .uuid(userUuid.get())
+                    .fullName(fullName)
+                    .isUser(true)
+                    .isAdmin(false)
+                    .isAdvisor("ADVISER".equals(roleName))
+                    .isStudent("STUDENT".equals(roleName))
+                    .isDeleted(false)
+                    .createDate(LocalDate.now())
+                    .updateDate(LocalDate.now())
+                    .slug(SlugUtil.toSlug(fullName, safeUsername))
+                    .build();
+            userRepository.save(saveUser);
+
+            // Student Detail
+            if (saveUser.getIsStudent()) {
+                StudentDetail studentDetail = new StudentDetail();
+                Integer idStudent;
+                int retriesStudent = 0;
+                do {
+                    if (retriesStudent++ > 50)
+                        throw new RuntimeException("Unable to generate unique ID after 50 attempts");
+                    idStudent = new Random().nextInt(1_000_000);
+                } while (studentDetailRepository.existsById(idStudent));
+                studentDetail.setId(idStudent);
+                studentDetail.setUuid(UUID.randomUUID().toString());
+                studentDetail.setStatus(STATUS.APPROVED);
+                studentDetail.setIsStudent(true);
+                studentDetail.setMajor("Information Technology");
+                studentDetail.setUniversity("Institute of Science Technology and Advanced Development");
+                studentDetail.setUser(saveUser);
+                studentDetail.setStudentCardUrl("https://placehold.co/600x400.png");
+                studentDetailRepository.save(studentDetail);
+            }
+
+            // Adviser Detail
+            if (saveUser.getIsAdvisor()) {
+                AdviserDetail adviserDetail = new AdviserDetail();
+                Integer idAdviser;
+                int retriesAdviser = 0;
+                do {
+                    if (retriesAdviser++ > 50)
+                        throw new RuntimeException("Unable to generate unique ID after 50 attempts");
+                    idAdviser = new Random().nextInt(1_000_000);
+                } while (adviserDetailRepository.existsById(idAdviser));
+                adviserDetail.setId(idAdviser);
+                adviserDetail.setPublication("ISTAD");
+                adviserDetail.setExperienceYears(1);
+                adviserDetail.setIsDeleted(false);
+                adviserDetail.setLinkedinUrl("https://www.linkedin.com/in/istad/");
+                adviserDetail.setSocialLinks("https://www.facebook.com/istad.co");
+                adviserDetail.setStatus("APPROVED");
+                adviserDetail.setUuid(UUID.randomUUID().toString());
+                adviserDetail.setUser(saveUser);
+                adviserDetailRepository.save(adviserDetail);
+            }
+
+            log.info("{} created with ID: {} and UUID: {}", roleName, saveUser.getId(), saveUser.getUuid());
+
+        } catch (Exception e) {
+            log.error("Error creating user in Keycloak: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, roleName + " creation failed: " + e.getMessage());
         }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, roleName + " creation failed");
     }
 
     @Override

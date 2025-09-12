@@ -42,7 +42,7 @@ public class AdviserDetail {
     // AdviserDetail → User (One-to-One via uuid)
     @OneToOne
     @JoinColumn(name = "user_uuid", referencedColumnName = "uuid")
-    private User userUuid;
+    private User user;
 
     // AdviserDetail → Specialize (Many-to-Many via uuid)
     @ManyToMany

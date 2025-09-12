@@ -2,19 +2,13 @@ package com.istad.docuhub.feature.adviserDetail.dto;
 
 import com.istad.docuhub.domain.Specialize;
 import com.istad.docuhub.enums.AdviserSpecialize;
-import lombok.Builder;
 
 import java.util.List;
 
-@Builder
-public record AdviserDetailResponse(
-        String uuid,
+public record UpdateAdviserDetailRequest(
         Integer experienceYears,
         String linkedinUrl,
         String publication,
         String socialLinks,
-        String status,
-        String userUuid,
-        List<Specialize> specialize
+        String status
 ) {}
-

@@ -1,4 +1,10 @@
 package com.istad.docuhub.feature.specialize.dto;
 
-public class SpecializeRequest {
+import jakarta.validation.constraints.NotBlank;
+
+public record SpecializeRequest(
+        @NotBlank
+        String name,
+        String slug
+) {
 }
