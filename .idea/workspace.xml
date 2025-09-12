@@ -5,45 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/CommentTreeResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/UpdateCommentRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/mapper/CommentMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/dto/FeedBackUpdate.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/specialize/SpecailizeRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/specialize/SpecializeImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/specialize/dto/SpecializeRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/dto/UserProfileResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/utils/CorsConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/utils/CurrentUserV2.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/utils/QuickService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/AdviserDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/AdviserDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/Comment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/Comment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/StudentDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/StudentDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserAssignment/AdviserAssignmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserAssignment/AdviserAssignmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/CommentResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/CommentResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/CreateCommentRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/CreateCommentRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/DeleteCommentRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/dto/EditCommentRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedBackController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedBackController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedbackRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedbackRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedbackService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedbackService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedbackServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/feedback/FeedbackServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/dto/StudentResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/dto/StudentResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/contoller/AuthRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/contoller/AuthRestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +82,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DocuhubApplication.executor": "Run",
-    "git-widget-placeholder": "Merging main",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/CSTAD/finalproject/backend_final_project/ipub-engine-backend",
     "node.js.detected.package.eslint": "true",
@@ -160,8 +123,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26574.91" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26574.91" />
       </set>
     </attachedChunks>
   </component>
@@ -236,6 +199,7 @@
       <workItem from="1757602749477" duration="8000" />
       <workItem from="1757603254878" duration="7512000" />
       <workItem from="1757610907700" duration="2069000" />
+      <workItem from="1757673836813" duration="1357000" />
     </task>
     <servers />
   </component>
@@ -279,12 +243,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java</url>
-          <line>126</line>
+          <line>107</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/comment/CommentServiceImpl.java</url>
-          <line>34</line>
+          <line>42</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
