@@ -41,7 +41,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AuthRestController {
 
     private final UserService userService;
