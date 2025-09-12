@@ -153,7 +153,7 @@ public class KeyCloakSecurityConfig {
                                 // --- ACCESS TOKEN COOKIE ---
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
-                                        .httpOnly(true)
+                                        .httpOnly(false)
                                         .secure(true)                   // required with SameSite=None
                                         .path("/")
                                         .maxAge(60)                     // short-lived
@@ -166,7 +166,7 @@ public class KeyCloakSecurityConfig {
                                 if (authorizedClient.getRefreshToken() != null) {
                                     String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
                                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
-                                            .httpOnly(true)
+                                            .httpOnly(false)
                                             .secure(true)
                                             .path("/") // restrict to refresh endpoint
                                             .maxAge(30 * 24 * 3600)       // 30 days
