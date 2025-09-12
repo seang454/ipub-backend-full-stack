@@ -26,5 +26,6 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
 
     Optional<Paper> findByUuidAndIsDeletedFalseAndIsApprovedFalse(String uuid);
 
-    boolean existsByIdAndIsPublishedTrue(Integer id); //added by Vannarith
+    // added by thongfazon
+    Boolean existsByUuid(String uuid);
 }

@@ -82,6 +82,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/profile").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
 
                         // Category Endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/categories").hasAnyRole("ADMIN")
@@ -126,7 +127,8 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/adviser/create-adviser").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/approve-student-detail").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/reject-student-detail").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/student/").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/students").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/advisers").hasAnyRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/papers/pending").hasAnyRole("ADMIN")
 

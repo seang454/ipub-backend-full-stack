@@ -3,197 +3,181 @@ package com.istad.docuhub.feature.comment;
 import com.istad.docuhub.domain.Comment;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
-import com.istad.docuhub.feature.comment.dto.CommentResponse;
-import com.istad.docuhub.feature.comment.dto.CreateCommentRequest;
-import com.istad.docuhub.feature.comment.dto.DeleteCommentRequest;
-import com.istad.docuhub.feature.comment.dto.EditCommentRequest;
+import com.istad.docuhub.feature.comment.dto.*;
+import com.istad.docuhub.feature.comment.mapper.CommentMapper;
 import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.user.UserRepository;
-import com.istad.docuhub.feature.user.UserService;
-import com.istad.docuhub.feature.user.dto.CurrentUser;
-import lombok.RequiredArgsConstructor;
+import com.istad.docuhub.utils.CurrentUserV2;
+import com.istad.docuhub.utils.QuickService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-
-    private final UserService userService;
-    private PaperRepository paperRepository;
-    private UserRepository userRepository;
-    private CommentRepository commentRepository;
-
-
-
+    private final UserRepository userRepository;
+    private final PaperRepository paperRepository;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
+    private final QuickService quickService;
 
     @Override
-    public CommentResponse createComment(CreateCommentRequest createCommentRequest) {
+    @Transactional
+    public CommentResponse createComment(CreateCommentRequest commentRequest) {
 
-        // Get user
-        CurrentUser userId = userService.getCurrentUserSub();
+        CurrentUserV2 currentUser = quickService.currentUserInfor();
 
-        // Validation Paper
-        Paper paper = paperRepository.findById(createCommentRequest.paperId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Paper not found with ID: " + createCommentRequest.paperId()
-                ));
-        if (!paper.getIsPublished()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper is not published yet");
+        User user = userRepository.findByUuidAndIsDeletedFalse(currentUser.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Paper paper = paperRepository.findByUuid(commentRequest.paperUuid())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
+
+        Comment parent = null;
+        if (commentRequest.parentUuid() != null && !commentRequest.parentUuid().isBlank()) {
+            parent = commentRepository.findByUuid(commentRequest.parentUuid())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parent comment not found"));
+
+            // Verify parent comment belongs to the same paper
+            if (!parent.getPaper().getUuid().equals(paper.getUuid())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent comment doesn't belong to this paper");
+            }
         }
 
-        // Validation User
-        User user = userRepository.findByUuidAndIsDeletedFalse(userId.id())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User does not exist"));
+        // ✅ Manual ID generation (your old approach)
+        int id;
+        int retries = 0;
+        do {
+            if (retries++ > 50) {
+                throw new RuntimeException("Unable to generate unique ID after 50 attempts");
+            }
+            id = new Random().nextInt(1000000); // Fixed: removed Integer.parseInt()
+        } while (commentRepository.existsById(id));
 
-        // Create Comment
         Comment comment = new Comment();
-        comment.setContent(createCommentRequest.content());
+        comment.setId(id); // ✅ Set the manually generated ID
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setContent(commentRequest.content());
         comment.setCreatedAt(LocalDate.now());
-        comment.setPaper(paper);
+        comment.setIsDeleted(false);
         comment.setUser(user);
+        comment.setPaper(paper);
+        comment.setParent(parent);
 
-        // Set comment Id
-        Integer commentId;
-        do {
-            commentId = (int) (Math.random() * 1_000_000); // generates a number between 0 and 999999
-        } while (commentRepository.existsById(commentId));
-        comment.setId(commentId);
+        Comment savedComment = commentRepository.save(comment);
 
-        // Set comment uuid
-        String commentUuid;
-        do {
-            commentUuid = UUID.randomUUID().toString();
-        } while (commentRepository.existsByUuid(commentUuid));
+        // If this is a reply, add it to parent's replies
+        if (parent != null) {
+            parent.getReplies().add(savedComment);
+            commentRepository.save(parent); // ✅ Save the parent to update its replies
+        }
 
+        return commentMapper.toCommentResponse(savedComment);
+    }
+    // allow to edit only user owner and admin
+    @Override
+    @Transactional
+    public CommentResponse editComment(UpdateCommentRequest updateCommentRequest) {
+        Comment comment = commentRepository.findByUuid(updateCommentRequest.commentUuid())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
 
-        // Save the comment
-        comment = commentRepository.save(comment);
+        CurrentUserV2 currentUser = quickService.currentUserInfor();
 
-        return CommentResponse.builder()
-                .id(comment.getId())
-                .uuid(comment.getUuid())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .paperId(comment.getPaper().getId())
-                .paperTitle(comment.getPaper().getTitle())
-                .userId(comment.getUser().getId())
-                .userFullName(comment.getUser().getFullName())
-                .userImageUrl(comment.getUser().getImageUrl())
-                .build();
+        // Handle null roles by using an empty list
+        List<String> roles = currentUser.getRoles() != null ? currentUser.getRoles() : List.of();
+
+        boolean isAdmin = roles.contains("ADMIN");
+        boolean isOwner = comment.getUser().getUuid().equals(currentUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException("You are not allowed to edit this comment");
+        }
+
+        comment.setContent(updateCommentRequest.content());
+        Comment commentSaved = commentRepository.save(comment);
+        return commentMapper.toCommentResponse(commentSaved);
     }
 
-
-
-
-
+    // allow to delete only user owner and admin
     @Override
-    public CommentResponse editComment(EditCommentRequest editCommentRequest) {
+    @Transactional
+    public void deleteCommentByUuid(String commentUuid) {
+        CurrentUserV2 currentUser = quickService.currentUserInfor();
 
-        // Get User ID
-        CurrentUser userId = userService.getCurrentUserSub();
+        // Handle null roles by using an empty list
+        List<String> roles = currentUser.getRoles() != null ? currentUser.getRoles() : List.of();
 
-        // Validation Comment
-        if(!commentRepository.existsById(editCommentRequest.commentId())){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found");
+        Comment comment = commentRepository.findByUuid(commentUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+
+        boolean isAdmin = roles.contains("ADMIN");
+        boolean isOwner = comment.getUser().getUuid().equals(currentUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException("You are not allowed to delete this comment");
         }
 
-        // Validation User
-        if(!userRepository.existsByUuidAndIsDeletedFalse(userId.id())){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
+        // Soft delete: mark as deleted instead of physically removing
+        comment.setIsDeleted(true);
+
+        // Also soft delete all replies
+        if (!comment.getReplies().isEmpty()) {
+            comment.getReplies().forEach(reply -> reply.setIsDeleted(true));
         }
 
-        // Get comment where user wants to edit
-        Comment comment = commentRepository.findById(editCommentRequest.commentId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found")
-        );
-
-        // Check if user really own this comment or not
-        if (!comment.getUser().getUuid().equals(userId.id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this comment");
-        }
-
-        comment.setContent(editCommentRequest.content());
-        comment.setCreatedAt(LocalDate.now());
         commentRepository.save(comment);
-
-
-        return CommentResponse.builder()
-                .id(comment.getId())
-                .uuid(comment.getUuid())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .paperId(comment.getPaper().getId())
-                .paperTitle(comment.getPaper().getTitle())
-                .userId(comment.getUser().getId())
-                .userFullName(comment.getUser().getFullName())
-                .userImageUrl(comment.getUser().getImageUrl())
-                .build();
     }
 
-
-
-
-
-
     @Override
-    public void deleteComment(DeleteCommentRequest deleteCommentRequest) {
+    @Transactional(readOnly = true)
+    public CommentResponse getCommentByUuid(String commentUuid) {
+        Comment comment = commentRepository.findByUuid(commentUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
 
-        // Get User ID
-        CurrentUser userId = userService.getCurrentUserSub();
-
-        // Fetch comment
-        Comment comment = commentRepository.findById(deleteCommentRequest.commentId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Comment not found"
-                ));
-
-        // Check if user owns the comment
-        if (!comment.getUser().getUuid().equals(userId.id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this comment");
+        if (comment.getIsDeleted()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment has been deleted");
         }
 
-        // Delete comment
-        commentRepository.delete(comment);
+        return commentMapper.toCommentResponse(comment);
     }
-
-
-
 
     @Override
-    public long countByPaperId(Integer paperId) {
-        return commentRepository.countByPaperId(paperId);
+    @Transactional(readOnly = true)
+    public CommentTreeResponse getCommentsForPaper(String paperUuid) {
+        // Verify paper exists
+        if (!paperRepository.existsByUuid(paperUuid)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found");
+        }
+
+        // Get all non-deleted root comments for this paper
+        List<Comment> rootComments = commentRepository.findByPaper_UuidAndParentIsNullAndIsDeletedFalse(paperUuid);
+
+        // Convert to response with nested replies
+        List<CommentResponse> commentResponses = rootComments.stream()
+                .map(this::buildCommentTree)
+                .collect(Collectors.toList());
+
+        return new CommentTreeResponse(paperUuid, commentResponses);
     }
 
+    // Recursive method to build comment tree with replies
+    private CommentResponse buildCommentTree(Comment comment) {
+        List<CommentResponse> replyResponses = comment.getReplies().stream()
+                .filter(reply -> !reply.getIsDeleted()) // Filter out deleted replies
+                .map(this::buildCommentTree)
+                .collect(Collectors.toList());
 
-
-
-    @Override
-    public List<CommentResponse> getCommentsByPaperId(Integer paperId) {
-        List<Comment> comments = commentRepository.findByPaperId(paperId);
-
-
-        return comments.stream()
-                .map(comment -> CommentResponse.builder()
-                        .id(comment.getId())
-                        .content(comment.getContent())
-                        .createdAt(comment.getCreatedAt())
-                        .paperId(comment.getPaper().getId())
-                        .paperTitle(comment.getPaper().getTitle())
-                        .userId(comment.getUser().getId())
-                        .userFullName(comment.getUser().getFullName())
-                        .userImageUrl(comment.getUser().getImageUrl())
-                        .build())
-                .toList();
+        return commentMapper.toCommentResponseWithReplies(comment);
     }
-
 }

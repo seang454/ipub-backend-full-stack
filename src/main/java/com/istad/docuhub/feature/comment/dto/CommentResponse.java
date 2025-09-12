@@ -1,22 +1,16 @@
 package com.istad.docuhub.feature.comment.dto;
 
-import lombok.Builder;
-
 import java.time.LocalDate;
+import java.util.List;
 
-@Builder
 public record CommentResponse(
-
-
-        Integer id,
         String uuid,
         String content,
         LocalDate createdAt,
-        Integer paperId,
-        String paperTitle,
-        Integer userId,
-        String userFullName,
-        String userImageUrl
-
-) {
-}
+        String userUuid,      // This exists
+        String paperUuid,
+        String parentUuid,
+        List<CommentResponse> replies,
+        boolean isDeleted
+        // userName field is missing
+) {}

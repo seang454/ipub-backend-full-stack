@@ -40,16 +40,4 @@ public class StudentDetail {
     @OneToOne
     @JoinColumn(name = "user_uuid",referencedColumnName = "uuid")
     private User user;
-
 }
-
-
-
-
-
-
-
-
-
-
-
