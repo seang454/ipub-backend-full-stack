@@ -1,5 +1,6 @@
 package com.istad.docuhub.feature.user.contoller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.RefreshTokenService;
@@ -119,53 +120,65 @@ public class AuthRestController {
             response.put("status", "unauthenticated");
             response.put("no", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "No token provided");
-            response.put("token", null);
+            response.put("access_token", null);
+            response.put("refresh_token", null);
+            response.put("claims", null);
+            response.put("accessTokenExpires", null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         try {
-            // Decode payload without verifying signature
+            // Decode JWT payload without signature verification
             String[] parts = accessToken.split("\\.");
             if (parts.length != 3) {
                 throw new JwtException("Invalid JWT format");
             }
 
             String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
-            Claims claims = Jwts.parserBuilder()
-                    .build()
-                    .parseClaimsJwt(parts[0] + "." + parts[1] + ".") // parseClaimsJwt ignores signature
-                    .getBody();
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> claims = mapper.readValue(payloadJson, Map.class);
+
+            // Get expiration as epoch seconds
+            Long exp = claims.get("exp") instanceof Integer
+                    ? ((Integer) claims.get("exp")).longValue()
+                    : (Long) claims.get("exp");
 
             // Check expiration
-            Date expiration = claims.getExpiration();
-            if (expiration != null && expiration.before(new Date())) {
+            long nowEpoch = System.currentTimeMillis() / 1000;
+            if (exp != null && exp < nowEpoch) {
                 response.put("status", "unauthenticated");
                 response.put("no", HttpStatus.UNAUTHORIZED.value());
                 response.put("message", "Token expired");
                 response.put("access_token", accessToken);
                 response.put("refresh_token", refreshToken);
                 response.put("claims", claims);
+                response.put("accessTokenExpires", exp);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
 
-            // Token is not expired
+            // Token is valid
             response.put("status", "authenticated");
             response.put("no", HttpStatus.OK.value());
             response.put("message", "Token is valid (not expired)");
             response.put("access_token", accessToken);
             response.put("refresh_token", refreshToken);
-
             response.put("claims", claims);
+            response.put("accessTokenExpires", exp);
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             response.put("status", "unauthenticated");
             response.put("no", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "Invalid token: " + e.getMessage());
-            response.put("token", null);
+            response.put("access_token", null);
+            response.put("refresh_token", null);
+            response.put("claims", null);
+            response.put("accessTokenExpires", null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+
 
 
     @PostMapping("/refresh")
