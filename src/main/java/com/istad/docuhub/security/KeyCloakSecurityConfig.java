@@ -157,8 +157,8 @@ public class KeyCloakSecurityConfig {
                                         .secure(false)                   // required with SameSite=None
                                         .path("/")
                                         .maxAge(60)                     // short-lived
-                                        .sameSite("None")               // cross-site allowed
-                                        .domain(".docuhub.me")          // share across subdomains
+                                        .sameSite("Lax")               // cross-site allowed
+//                                        .domain(".docuhub.me")          // share across subdomains
                                         .build();
                                 response.addHeader("Set-Cookie", accessCookie.toString());
 
@@ -170,8 +170,8 @@ public class KeyCloakSecurityConfig {
                                             .secure(false)
                                             .path("/") // restrict to refresh endpoint
                                             .maxAge(30 * 24 * 3600)       // 30 days
-                                            .sameSite("None")
-                                            .domain(".docuhub.me")
+                                            .sameSite("Lax")
+//                                            .domain(".docuhub.me")
                                             .build();
                                     response.addHeader("Set-Cookie", refreshCookie.toString());
                                 }
