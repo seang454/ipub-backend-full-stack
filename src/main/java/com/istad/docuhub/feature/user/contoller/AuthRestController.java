@@ -110,11 +110,12 @@ public class AuthRestController {
     }
     @GetMapping("/protected-endpoint")
     public ResponseEntity<Map<String, Object>> protectedEndpoint(
-            @CookieValue(name = "access_token", required = false) String token) {
+            @CookieValue(name = "access_token", required = false) String accessToken,
+            @CookieValue(name = "refresh_token", required = false) String refreshToken) {
 
         Map<String, Object> response = new HashMap<>();
 
-        if (token == null) {
+        if (accessToken == null) {
             response.put("status", "unauthenticated");
             response.put("no", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "No token provided");
@@ -124,7 +125,7 @@ public class AuthRestController {
 
         try {
             // Decode payload without verifying signature
-            String[] parts = token.split("\\.");
+            String[] parts = accessToken.split("\\.");
             if (parts.length != 3) {
                 throw new JwtException("Invalid JWT format");
             }
@@ -141,7 +142,8 @@ public class AuthRestController {
                 response.put("status", "unauthenticated");
                 response.put("no", HttpStatus.UNAUTHORIZED.value());
                 response.put("message", "Token expired");
-                response.put("token", token);
+                response.put("access_token", accessToken);
+                response.put("refresh_token", refreshToken);
                 response.put("claims", claims);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
@@ -150,7 +152,9 @@ public class AuthRestController {
             response.put("status", "authenticated");
             response.put("no", HttpStatus.OK.value());
             response.put("message", "Token is valid (not expired)");
-            response.put("token", token);
+            response.put("access_token", accessToken);
+            response.put("refresh_token", refreshToken);
+
             response.put("claims", claims);
             return ResponseEntity.ok(response);
 
