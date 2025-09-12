@@ -80,6 +80,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/profile").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
