@@ -2,6 +2,9 @@ package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.istad.docuhub.feature.user.RefreshTokenService;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -188,10 +191,22 @@ public class KeyCloakSecurityConfig {
                                 //        .domain(".docuhub.me")
                                 //        .build();
                                 // response.addHeader("Set-Cookie", idCookie.toString());
+                                // Redirect to frontend (localhost for dev, your domain in production)
+                                try {
+                                    JWTClaimsSet claims = decodeToken(accessToken);
+                                    JsonObject realmAccess = (JsonObject) claims.getClaim("realm_access");
+                                    if (realmAccess != null) {
+                                        List<String> roles = (List<String>) realmAccess.get("roles");
+                                        if(roles.contains("ADMIN")) {
+                                            response.sendRedirect("http://admin.docuhub.me");
+                                        }else {
+                                            response.sendRedirect("http://localhost:3000");
+                                        }
+                                    }
+                                } catch (Exception ignore) {}
+                            }else {
+                                response.sendRedirect("https://api.docuhub.me/api/v1/auth/keycloak/login");
                             }
-
-                            // Redirect to frontend (localhost for dev, your domain in production)
-                            response.sendRedirect("http://localhost:3000");
                         })
                 )
 
@@ -223,6 +238,10 @@ public class KeyCloakSecurityConfig {
                         .invalidateHttpSession(true)
                 );
         return http.build();
+    }
+    public static JWTClaimsSet decodeToken(String token) throws Exception {
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        return signedJWT.getJWTClaimsSet();
     }
 
     private void deleteCookie(HttpServletResponse response, String name) {
