@@ -156,11 +156,12 @@ public class KeyCloakSecurityConfig {
                                 // --- ACCESS TOKEN COOKIE ---
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
-                                        .httpOnly(false)
-                                        .secure(false)      // change to true in production (HTTPS)
+                                        .httpOnly(true)
+                                        .secure(true)      // change to true in production (HTTPS)
                                         .path("/")
                                         .maxAge(60)
-                                        .sameSite("Lax")
+                                        .sameSite("None")
+                                        .domain(".docuhub.me")
                                         .build();
                                 response.addHeader("Set-Cookie", accessCookie.toString());
 
@@ -168,11 +169,12 @@ public class KeyCloakSecurityConfig {
                                 if (authorizedClient.getRefreshToken() != null) {
                                     String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
                                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
-                                            .httpOnly(false)
-                                            .secure(false)
+                                            .httpOnly(true)
+                                            .secure(true)
                                             .path("/")
                                             .maxAge(30 * 24 * 3600)
-                                            .sameSite("Lax")
+                                            .sameSite("None")
+                                            .domain(".docuhub.me")
                                             .build();
                                     response.addHeader("Set-Cookie", refreshCookie.toString());
                                 }
