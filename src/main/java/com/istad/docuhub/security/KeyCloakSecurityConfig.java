@@ -157,11 +157,10 @@ public class KeyCloakSecurityConfig {
                                 String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                                         .httpOnly(false)
-                                        .secure(false)                   // required with SameSite=None
+                                        .secure(false)      // change to true in production (HTTPS)
                                         .path("/")
-                                        .maxAge(60)                     // short-lived
-                                        .sameSite("Lax")               // cross-site allowed
-//                                        .domain(".docuhub.me")          // share across subdomains
+                                        .maxAge(60)
+                                        .sameSite("Lax")
                                         .build();
                                 response.addHeader("Set-Cookie", accessCookie.toString());
 
@@ -171,44 +170,41 @@ public class KeyCloakSecurityConfig {
                                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                                             .httpOnly(false)
                                             .secure(false)
-                                            .path("/") // restrict to refresh endpoint
-                                            .maxAge(30 * 24 * 3600)       // 30 days
+                                            .path("/")
+                                            .maxAge(30 * 24 * 3600)
                                             .sameSite("Lax")
-//                                            .domain(".docuhub.me")
                                             .build();
                                     response.addHeader("Set-Cookie", refreshCookie.toString());
                                 }
 
-                                // --- Optional: ID TOKEN COOKIE ---
-                                // Uncomment if needed
-                                // String idToken = oidcUser.getIdToken().getTokenValue();
-                                // ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
-                                //        .httpOnly(true)
-                                //        .secure(true)
-                                //        .path("/")
-                                //        .maxAge(3600)
-                                //        .sameSite("None")
-                                //        .domain(".docuhub.me")
-                                //        .build();
-                                // response.addHeader("Set-Cookie", idCookie.toString());
-                                // Redirect to frontend (localhost for dev, your domain in production)
+                                // --- Check roles from token ---
                                 try {
                                     JWTClaimsSet claims = decodeToken(accessToken);
-                                    JsonObject realmAccess = (JsonObject) claims.getClaim("realm_access");
-                                    if (realmAccess != null) {
+
+                                    // Extract realm roles
+                                    Map<String, Object> realmAccess = (Map<String, Object>) claims.getClaim("realm_access");
+                                    if (realmAccess != null && realmAccess.containsKey("roles")) {
                                         List<String> roles = (List<String>) realmAccess.get("roles");
-                                        if(roles.contains("ADMIN")) {
+
+                                        if (roles.contains("ADMIN")) {
                                             response.sendRedirect("http://admin.docuhub.me");
-                                        }else {
-                                            response.sendRedirect("http://localhost:3000");
+                                            return;
                                         }
                                     }
-                                } catch (Exception ignore) {}
-                            }else {
+
+                                    // Default redirect (non-admin)
+                                    response.sendRedirect("http://localhost:3000");
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    response.sendRedirect("http://localhost:3000");
+                                }
+                            } else {
                                 response.sendRedirect("https://api.docuhub.me/api/v1/auth/keycloak/login");
                             }
                         })
                 )
+
 
 
                 // JSON response for unauthenticated API requests
