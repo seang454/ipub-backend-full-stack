@@ -193,7 +193,6 @@ public class KeyCloakSecurityConfig {
                                             return;
                                         }
                                     }
-
                                     // Default redirect (non-admin)
                                     response.sendRedirect("http://localhost:3000");
 
