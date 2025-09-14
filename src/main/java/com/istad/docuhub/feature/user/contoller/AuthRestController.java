@@ -192,7 +192,6 @@ public class AuthRestController {
         if (storedRefreshToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No refresh token found");
         }
-
         // Prepare Keycloak token request
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "refresh_token");
