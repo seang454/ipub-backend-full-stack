@@ -56,9 +56,11 @@ public class KeyCloakSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
         // Frontend origin
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // dev frontend
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://*.docuhub.me",   // all your subdomains
+                "http://localhost:3000"   // dev
+        ));
         configuration.setAllowCredentials(true); // must allow credentials (cookies)
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
