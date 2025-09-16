@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
     @RequestMapping("/api/v1/media")
-@CrossOrigin("*")
+//@CrossOrigin("*") can not contain special character
 public class MediaController {
 
     private final MediaService mediaService;
