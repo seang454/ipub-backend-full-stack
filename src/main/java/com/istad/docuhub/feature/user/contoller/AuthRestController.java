@@ -286,12 +286,12 @@ public class AuthRestController {
         return userService.updateImageUrl(updateUserImageDto.imageUrl(),uuid);
     }
     @GetMapping("/user")
-    public List<UserResponse> getAllUsers(){
-        return userService.getAllPublicUser();
+    public Map<String,Object> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllPublicUser(PageRequest.of(page,size));
     }
     @GetMapping("/user/student")
-    public List<UserResponse> getAllStudents(){
-        return userService.getAllStudent();
+    public Map<String,Object> getAllStudents(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllStudent(PageRequest.of(page,size));
     }
     @GetMapping ("/user/mentor")
     public Map<String,Object> getAllMentors(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){

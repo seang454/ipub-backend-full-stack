@@ -324,29 +324,59 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllPublicUser() {
+    public Map<String,Object> getAllPublicUser(Pageable pageable) {
         RealmResource realmResource = keycloak.realm("docuapi");
-        List<User> user = userRepository.getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse();
-        List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
-        List<UserResponse> userResponses = new ArrayList<>();
-        for (User user1 : user) {
-            UserRepresentation userRepresentation = userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
-            userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
-        }
-        return userResponses;
+
+        Page<User> userPage = userRepository.getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse(pageable);
+
+        List<UserRepresentation> userRepresentationList = realmResource.users().list()
+                .stream().filter(UserRepresentation::isEnabled).toList();
+
+        List<UserResponse> userResponses = userPage.getContent().stream()
+                .map(user1 -> {
+                    UserRepresentation userRepresentation = userRepresentationList.stream()
+                            .filter(ur -> ur.getId().equals(user1.getUuid()))
+                            .findFirst()
+                            .orElse(null);  // handle missing userRepresentation
+                    return UserMapperManual.mapUserToUserResponse(user1, userRepresentation);
+                })
+                .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", userResponses);
+        response.put("number", userPage.getNumber());
+        response.put("totalPages", userPage.getTotalPages());
+        response.put("totalElements", userPage.getTotalElements());
+
+        return response;
     }
 
     @Override
-    public List<UserResponse> getAllStudent() {
+    public Map<String,Object> getAllStudent(Pageable pageable) {
         RealmResource realmResource = keycloak.realm("docuapi");
-        List<User> user = userRepository.getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentTrueAndIsAdminFalseAndIsDeletedFalse();
-        List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
-        List<UserResponse> userResponses = new ArrayList<>();
-        for (User user1 : user) {
-            UserRepresentation userRepresentation = userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
-            userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
-        }
-        return userResponses;
+
+        Page<User> userPage = userRepository.getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentTrueAndIsAdminFalseAndIsDeletedFalse(pageable);
+
+        List<UserRepresentation> userRepresentationList = realmResource.users().list()
+                .stream().filter(UserRepresentation::isEnabled).toList();
+
+        List<UserResponse> userResponses = userPage.getContent().stream()
+                .map(user1 -> {
+                    UserRepresentation userRepresentation = userRepresentationList.stream()
+                            .filter(ur -> ur.getId().equals(user1.getUuid()))
+                            .findFirst()
+                            .orElse(null);  // handle missing userRepresentation
+                    return UserMapperManual.mapUserToUserResponse(user1, userRepresentation);
+                })
+                .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", userResponses);
+        response.put("number", userPage.getNumber());
+        response.put("totalPages", userPage.getTotalPages());
+        response.put("totalElements", userPage.getTotalElements());
+
+        return response;
     }
 
     @Override

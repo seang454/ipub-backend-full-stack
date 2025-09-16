@@ -21,8 +21,8 @@ public interface UserService {
     void updateUser(String userUuid, UpdateUserDto updateUserDto);
     UpdateUserImageDto updateImageUrl(String imageUrl, String userUuid);
     Map<String, Object> getValidTokens(OAuth2AuthorizedClient client, OidcUser oidcUser);
-    List<UserResponse> getAllPublicUser();
-    List<UserResponse> getAllStudent();
+    Map<String,Object> getAllPublicUser(Pageable pageable);
+    Map<String,Object> getAllStudent(Pageable pageable);
     void promoteAsStudent(String studentUuid);
     void promoteAsMentor(String mentorUuid);
     CurrentUser getCurrentUserSub();

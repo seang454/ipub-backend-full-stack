@@ -53,8 +53,8 @@ public class AdminController {
         }
 
         @GetMapping("/public/users")
-        public List<UserResponse> getAllPublicUsers(){
-            return userService.getAllPublicUser();
+        public Map<String, Object> getAllPublicUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+            return userService.getAllPublicUser(PageRequest.of(page,size));
         }
         @GetMapping("/user/{uuid}")
         public UserResponse getSingleUser(@PathVariable String uuid){
@@ -70,8 +70,8 @@ public class AdminController {
 
     // student sections
     @GetMapping("/students")
-    public List<UserResponse> getAllStudents(){
-        return userService.getAllStudent();
+    public Map<String,Object> getAllStudents(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllStudent(PageRequest.of(page,size));
     }
 
     @ResponseStatus(HttpStatus.CREATED)

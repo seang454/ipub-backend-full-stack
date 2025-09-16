@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> getAllUsersByIsDeletedFalse();
     List<User> findBySlugContainingAndIsDeletedFalse(String slug);
     Optional<User> findByUuid(String uuid);
-    List<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse();
-    List<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentTrueAndIsAdminFalseAndIsDeletedFalse();
+    Page<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse(Pageable pageable);
+    Page<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentTrueAndIsAdminFalseAndIsDeletedFalse(Pageable pageable);
     Page<User> getUserByIsUserTrueAndIsAdvisorTrueAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse(Pageable pageable);
 }
