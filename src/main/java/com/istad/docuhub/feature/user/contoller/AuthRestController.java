@@ -246,11 +246,11 @@ public class AuthRestController {
     }
 
 
-    @GetMapping("users")
+    @GetMapping("/users")
     public List<UserResponse> getUsers(){
         return userService.getAllUsers();
     }
-    @GetMapping("users/page")
+    @GetMapping("/users/page")
     Map<String,Object> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
         Page<UserResponse> userPage = userService.getAllUsersByPage(page, size);
         Map<String,Object> response= new HashMap<>();
@@ -260,11 +260,11 @@ public class AuthRestController {
         response.put("number", userPage.getNumber()); // current page
         return response;
     }
-    @GetMapping("user/{uuid}")
+    @GetMapping("/user/{uuid}")
     public UserResponse getSingleUser(@PathVariable String uuid){
         return userService.getSingleUser(uuid);
     }
-    @GetMapping("slug")
+    @GetMapping("/slug")
     public List<UserResponse> searchUserByUsername(@RequestParam String username){
         return userService.searchUserByUsername(username);
     }
