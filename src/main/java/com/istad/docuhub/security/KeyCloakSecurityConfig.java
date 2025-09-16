@@ -183,27 +183,28 @@ public class KeyCloakSecurityConfig {
                                 }
 
                                 // --- Check roles from token ---
-                                try {
-                                    JWTClaimsSet claims = decodeToken(accessToken);
-
-                                    // Extract realm roles
-                                    Map<String, Object> realmAccess = (Map<String, Object>) claims.getClaim("realm_access");
-                                    if (realmAccess != null && realmAccess.containsKey("roles")) {
-                                        List<String> roles = (List<String>) realmAccess.get("roles");
-
-                                        if (roles.contains("ADMIN")) {
-                                            response.sendRedirect("http://admin.docuhub.me");
-                                            return;
-                                        }
-                                    }
-                                    // Default redirect (non-admin)
-                                    response.sendRedirect("http://localhost:3000");
-
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    response.sendRedirect("http://localhost:3000");
-                                }
-                            } else {
+//                                try {
+//                                    JWTClaimsSet claims = decodeToken(accessToken);
+//
+//                                    // Extract realm roles
+//                                    Map<String, Object> realmAccess = (Map<String, Object>) claims.getClaim("realm_access");
+//                                    if (realmAccess != null && realmAccess.containsKey("roles")) {
+//                                        List<String> roles = (List<String>) realmAccess.get("roles");
+//
+//                                        if (roles.contains("ADMIN")) {
+//                                            response.sendRedirect("http://admin.docuhub.me");
+//                                            return;
+//                                        }
+//                                    }
+//                                    // Default redirect (non-admin)
+//                                    response.sendRedirect("http://localhost:3000");
+//
+//                                } catch (Exception e) {
+//                                    e.printStackTrace();
+//                                    response.sendRedirect("http://localhost:3000");
+//                                }
+                            }
+                            else {
                                 response.sendRedirect("https://api.docuhub.me/api/v1/auth/keycloak/login");
                             }
                         })
