@@ -135,8 +135,8 @@ public class AdminController {
 
     // adviser section
     @GetMapping ("/advisers")
-    public List<UserResponse> getAllMentors(){
-        return userService.getAllMentor();
+    public Map<String,Object> getAllMentors(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllMentor(PageRequest.of(page,size));
     }
 
     @PostMapping("/adviser/create-adviser")

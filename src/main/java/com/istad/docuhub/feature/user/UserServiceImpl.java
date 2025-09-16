@@ -24,6 +24,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -349,17 +350,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllMentor() {
+    public Map<String, Object> getAllMentor(Pageable pageable) {
         RealmResource realmResource = keycloak.realm("docuapi");
-        List<User> user = userRepository.getUserByIsUserTrueAndIsAdvisorTrueAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse();
-        List<UserRepresentation> userRepresentationList = realmResource.users().list().stream().filter(UserRepresentation::isEnabled).toList();
-        List<UserResponse> userResponses = new ArrayList<>();
-        for (User user1 : user) {
-            UserRepresentation userRepresentation = userRepresentationList.stream().filter(userRepresentation1 -> userRepresentation1.getId().equals(user1.getUuid())).findFirst().get();
-            userResponses.add(UserMapperManual.mapUserToUserResponse(user1, userRepresentation));
-        }
-        return userResponses;
+
+        Page<User> userPage = userRepository
+                .getUserByIsUserTrueAndIsAdvisorTrueAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse(pageable);
+
+        List<UserRepresentation> userRepresentationList = realmResource.users().list()
+                .stream().filter(UserRepresentation::isEnabled).toList();
+
+        List<UserResponse> userResponses = userPage.getContent().stream()
+                .map(user1 -> {
+                    UserRepresentation userRepresentation = userRepresentationList.stream()
+                            .filter(ur -> ur.getId().equals(user1.getUuid()))
+                            .findFirst()
+                            .orElse(null);  // handle missing userRepresentation
+                    return UserMapperManual.mapUserToUserResponse(user1, userRepresentation);
+                })
+                .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", userResponses);
+        response.put("number", userPage.getNumber());
+        response.put("totalPages", userPage.getTotalPages());
+        response.put("totalElements", userPage.getTotalElements());
+
+        return response;
     }
+
 
     @Override
     public void promoteAsStudent(String studentUuidOrUsername) {

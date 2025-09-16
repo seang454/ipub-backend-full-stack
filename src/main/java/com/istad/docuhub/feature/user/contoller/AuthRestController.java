@@ -1,6 +1,7 @@
 package com.istad.docuhub.feature.user.contoller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.RefreshTokenService;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -292,8 +294,8 @@ public class AuthRestController {
         return userService.getAllStudent();
     }
     @GetMapping ("/user/mentor")
-    public List<UserResponse> getAllMentors(@RequestParam int page, @RequestParam int size){
-        return userService.getAllMentor();
+    public Map<String,Object> getAllMentors(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllMentor(PageRequest.of(page,size));
     }
     @PostMapping("/user/student/{uuid}")
     public void promoteStudent(@PathVariable String uuid) {

@@ -3,6 +3,7 @@ package com.istad.docuhub.feature.user;
 
 import com.istad.docuhub.feature.user.dto.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
@@ -22,9 +23,9 @@ public interface UserService {
     Map<String, Object> getValidTokens(OAuth2AuthorizedClient client, OidcUser oidcUser);
     List<UserResponse> getAllPublicUser();
     List<UserResponse> getAllStudent();
-    List<UserResponse> getAllMentor();
     void promoteAsStudent(String studentUuid);
     void promoteAsMentor(String mentorUuid);
     CurrentUser getCurrentUserSub();
     UserProfileResponse getUserProfile(String uuid);
+    Map<String, Object> getAllMentor(Pageable pageable);
 }
