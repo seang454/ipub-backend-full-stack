@@ -58,7 +58,8 @@ public class KeyCloakSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // Frontend origin
         configuration.setAllowedOriginPatterns(List.of(
-                "https://*.docuhub.me",   // all your subdomains
+                "https://*.docuhub.me",
+                "https://admin.docuhub.me",// all your subdomains
                 "http://localhost:3000"   // dev
         ));
         configuration.setAllowCredentials(true); // must allow credentials (cookies)
