@@ -41,7 +41,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AuthRestController {
 
     private final UserService userService;
@@ -252,8 +251,14 @@ public class AuthRestController {
         return userService.getAllUsers();
     }
     @GetMapping("users/page")
-    Page<UserResponse> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
-        return userService.getAllUsersByPage(page, size);
+    Map<String,Object> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Page<UserResponse> userPage = userService.getAllUsersByPage(page, size);
+        Map<String,Object> response= new HashMap<>();
+        response.put("content", userPage.getContent()); // list of users
+        response.put("totalElements", userPage.getTotalElements()); // total number of users
+        response.put("totalPages", userPage.getTotalPages());
+        response.put("number", userPage.getNumber()); // current page
+        return response;
     }
     @GetMapping("user/{uuid}")
     public UserResponse getSingleUser(@PathVariable String uuid){
@@ -287,7 +292,7 @@ public class AuthRestController {
         return userService.getAllStudent();
     }
     @GetMapping ("/user/mentor")
-    public List<UserResponse> getAllMentors(){
+    public List<UserResponse> getAllMentors(@RequestParam int page, @RequestParam int size){
         return userService.getAllMentor();
     }
     @PostMapping("/user/student/{uuid}")
