@@ -1,16 +1,21 @@
 package com.istad.docuhub.feature.adviserDetail;
 
+import com.istad.docuhub.domain.AdviserAssignment;
 import com.istad.docuhub.domain.AdviserDetail;
+import com.istad.docuhub.feature.adviserAssignment.AdviserAssignmentRepository;
 import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
 import com.istad.docuhub.feature.adviserDetail.dto.UpdateAdviserDetailRequest;
+import com.istad.docuhub.feature.user.UserService;
+import com.istad.docuhub.feature.user.dto.CurrentUser;
 import com.istad.docuhub.utils.CurrentUserV2;
 import com.istad.docuhub.utils.QuickService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,6 +32,9 @@ public class AdviserDetailImpl implements AdviserService {
 
     private final AdviserDetailRepository adviserDetailRepository;
     private final QuickService quickService;
+    private final UserService userService;
+    private final AdviserAssignmentRepository adviserAssignmentRepository;
+
     // Convert Domain -> Response DTO
     private AdviserDetailResponse mapToResponse(AdviserDetail adviserDetail) {
         return AdviserDetailResponse.builder()
@@ -155,8 +163,19 @@ public class AdviserDetailImpl implements AdviserService {
     }
 
     @Override
-    public Page<AdviserAssignmentResponse> getAllAssignment() {
-        return null;
+    public Page<AdviserAssignmentResponse> getAllAssignment(Pageable pageable) {
+        CurrentUser subId = userService.getCurrentUserSub();
+        Page<AdviserAssignment> adviserAssignmentResponses = adviserAssignmentRepository.findByAdvisorUuid(subId.id(), pageable);
+        return adviserAssignmentResponses.map(adviserAssignmentResponse -> new AdviserAssignmentResponse(
+                adviserAssignmentResponse.getUuid(),
+                adviserAssignmentResponse.getPaper().getUuid(),
+                adviserAssignmentResponse.getAdvisor().getUuid(),
+                adviserAssignmentResponse.getAdmin().getUuid(),
+                adviserAssignmentResponse.getDeadline(),
+                adviserAssignmentResponse.getStatus(),
+                adviserAssignmentResponse.getAssignedDate(),
+                adviserAssignmentResponse.getUpdateDate()
+        ));
     }
 
 }

@@ -4,8 +4,8 @@ import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
 import com.istad.docuhub.feature.adviserDetail.dto.UpdateAdviserDetailRequest;
-import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -23,5 +23,5 @@ public interface AdviserService {
 
     AdviserDetailResponse updateByToken( UpdateAdviserDetailRequest updateRequest);
 
-    Page<AdviserAssignmentResponse> getAllAssignment();
+    Page<AdviserAssignmentResponse> getAllAssignment(Pageable pageable);
 }

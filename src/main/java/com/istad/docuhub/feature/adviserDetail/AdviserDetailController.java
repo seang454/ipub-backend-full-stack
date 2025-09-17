@@ -4,10 +4,15 @@ import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
 import com.istad.docuhub.feature.adviserDetail.dto.UpdateAdviserDetailRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/adviser_details")
@@ -46,5 +51,20 @@ public class AdviserDetailController {
     @PutMapping
     public ResponseEntity<AdviserDetailResponse>updateByToken(@RequestBody  UpdateAdviserDetailRequest request){
         return ResponseEntity.ok(adviserService.updateByToken(request));
+    }
+
+    @GetMapping("/assignments")
+    public ResponseEntity<?> getAllAssignments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return new ResponseEntity<>(
+                Map.of(
+                        "status", HttpStatus.OK,
+                        "data", adviserService.getAllAssignment(pageable)
+                ), HttpStatus.OK
+        );
     }
 }
