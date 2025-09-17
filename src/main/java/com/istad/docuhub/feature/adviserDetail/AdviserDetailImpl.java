@@ -1,6 +1,8 @@
 package com.istad.docuhub.feature.adviserDetail;
 
+import com.istad.docuhub.domain.AdviserAssignment;
 import com.istad.docuhub.domain.AdviserDetail;
+import com.istad.docuhub.feature.adviserAssignment.AdviserAssignmentRepository;
 import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
@@ -16,12 +18,15 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.stream;
+
 @Service
 @RequiredArgsConstructor
 public class AdviserDetailImpl implements AdviserService {
 
     private final AdviserDetailRepository adviserDetailRepository;
     private final UserService userService;
+    private final AdviserAssignmentRepository adviserAssignmentRepository;
 
     // Convert Domain -> Response DTO
     private AdviserDetailResponse mapToResponse(AdviserDetail adviserDetail) {
@@ -112,7 +117,7 @@ public class AdviserDetailImpl implements AdviserService {
     @Override
     public Page<AdviserAssignmentResponse> getAllAssignment() {
         CurrentUser subId = userService.getCurrentUserSub();
-
+        List<AdviserAssignment> adviserAssignment = adviserAssignmentRepository.findByAdvisorUuid(subId.id());
         return null;
     }
 }
