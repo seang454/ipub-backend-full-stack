@@ -35,6 +35,7 @@ public class AdviserAssignment {
     @OneToOne
     @JoinColumn(name = "advisor_uuid",referencedColumnName = "uuid")
     private User advisor;
+
     //one to one paper
     @OneToOne
     @JoinColumn(name = "paper_uuid",referencedColumnName = "uuid")
