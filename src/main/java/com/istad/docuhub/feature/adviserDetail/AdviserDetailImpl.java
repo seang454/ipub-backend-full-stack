@@ -1,10 +1,14 @@
 package com.istad.docuhub.feature.adviserDetail;
 
 import com.istad.docuhub.domain.AdviserDetail;
+import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
+import com.istad.docuhub.feature.user.UserService;
+import com.istad.docuhub.feature.user.dto.CurrentUser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +21,7 @@ import java.util.stream.Collectors;
 public class AdviserDetailImpl implements AdviserService {
 
     private final AdviserDetailRepository adviserDetailRepository;
+    private final UserService userService;
 
     // Convert Domain -> Response DTO
     private AdviserDetailResponse mapToResponse(AdviserDetail adviserDetail) {
@@ -102,5 +107,12 @@ public class AdviserDetailImpl implements AdviserService {
                 .filter(adviserDetail -> !Boolean.TRUE.equals(adviserDetail.getIsDeleted()))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<AdviserAssignmentResponse> getAllAssignment() {
+        CurrentUser subId = userService.getCurrentUserSub();
+
+        return null;
     }
 }

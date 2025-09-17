@@ -1,10 +1,18 @@
 package com.istad.docuhub.feature.user.contoller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.RefreshTokenService;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.*;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,9 +35,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URL;
+import java.security.interfaces.RSAPublicKey;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -40,6 +49,9 @@ public class AuthRestController {
     private final KeycloakAuthService keycloakAuthService;
     private final RefreshTokenService refreshTokenService;
     private final RestTemplate restTemplate = new RestTemplate();
+    // to verify token
+    private static final String JWKS_URL = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/certs";
+
 
     @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
     private String clientId;
@@ -101,21 +113,74 @@ public class AuthRestController {
     }
     @GetMapping("/protected-endpoint")
     public ResponseEntity<Map<String, Object>> protectedEndpoint(
-            @CookieValue(name = "access_token", required = false) String token) {
+            @CookieValue(name = "access_token", required = false) String accessToken,
+            @CookieValue(name = "refresh_token", required = false) String refreshToken) {
 
-        if (token != null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Protected data accessed");
-            response.put("token", token);
-            return ResponseEntity.ok(response);
+        Map<String, Object> response = new HashMap<>();
+
+        if (accessToken == null) {
+            response.put("status", "unauthenticated");
+            response.put("no", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "No token provided");
+            response.put("access_token", null);
+            response.put("refresh_token", null);
+            response.put("claims", null);
+            response.put("accessTokenExpires", null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("status", "error");
-        errorResponse.put("message", "No valid token");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        try {
+            // Decode JWT payload without signature verification
+            String[] parts = accessToken.split("\\.");
+            if (parts.length != 3) {
+                throw new JwtException("Invalid JWT format");
+            }
+
+            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> claims = mapper.readValue(payloadJson, Map.class);
+
+            // Get expiration as epoch seconds
+            Long exp = claims.get("exp") instanceof Integer
+                    ? ((Integer) claims.get("exp")).longValue()
+                    : (Long) claims.get("exp");
+
+            // Check expiration
+            long nowEpoch = System.currentTimeMillis() / 1000;
+            if (exp != null && exp < nowEpoch) {
+                response.put("status", "unauthenticated");
+                response.put("no", HttpStatus.UNAUTHORIZED.value());
+                response.put("message", "Token expired");
+                response.put("access_token", accessToken);
+                response.put("refresh_token", refreshToken);
+                response.put("claims", claims);
+                response.put("accessTokenExpires", exp);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            // Token is valid
+            response.put("status", "authenticated");
+            response.put("no", HttpStatus.OK.value());
+            response.put("message", "Token is valid (not expired)");
+            response.put("access_token", accessToken);
+            response.put("refresh_token", refreshToken);
+            response.put("claims", claims);
+            response.put("accessTokenExpires", exp);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("status", "unauthenticated");
+            response.put("no", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "Invalid token: " + e.getMessage());
+            response.put("access_token", null);
+            response.put("refresh_token", null);
+            response.put("claims", null);
+            response.put("accessTokenExpires", null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
     }
+
 
 
     @PostMapping("/refresh")
@@ -128,7 +193,6 @@ public class AuthRestController {
         if (storedRefreshToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No refresh token found");
         }
-
         // Prepare Keycloak token request
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "refresh_token");
@@ -184,19 +248,25 @@ public class AuthRestController {
     }
 
 
-    @GetMapping("users")
+    @GetMapping("/users")
     public List<UserResponse> getUsers(){
         return userService.getAllUsers();
     }
-    @GetMapping("users/page")
-    Page<UserResponse> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
-        return userService.getAllUsersByPage(page, size);
+    @GetMapping("/users/page")
+    Map<String,Object> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Page<UserResponse> userPage = userService.getAllUsersByPage(page, size);
+        Map<String,Object> response= new HashMap<>();
+        response.put("content", userPage.getContent()); // list of users
+        response.put("totalElements", userPage.getTotalElements()); // total number of users
+        response.put("totalPages", userPage.getTotalPages());
+        response.put("number", userPage.getNumber()); // current page
+        return response;
     }
-    @GetMapping("user/{uuid}")
+    @GetMapping("/user/{uuid}")
     public UserResponse getSingleUser(@PathVariable String uuid){
         return userService.getSingleUser(uuid);
     }
-    @GetMapping("slug")
+    @GetMapping("/slug")
     public List<UserResponse> searchUserByUsername(@RequestParam String username){
         return userService.searchUserByUsername(username);
     }
@@ -216,16 +286,16 @@ public class AuthRestController {
         return userService.updateImageUrl(updateUserImageDto.imageUrl(),uuid);
     }
     @GetMapping("/user")
-    public List<UserResponse> getAllUsers(){
-        return userService.getAllPublicUser();
+    public Map<String,Object> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllPublicUser(PageRequest.of(page,size));
     }
     @GetMapping("/user/student")
-    public List<UserResponse> getAllStudents(){
-        return userService.getAllStudent();
+    public Map<String,Object> getAllStudents(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllStudent(PageRequest.of(page,size));
     }
     @GetMapping ("/user/mentor")
-    public List<UserResponse> getAllMentors(){
-        return userService.getAllMentor();
+    public Map<String,Object> getAllMentors(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return userService.getAllMentor(PageRequest.of(page,size));
     }
     @PostMapping("/user/student/{uuid}")
     public void promoteStudent(@PathVariable String uuid) {

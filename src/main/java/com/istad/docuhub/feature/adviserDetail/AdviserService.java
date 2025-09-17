@@ -1,7 +1,10 @@
 package com.istad.docuhub.feature.adviserDetail;
 
+import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
+import com.istad.docuhub.feature.paper.dto.PaperResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -16,4 +19,6 @@ public interface AdviserService {
     void deleteAdviserDetail(String uuid);
 
     List<AdviserDetailResponse> getAllAdviserDetails();
+
+    Page<AdviserAssignmentResponse> getAllAssignment();
 }
