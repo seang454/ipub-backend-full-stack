@@ -1,8 +1,5 @@
 package com.istad.docuhub.feature.studentDetail;
 
-
-import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
-import com.istad.docuhub.feature.studentDetail.dto.StudentApproveRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

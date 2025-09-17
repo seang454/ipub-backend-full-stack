@@ -12,10 +12,15 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:8080", "http://127.0.0.1:5500") // Add your frontend URL
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
-                        .allowedHeaders("*")
+//                registry.addMapping("/api/**")
+                registry.addMapping("**")
+//                        .allowedOrigins("http://localhost:8080", "http://127.0.0.1:5500") // Add your frontend URL
+//                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+//                        .allowedHeaders("*")
+//                        .allowCredentials(true);
+
+                        .allowedOriginPatterns("*")
+                        .allowedMethods("*")
                         .allowCredentials(true);
             }
         };

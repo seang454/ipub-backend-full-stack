@@ -2,6 +2,7 @@ package com.istad.docuhub.feature.adviserDetail;
 
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailRequest;
 import com.istad.docuhub.feature.adviserDetail.dto.AdviserDetailResponse;
+import com.istad.docuhub.feature.adviserDetail.dto.UpdateAdviserDetailRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +27,9 @@ public class AdviserDetailController {
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<AdviserDetailResponse> updateAdviser(@PathVariable String uuid,
-                                                               @RequestBody AdviserDetailRequest request) {
-        return ResponseEntity.ok(adviserService.updateAdviserDetail(uuid, request));
+    public ResponseEntity<AdviserDetailResponse> updateAdviserDetailByUuid(@PathVariable String uuid,
+                                                               @RequestBody UpdateAdviserDetailRequest request) {
+        return ResponseEntity.ok(adviserService.updateAdviserDetailByUuid(uuid, request));
     }
 
     @DeleteMapping("/{uuid}")
@@ -40,5 +41,10 @@ public class AdviserDetailController {
     @GetMapping
     public ResponseEntity<List<AdviserDetailResponse>> getAllAdvisers() {
         return ResponseEntity.ok(adviserService.getAllAdviserDetails());
+    }
+
+    @PutMapping
+    public ResponseEntity<AdviserDetailResponse>updateByToken(@RequestBody  UpdateAdviserDetailRequest request){
+        return ResponseEntity.ok(adviserService.updateByToken(request));
     }
 }
