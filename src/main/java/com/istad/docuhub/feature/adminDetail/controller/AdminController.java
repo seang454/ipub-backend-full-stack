@@ -151,6 +151,10 @@ public class AdminController {
         userService.deleteUser(uuid);
     }
 
+    @GetMapping("/advisor/{uuid}")
+    public UserResponse getAdviserByUuid(@PathVariable String uuid) {
+            return userService.getSingleUser(uuid);
+    }
 
 
     // adviser assignment
