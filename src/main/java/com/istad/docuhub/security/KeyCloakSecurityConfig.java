@@ -2,6 +2,9 @@ package com.istad.docuhub.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.istad.docuhub.feature.user.RefreshTokenService;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -53,9 +56,12 @@ public class KeyCloakSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
         // Frontend origin
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // dev frontend
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://*.docuhub.me",
+                "https://admin.docuhub.me",// all your subdomains
+                "http://localhost:3000"   // dev
+        ));
         configuration.setAllowCredentials(true); // must allow credentials (cookies)
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
@@ -74,7 +80,7 @@ public class KeyCloakSecurityConfig {
                 .cors(Customizer.withDefaults()) // enable CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","/api/v1/auth/protected-endpoint").permitAll()
+                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","/api/v1/auth/user/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh/**").permitAll()
                         .requestMatchers("/favicon.ico", "/health").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
@@ -144,44 +150,67 @@ public class KeyCloakSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
                         .successHandler((request, response, authentication) -> {
+
                             OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
                             OAuth2AuthorizedClient authorizedClient =
                                     authorizedClientService.loadAuthorizedClient("keycloak", authentication.getName());
 
                             if (authorizedClient != null) {
-                                String accessToken = authorizedClient.getAccessToken().getTokenValue();
-                                String idToken = oidcUser.getIdToken().getTokenValue();
-
                                 // --- ACCESS TOKEN COOKIE ---
+                                String accessToken = authorizedClient.getAccessToken().getTokenValue();
                                 ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                                         .httpOnly(true)
-                                        .secure(true)                   // ✅ required with SameSite=None
+                                        .secure(true)      // change to true in production (HTTPS)
                                         .path("/")
-                                        .maxAge(3600)
-                                        .sameSite("None")               // ✅ cross-site allowed
-                                        .domain(".docuhub.me")          // ✅ share across subdomains
-                                        .build();
-
-                                // --- ID TOKEN COOKIE ---
-                                ResponseCookie idCookie = ResponseCookie.from("id_token", idToken)
-                                        .httpOnly(true)
-                                        .secure(true)
-                                        .path("/")
-                                        .maxAge(3600)
+                                        .maxAge(60)
                                         .sameSite("None")
                                         .domain(".docuhub.me")
                                         .build();
-
-                                // ✅ add cookies safely
                                 response.addHeader("Set-Cookie", accessCookie.toString());
-                                response.addHeader("Set-Cookie", idCookie.toString());
-                            }
 
-                            // ✅ Redirect to frontend (can be localhost for dev)
-                            // In production: "https://frontend.docuhub.me"
-                            response.sendRedirect("http://localhost:3000");
+                                // --- REFRESH TOKEN COOKIE ---
+                                if (authorizedClient.getRefreshToken() != null) {
+                                    String refreshToken = authorizedClient.getRefreshToken().getTokenValue();
+                                    ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
+                                            .httpOnly(true)
+                                            .secure(true)
+                                            .path("/")
+                                            .maxAge(30 * 24 * 3600)
+                                            .sameSite("None")
+                                            .domain(".docuhub.me")
+                                            .build();
+                                    response.addHeader("Set-Cookie", refreshCookie.toString());
+                                }
+
+                                // --- Check roles from token ---
+//                                try {
+//                                    JWTClaimsSet claims = decodeToken(accessToken);
+//
+//                                    // Extract realm roles
+//                                    Map<String, Object> realmAccess = (Map<String, Object>) claims.getClaim("realm_access");
+//                                    if (realmAccess != null && realmAccess.containsKey("roles")) {
+//                                        List<String> roles = (List<String>) realmAccess.get("roles");
+//
+//                                        if (roles.contains("ADMIN")) {
+//                                            response.sendRedirect("http://admin.docuhub.me");
+//                                            return;
+//                                        }
+//                                    }
+//                                    // Default redirect (non-admin)
+//                                    response.sendRedirect("http://localhost:3000");
+//
+//                                } catch (Exception e) {
+//                                    e.printStackTrace();
+//                                    response.sendRedirect("http://localhost:3000");
+//                                }
+                            }
+                            else {
+                                response.sendRedirect("https://api.docuhub.me/api/v1/auth/keycloak/login");
+                            }
                         })
                 )
+
+
 
                 // JSON response for unauthenticated API requests
                 .exceptionHandling(exception -> exception
@@ -198,7 +227,8 @@ public class KeyCloakSecurityConfig {
                         .logoutSuccessHandler((request, response, authentication) -> {
                             // Delete access_token and id_token cookies
                             deleteCookie(response, "access_token");
-                            deleteCookie(response, "id_token");
+//                            deleteCookie(response, "id_token");
+                            deleteCookie(response, "refresh_token");
                             deleteCookie(response, "JSESSIONID"); // optional
                             // Redirect to frontend or Keycloak logout
                             String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
@@ -209,6 +239,10 @@ public class KeyCloakSecurityConfig {
                         .invalidateHttpSession(true)
                 );
         return http.build();
+    }
+    public static JWTClaimsSet decodeToken(String token) throws Exception {
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        return signedJWT.getJWTClaimsSet();
     }
 
     private void deleteCookie(HttpServletResponse response, String name) {

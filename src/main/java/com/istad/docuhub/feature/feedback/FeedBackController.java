@@ -1,6 +1,7 @@
 package com.istad.docuhub.feature.feedback;
 
 
+import com.istad.docuhub.feature.feedback.dto.FeedBackUpdate;
 import com.istad.docuhub.feature.feedback.dto.FeedbackRequest;
 import com.istad.docuhub.feature.feedback.dto.FeedbackResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,5 +45,15 @@ public class FeedBackController {
 
         Pageable pageable = PageRequest.of(page, size, sort);
         return feedbackService.getAllFeedBack(pageable);
+    }
+
+    @PutMapping("/{paperUuid}")
+    public ResponseEntity<?> updateFeedbackStatus(@PathVariable String paperUuid, @RequestBody FeedBackUpdate feedBackUpdate) {
+        feedbackService.updateFeedbackStatus(paperUuid, feedBackUpdate);
+        return new ResponseEntity<>(
+                Map.of(
+                        "message", "Update feedback status successfully"
+                ), HttpStatus.OK
+        );
     }
 }
