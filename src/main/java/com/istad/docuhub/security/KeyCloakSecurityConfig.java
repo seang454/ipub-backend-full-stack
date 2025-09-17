@@ -86,6 +86,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
                         .requestMatchers("/api/v1/auth/keycloak/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/profile").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
@@ -145,6 +146,10 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/feedback").hasAnyRole("ADMIN", "ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/feedback").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/feedback/**").hasAnyRole("ADMIN", "ADVISER")
+
+
+                        // get all assingment
+                        .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/assignments").hasAnyRole("ADVISER")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
