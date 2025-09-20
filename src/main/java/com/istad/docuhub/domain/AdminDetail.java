@@ -22,7 +22,5 @@ public class AdminDetail {
     @JoinColumn(name = "user_uuid",referencedColumnName = "uuid")
     private User user;
 
-    @ManyToMany
-    private List<Specialize> specializeList;
 
 }

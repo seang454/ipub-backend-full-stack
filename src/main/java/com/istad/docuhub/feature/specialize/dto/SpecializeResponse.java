@@ -1,4 +1,8 @@
 package com.istad.docuhub.feature.specialize.dto;
 
-public record SpecializeResponse() {
+public record SpecializeResponse(
+        String uuid,
+        String name,
+        String slug
+) {
 }

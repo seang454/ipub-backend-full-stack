@@ -6,18 +6,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-
+@Entity
+@Table(
+        name = "adviser_assignments",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"advisor_uuid", "paper_uuid"}) // prevent duplicate adviser-paper
+        }
+)
 @Getter
 @Setter
-@Entity
 @NoArgsConstructor
-@Table(name = "adviser_assignments")
 public class AdviserAssignment {
 
     @Id
     private Integer id;
 
-    @Column(nullable = false, unique = true) // ✅ this makes uuid usable in FKs
+    @Column(nullable = false, unique = true)
     private String uuid;
 
     @Column(nullable = false)
@@ -29,20 +33,21 @@ public class AdviserAssignment {
     @Column(nullable = false)
     private LocalDate assignedDate;
 
-    @Column(nullable = true)
     private LocalDate updateDate;
 
-    @OneToOne
-    @JoinColumn(name = "advisor_uuid",referencedColumnName = "uuid")
+    // adviser → many assignments allowed
+    @ManyToOne
+    @JoinColumn(name = "advisor_uuid", referencedColumnName = "uuid", nullable = false)
     private User advisor;
-    //one to one paper
-    @OneToOne
-    @JoinColumn(name = "paper_uuid",referencedColumnName = "uuid")
+
+    // paper → many assignments allowed
+    @ManyToOne
+    @JoinColumn(name = "paper_uuid", referencedColumnName = "uuid", nullable = false)
     private Paper paper;
-    //one to one admin
 
-    @OneToOne
-    @JoinColumn(name = "admin_uuid",referencedColumnName = "uuid")
+    // admin → many assignments allowed
+    @ManyToOne
+    @JoinColumn(name = "admin_uuid", referencedColumnName = "uuid", nullable = false)
     private User admin;
-
 }
+

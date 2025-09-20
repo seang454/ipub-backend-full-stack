@@ -564,15 +564,15 @@ public class UserServiceImpl implements UserService {
         }
 
         if (Boolean.TRUE.equals(user.getIsAdvisor())) {
-            AdviserDetail adviserDetail = adviserDetailRepository.findByUserUuid_Uuid(user.getUuid())
+            AdviserDetail adviserDetail = adviserDetailRepository.findByUser_Uuid(user.getUuid())
                     .orElseThrow(
                             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser details not found for user")
                     );
             adviserDetailResponse = AdviserDetailResponse.builder()
-                    .yearsExperience(adviserDetail.getExperienceYears())
+                    .experienceYears(adviserDetail.getExperienceYears())
                     .linkedinUrl(adviserDetail.getLinkedinUrl())
                     .publication(adviserDetail.getPublication())
-                    .availability(adviserDetail.getStatus())
+                    .status(adviserDetail.getStatus())
                     .socialLinks(adviserDetail.getSocialLinks())
                     .userUuid(adviserDetail.getUser().getUuid())
                     .build();
