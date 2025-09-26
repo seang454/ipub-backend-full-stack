@@ -304,11 +304,14 @@ public class AdminController {
         );
     }
 
+
+    // adjust shortby createdAt to name in get all cetegories
     @GetMapping("/categories")
-    public ResponseEntity<?> getAllCategories(@RequestParam(defaultValue = "0") int page,   // page index (0 = first page)
-                                                                   @RequestParam(defaultValue = "10") int size,  // default 10 items per page
-                                                                   @RequestParam(defaultValue = "createdAt") String sortBy,
-                                                                   @RequestParam(defaultValue = "desc") String direction
+    public ResponseEntity<?> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortBy,   // 🟢 use an existing field
+            @RequestParam(defaultValue = "asc") String direction
     ) {
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -318,5 +321,6 @@ public class AdminController {
         Page<CategoryResponse> categories = categoryService.getAllCategory(pageable);
         return ResponseEntity.ok(categories);
     }
+
 }
 
