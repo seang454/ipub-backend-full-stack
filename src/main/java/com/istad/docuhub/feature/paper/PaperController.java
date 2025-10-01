@@ -112,4 +112,10 @@ public class PaperController {
                 ), HttpStatus.OK
         );
     }
+
+    @PostMapping("/publish/{uuid}")
+    public ResponseEntity<?> publishPaperByUuid(@PathVariable String uuid) {
+        paperService.publishPaperByUuid(uuid);
+        return ResponseEntity.status(HttpStatus.OK).body("Paper published successfully");
+    }
 }

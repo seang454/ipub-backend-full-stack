@@ -113,6 +113,17 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
+    public void publishPaperByUuid(String uuid) {
+        CurrentUser subId = userService.getCurrentUserSub();
+        String authorUuid = subId.id();
+        Paper paper = paperRepository.findPaperByUuidAndAuthor_Uuid(uuid, authorUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper is  not found or already published"));
+        paper.setIsPublished(true);
+        paper.setPublishedAt(LocalDate.now());
+        paperRepository.save(paper);
+    }
+
+    @Override
     public PaperResponse getPaperById(String Uuid) {
         Paper paper = paperRepository.findByUuid(Uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
         return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt());

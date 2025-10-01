@@ -28,4 +28,6 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
 
     // added by thongfazon
     Boolean existsByUuid(String uuid);
+
+    Optional<Paper> findPaperByUuidAndAuthor_Uuid(String uuid, String authorUuid);
 }

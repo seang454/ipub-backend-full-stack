@@ -24,4 +24,6 @@ public interface PaperService {
     Page<PaperResponse> getAllPapersIsApprovedForAuthor(Pageable pageable);
     void deletePaperByAuthor(String uuid);
     PaperResponse updatePaperByAuthor(String uuid, PaperRequest paperRequest);
+
+    void publishPaperByUuid(String uuid);
 }
