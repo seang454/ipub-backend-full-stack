@@ -6,10 +6,7 @@ import java.time.LocalDate;
 
 @Builder
 public record StarResponse(
-        Integer userId,
-        String userUuid,
-        String fullName,
-        String imageUrl,
-        LocalDate starredAt
+        String paperUuid,
+        String userUuid
 ) {
 }

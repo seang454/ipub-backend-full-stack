@@ -8,6 +8,7 @@ import com.istad.docuhub.feature.star.dto.StarResponse;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,15 +18,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class StarServiceImpl implements StarService {
 
-
-    private UserService userService;
-    private PaperRepository paperRepository;
-    private UserRepository userRepository;
-    private StarRepository starRepository;
-
-
+    private final UserService userService;
+    private final PaperRepository paperRepository;
+    private final UserRepository userRepository;
+    private final StarRepository starRepository;
 
     @Override
     public StarResponse starReaction(String paperUuid) {
@@ -34,14 +33,9 @@ public class StarServiceImpl implements StarService {
         CurrentUser userId = userService.getCurrentUserSub();
 
         // Get paper by uuid
-        Paper paper = paperRepository.findByUuid(paperUuid).orElseThrow(
+        Paper paper = paperRepository.findPaperByUuidAndIsApprovedTrueAndIsPublishedTrueAndIsDeletedFalse(paperUuid).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Paper Not Found")
         );
-
-        // Check if published or not
-        if(!paper.getIsPublished()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Paper Not Published");
-        }
 
         // Get user by uuid
         User user = userRepository.findByUuidAndIsDeletedFalse(userId.id()).orElseThrow(
@@ -63,11 +57,7 @@ public class StarServiceImpl implements StarService {
         star.setId(id);
 
         // Set UUID
-        String starUuid;
-        do {
-            starUuid = UUID.randomUUID().toString();
-        } while (starRepository.existsByUuid(starUuid));
-        star.setUuid(starUuid);
+        star.setUuid(UUID.randomUUID().toString());
 
         star.setPaper(paper);
         star.setUser(user);
@@ -77,22 +67,16 @@ public class StarServiceImpl implements StarService {
         starRepository.save(star);
 
         return StarResponse.builder()
-                .userId(user.getId())
+                .paperUuid(paperUuid)
                 .userUuid(user.getUuid())
-                .fullName(user.getFullName())
-                .imageUrl(user.getImageUrl())
-                .starredAt(star.getStaredAt())
                 .build();
     }
-
-
-
 
     @Override
     public void unstarReaction(String paperUuid) {
 
         // Find paper
-        Paper paper = paperRepository.findByUuid(paperUuid).orElseThrow(
+        Paper paper = paperRepository.findPaperByUuidAndIsApprovedTrueAndIsPublishedTrueAndIsDeletedFalse(paperUuid).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Paper not found")
         );
 
@@ -122,7 +106,7 @@ public class StarServiceImpl implements StarService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Paper not found"
                 ));
-        return starRepository.countByPaper_Uuid(paperUuid);
+        return starRepository.countByPaper_Uuid(paper.getUuid());
     }
 
 
