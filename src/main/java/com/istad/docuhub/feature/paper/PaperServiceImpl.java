@@ -67,7 +67,7 @@ public class PaperServiceImpl implements PaperService {
     public Page<PaperResponse> getAllPapersIsApprovedForAuthor(Pageable pageable) {
         CurrentUser subId = userService.getCurrentUserSub();
         Page<Paper> papers = paperRepository.findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(subId.id(), pageable);
-        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt(), p.getDownloadCount()));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class PaperServiceImpl implements PaperService {
             paper.setCategory(category);
             paperRepository.save(paper);
 
-            return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt());
+            return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt(), paper.getDownloadCount());
         }
     }
 
@@ -126,38 +126,38 @@ public class PaperServiceImpl implements PaperService {
     @Override
     public PaperResponse getPaperById(String Uuid) {
         Paper paper = paperRepository.findByUuid(Uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
-        return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt());
+        return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt(), paper.getDownloadCount());
     }
 
     @Override
     public Page<PaperResponse> getAllPapersIsPublished(Pageable pageable) {
         Page<Paper> paper = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrueAndIsPublishedIsTrue(pageable);
-        return paper.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+        return paper.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt(), p.getDownloadCount()));
     }
 
     @Override
     public Page<PaperResponse> getPapersByAuthor(Pageable pageable) {
         CurrentUser subId = userService.getCurrentUserSub();
         Page<Paper> papers = paperRepository.findByAuthor_UuidAndIsDeletedFalse(subId.id(), pageable);
-        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt(), p.getDownloadCount()));
     }
 
     @Override
     public Page<PaperResponse> getAllPapersIsApproved(Pageable pageable) {
         Page<Paper> papers = paperRepository.findByIsDeletedIsFalseAndIsApprovedTrue(pageable);
-        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt(), p.getDownloadCount()));
     }
 
     @Override
     public Page<PaperResponse> getAllPapersIsPending(Pageable pageable) {
         Page<Paper> papers = paperRepository.findByIsApprovedFalse(pageable);
-        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt(), p.getDownloadCount()));
     }
 
     @Override
     public Page<PaperResponse> getAllPaper(Pageable pageable) {
         Page<Paper> papers = paperRepository.findAll(pageable);
-        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt()));
+        return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt(), p.getDownloadCount()));
     }
 
     @Override

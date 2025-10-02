@@ -19,6 +19,7 @@ public record PaperResponse(
         LocalDate submittedAt,
         LocalDate createdAt,
         Boolean isPublished,
-        LocalDate publishedAt
+        LocalDate publishedAt,
+        Integer downloads
 ) {
 }
