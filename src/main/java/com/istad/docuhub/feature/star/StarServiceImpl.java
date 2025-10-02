@@ -8,6 +8,7 @@ import com.istad.docuhub.feature.star.dto.StarResponse;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,7 @@ public class StarServiceImpl implements StarService {
     }
 
     @Override
+    @Transactional
     public void unstarReaction(String paperUuid) {
 
         // Find paper
@@ -97,9 +99,6 @@ public class StarServiceImpl implements StarService {
         starRepository.deleteByPaper_UuidAndUser_Uuid(paperUuid, user.getUuid());
     }
 
-
-
-
     @Override
     public long countByPaperUuid(String paperUuid) {
         Paper paper = paperRepository.findByUuid(paperUuid)
@@ -108,9 +107,6 @@ public class StarServiceImpl implements StarService {
                 ));
         return starRepository.countByPaper_Uuid(paper.getUuid());
     }
-
-
-
 
     @Override
     public List<User> getUsersByPaperUuid(String paperUuid) {

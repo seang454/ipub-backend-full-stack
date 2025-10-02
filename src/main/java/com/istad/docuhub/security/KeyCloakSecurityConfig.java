@@ -149,6 +149,9 @@ public class KeyCloakSecurityConfig {
 
                         //star
                         .requestMatchers(HttpMethod.POST, "/api/v1/stars/**").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/stars/**").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stars/{paperUuid}/count").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stars/{paperUuid}/users").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
 
                         // get all assingment
                         .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/assignments").hasAnyRole("ADVISER")
