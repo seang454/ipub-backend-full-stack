@@ -124,6 +124,15 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
+    public List<Integer> getAllDownloadCountOfPapers() {
+        CurrentUser subId = userService.getCurrentUserSub();
+        List<Paper> papers = paperRepository.findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(subId.id())
+                .stream().toList();
+        return papers.stream().map(Paper::getDownloadCount).toList(
+        );
+    }
+
+    @Override
     public PaperResponse getPaperById(String Uuid) {
         Paper paper = paperRepository.findByUuid(Uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
         return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt(), paper.getDownloadCount());

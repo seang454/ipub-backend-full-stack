@@ -118,4 +118,9 @@ public class PaperController {
         paperService.publishPaperByUuid(uuid);
         return ResponseEntity.status(HttpStatus.OK).body("Paper published successfully");
     }
+
+    @GetMapping("/author/papers/download-count")
+    public ResponseEntity<?> getAllDownloadCountOfPapers(){
+        return ResponseEntity.ok(paperService.getAllDownloadCountOfPapers());
+    }
 }
