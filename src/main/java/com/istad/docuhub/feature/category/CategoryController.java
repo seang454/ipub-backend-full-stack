@@ -32,7 +32,7 @@ public class CategoryController {
         );
     }
 
-    @GetMapping("/categories")
+    @GetMapping
     public ResponseEntity<?> getAllCategories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
