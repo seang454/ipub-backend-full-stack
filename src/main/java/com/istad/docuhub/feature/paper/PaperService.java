@@ -3,6 +3,7 @@ package com.istad.docuhub.feature.paper;
 import com.istad.docuhub.feature.paper.dto.AdminPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
+import com.istad.docuhub.feature.star.dto.StarResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,5 +30,5 @@ public interface PaperService {
 
     void publishPaperByUuid(String uuid);
 
-    List<Integer> getAllDownloadCountOfPapers();
+    List<StarResponse> getAllStarOfPapers();
 }

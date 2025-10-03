@@ -24,4 +24,6 @@ public interface StarRepository extends JpaRepository<Star, Integer> {
     void deleteByPaper_UuidAndUser_Uuid(String paperUuid, String userUuid);
 
     boolean existsByUuid(String uuid);
+
+    List<Star> findStarByPaper_UuidIn(List<String> paperUuids);
 }

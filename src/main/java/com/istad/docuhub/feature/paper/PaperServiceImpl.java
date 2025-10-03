@@ -3,12 +3,15 @@ package com.istad.docuhub.feature.paper;
 
 import com.istad.docuhub.domain.Category;
 import com.istad.docuhub.domain.Paper;
+import com.istad.docuhub.domain.Star;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.category.CategoryRepository;
 import com.istad.docuhub.feature.media.MediaService;
 import com.istad.docuhub.feature.paper.dto.AdminPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
+import com.istad.docuhub.feature.star.StarRepository;
+import com.istad.docuhub.feature.star.dto.StarResponse;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
@@ -33,6 +36,7 @@ public class PaperServiceImpl implements PaperService {
     private final CategoryRepository categoryRepository;
     private final UserService userService;
     private final MediaService mediaService;
+    private final StarRepository starRepository;
 
     @Override
     public void createPaper(PaperRequest paperRequest) {
@@ -116,19 +120,23 @@ public class PaperServiceImpl implements PaperService {
     public void publishPaperByUuid(String uuid) {
         CurrentUser subId = userService.getCurrentUserSub();
         String authorUuid = subId.id();
-        Paper paper = paperRepository.findPaperByUuidAndAuthor_Uuid(uuid, authorUuid)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper is  not found or already published"));
+        Paper paper = paperRepository.findPaperByUuidAndAuthor_Uuid(uuid, authorUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper is  not found or already published"));
         paper.setIsPublished(true);
         paper.setPublishedAt(LocalDate.now());
         paperRepository.save(paper);
     }
 
     @Override
-    public List<Integer> getAllDownloadCountOfPapers() {
+    public List<StarResponse> getAllStarOfPapers() {
         CurrentUser subId = userService.getCurrentUserSub();
-        List<Paper> papers = paperRepository.findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(subId.id())
-                .stream().toList();
-        return papers.stream().map(Paper::getDownloadCount).toList(
+        List<Paper> papers = paperRepository.findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(subId.id()).stream().toList();
+        List<Star> stars = starRepository.findStarByPaper_UuidIn(papers.stream().map(Paper::getUuid).toList());
+        return stars.stream().map(
+                star -> new StarResponse(
+                        star.getPaper().getUuid(),
+                        star.getUser().getUuid()
+                )
+        ).toList(
         );
     }
 

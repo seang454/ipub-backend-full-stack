@@ -1,8 +1,6 @@
 package com.istad.docuhub.feature.paper;
 
 import com.istad.docuhub.feature.paper.dto.PaperRequest;
-import com.istad.docuhub.feature.paper.dto.PaperResponse;
-import jakarta.ws.rs.PUT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -119,8 +117,8 @@ public class PaperController {
         return ResponseEntity.status(HttpStatus.OK).body("Paper published successfully");
     }
 
-    @GetMapping("/author/papers/download-count")
+    @GetMapping("/author/papers/stars")
     public ResponseEntity<?> getAllDownloadCountOfPapers(){
-        return ResponseEntity.ok(paperService.getAllDownloadCountOfPapers());
+        return ResponseEntity.ok(paperService.getAllStarOfPapers());
     }
 }
