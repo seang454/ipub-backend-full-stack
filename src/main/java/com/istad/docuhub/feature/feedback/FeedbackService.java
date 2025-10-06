@@ -11,4 +11,6 @@ public interface FeedbackService {
     void createFeedback(FeedbackRequest feedbackRequest);
     Page<FeedbackResponse> getAllFeedBack(Pageable pageable);
     void updateFeedbackStatus(String paperUuid,FeedBackUpdate feedBackUpdate);
+
+    FeedbackResponse getFeedbackByPaperUuid(String paperUuid);
 }

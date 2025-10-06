@@ -135,4 +135,24 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.setUpdatedAt(LocalDate.now());
         feedbackRepository.save(feedback);
     }
+
+    @Override
+    public FeedbackResponse getFeedbackByPaperUuid(String paperUuid) {
+        CurrentUser subId = userService.getCurrentUserSub();
+        if (subId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+        Feedback feedback = feedbackRepository.findByPaper_Uuid(paperUuid);
+        return new FeedbackResponse(
+                feedback.getFeedbackText(),
+                feedback.getStatus().toString(),
+                feedback.getPaper().getUuid(),
+                feedback.getFileUrl(),
+                feedback.getDeadline(),
+                feedback.getAdvisor().getFullName(),
+                feedback.getReceiver().getFullName(),
+                feedback.getCreatedAt(),
+                feedback.getUpdatedAt()
+        );
+    }
 }
