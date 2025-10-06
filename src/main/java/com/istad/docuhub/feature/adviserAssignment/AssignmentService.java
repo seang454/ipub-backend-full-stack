@@ -5,7 +5,6 @@ import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse
 import com.istad.docuhub.feature.adviserAssignment.dto.AdviserReviewRequest;
 import com.istad.docuhub.feature.adviserAssignment.dto.RejectPaperRequest;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
-import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,4 +15,6 @@ public interface AssignmentService {
     AdviserAssignmentResponse reviewPaperByAdviser(AdviserReviewRequest reviewRequest);
     PaperResponse rejectPaperByAdmin(RejectPaperRequest rejectRequest);
     List<AdviserAssignmentResponse> getAssignmentsByAdviserUuid(String adviserUuid);
+
+    List<AdviserAssignmentResponse> getAllAssignmentsByAuthorUuid();
 }

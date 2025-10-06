@@ -279,7 +279,7 @@ public class AdminController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("paper/{uuid}")
+    @DeleteMapping("/paper/{uuid}")
     public void deletePaperById(String uuid) {
             paperService.deletePaperById(uuid);
     }

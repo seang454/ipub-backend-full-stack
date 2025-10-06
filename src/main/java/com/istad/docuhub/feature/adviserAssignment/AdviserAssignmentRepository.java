@@ -1,6 +1,7 @@
 package com.istad.docuhub.feature.adviserAssignment;
 
 import com.istad.docuhub.domain.AdviserAssignment;
+import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,6 @@ public interface AdviserAssignmentRepository extends JpaRepository<AdviserAssign
     // fetch all assignments by adviser
     List<AdviserAssignment>findByAdvisorUuid(String adviserUuid);
     Page<AdviserAssignment> findByAdvisorUuid(String advisorUuid, Pageable pageable);
+
+    List<AdviserAssignment> findByPaper_UuidIn(List<String> paperUuid);
 }

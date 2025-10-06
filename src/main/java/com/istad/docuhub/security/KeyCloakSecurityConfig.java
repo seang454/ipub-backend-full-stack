@@ -155,6 +155,7 @@ public class KeyCloakSecurityConfig {
 
                         // get all assingment
                         .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/assignments").hasAnyRole("ADVISER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/author").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

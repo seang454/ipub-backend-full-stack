@@ -56,4 +56,11 @@ public class AdviserAssignmentController {
         );
     }
 
+    @GetMapping("/assignments/author")
+    public ResponseEntity<?> getAllAssignmentsByAuthorUuid() {
+        return ResponseEntity.ok(
+                adviserAssignmentService.getAllAssignmentsByAuthorUuid()
+        );
+    }
+
 }

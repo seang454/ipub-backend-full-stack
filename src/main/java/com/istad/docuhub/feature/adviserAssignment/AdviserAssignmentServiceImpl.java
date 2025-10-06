@@ -232,4 +232,24 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 ).toList();
     }
 
+    @Override
+    public List<AdviserAssignmentResponse> getAllAssignmentsByAuthorUuid() {
+        CurrentUser currentUser = userService.getCurrentUserSub();
+        List<Paper> papers = paperRepository.findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(currentUser.id());
+        List<String> paperUuids = papers.stream().map(Paper::getUuid).toList();
+        List<AdviserAssignment> assignments = adviserAssignmentRepository.findByPaper_UuidIn(paperUuids);
+        return assignments.stream().map(
+                assignment -> AdviserAssignmentResponse.builder()
+                        .uuid(assignment.getUuid())
+                        .paperUuid(assignment.getPaper().getUuid())
+                        .adviserUuid(assignment.getAdvisor().getUuid())
+                        .adminUuid(assignment.getAdmin().getUuid())
+                        .deadline(assignment.getDeadline())
+                        .status(assignment.getStatus())
+                        .assignedDate(assignment.getAssignedDate())
+                        .updateDate(assignment.getUpdateDate())
+                        .build()
+        ).toList();
+    }
+
 }
