@@ -88,7 +88,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             paper.setIsApproved(true);
             paper.setStatus(PaperStatus.APPROVED.toString());
         } else {
-            feedback.setStatus(FeedBackStatus.REJECTED);
+            feedback.setStatus(FeedBackStatus.REVISION);
             feedback.setDeadline(feedbackRequest.deadline());
             paper.setIsApproved(false);
             paper.setStatus(PaperStatus.REJECTED.toString());
