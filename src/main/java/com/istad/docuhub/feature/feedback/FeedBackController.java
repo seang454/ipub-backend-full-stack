@@ -61,4 +61,9 @@ public class FeedBackController {
     public ResponseEntity<?> getFeedbackByPaperUuid(@PathVariable String paperUuid){
         return ResponseEntity.ok(feedbackService.getFeedbackByPaperUuid(paperUuid));
     }
+
+    @GetMapping("/author")
+    public ResponseEntity<?> getAllFeedbackByAuthor(){
+        return ResponseEntity.ok(feedbackService.getAllFeedbackByAuthor());
+    }
 }

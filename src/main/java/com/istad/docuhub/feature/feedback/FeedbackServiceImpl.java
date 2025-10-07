@@ -13,6 +13,7 @@ import com.istad.docuhub.feature.user.dto.CurrentUser;
 import com.istad.docuhub.utils.FeedBackStatus;
 import com.istad.docuhub.utils.PaperStatus;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.Current;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -154,5 +156,24 @@ public class FeedbackServiceImpl implements FeedbackService {
                 feedback.getCreatedAt(),
                 feedback.getUpdatedAt()
         );
+    }
+
+    @Override
+    public List<FeedbackResponse> getAllFeedbackByAuthor() {
+        CurrentUser subId = userService.getCurrentUserSub();
+        List<Feedback> feedbacks = feedbackRepository.findByReceiver_Uuid(subId.id());
+        return feedbacks.stream().map(
+                feedback -> new FeedbackResponse(
+                        feedback.getFeedbackText(),
+                        feedback.getStatus().toString(),
+                        feedback.getPaper().getUuid(),
+                        feedback.getFileUrl(),
+                        feedback.getDeadline(),
+                        feedback.getAdvisor().getFullName(),
+                        feedback.getReceiver().getFullName(),
+                        feedback.getCreatedAt(),
+                        feedback.getUpdatedAt()
+                )
+        ).toList();
     }
 }

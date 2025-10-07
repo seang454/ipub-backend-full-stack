@@ -6,6 +6,8 @@ import com.istad.docuhub.feature.feedback.dto.FeedbackResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 
 public interface FeedbackService {
     void createFeedback(FeedbackRequest feedbackRequest);
@@ -13,4 +15,6 @@ public interface FeedbackService {
     void updateFeedbackStatus(String paperUuid,FeedBackUpdate feedBackUpdate);
 
     FeedbackResponse getFeedbackByPaperUuid(String paperUuid);
+
+    List<FeedbackResponse> getAllFeedbackByAuthor();
 }
