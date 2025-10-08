@@ -408,7 +408,6 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
-
     @Override
     public void promoteAsStudent(String studentUuidOrUsername) {
         RealmResource realmResource = keycloak.realm("docuapi");

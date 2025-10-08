@@ -3,6 +3,7 @@ package com.istad.docuhub.feature.user.contoller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
+import com.istad.docuhub.feature.studentDetail.StudentService;
 import com.istad.docuhub.feature.user.KeycloakAuthService;
 import com.istad.docuhub.feature.user.RefreshTokenService;
 import com.istad.docuhub.feature.user.UserService;
@@ -51,6 +52,7 @@ public class AuthRestController {
     private final RestTemplate restTemplate = new RestTemplate();
     // to verify token
     private static final String JWKS_URL = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/certs";
+    private final StudentService studentService;
 
 
     @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
@@ -68,6 +70,7 @@ public class AuthRestController {
         log.info("Registering user {}", userCreateDto);
         return userService.register(userCreateDto);
     }
+
     @GetMapping("/tokens")
     public ResponseEntity<TokenResponseRecord> getTokens(
             @RegisteredOAuth2AuthorizedClient("keycloak") OAuth2AuthorizedClient client,
@@ -111,6 +114,7 @@ public class AuthRestController {
 
         return ResponseEntity.ok(tokenResponse);
     }
+
     @GetMapping("/protected-endpoint")
     public ResponseEntity<Map<String, Object>> protectedEndpoint(
             @CookieValue(name = "access_token", required = false) String accessToken,
@@ -182,7 +186,6 @@ public class AuthRestController {
     }
 
 
-
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam String username, HttpServletResponse response) {
         if (username == null || username.isBlank()) {
@@ -249,63 +252,75 @@ public class AuthRestController {
 
 
     @GetMapping("/users")
-    public List<UserResponse> getUsers(){
+    public List<UserResponse> getUsers() {
         return userService.getAllUsers();
     }
+
     @GetMapping("/users/page")
-    Map<String,Object> getAllActiveUsers( @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+    Map<String, Object> getAllActiveUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         Page<UserResponse> userPage = userService.getAllUsersByPage(page, size);
-        Map<String,Object> response= new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("content", userPage.getContent()); // list of users
         response.put("totalElements", userPage.getTotalElements()); // total number of users
         response.put("totalPages", userPage.getTotalPages());
         response.put("number", userPage.getNumber()); // current page
         return response;
     }
+
     @GetMapping("/user/{uuid}")
-    public UserResponse getSingleUser(@PathVariable String uuid){
+    public UserResponse getSingleUser(@PathVariable String uuid) {
         return userService.getSingleUser(uuid);
     }
+
     @GetMapping("/slug")
-    public List<UserResponse> searchUserByUsername(@RequestParam String username){
+    public List<UserResponse> searchUserByUsername(@RequestParam String username) {
         return userService.searchUserByUsername(username);
     }
+
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/user/{uuid}")
     public void deleteUser(@PathVariable String uuid) {
-        log.info("User id controller {} ",uuid);
-         userService.deleteUser(uuid);
+        log.info("User id controller {} ", uuid);
+        userService.deleteUser(uuid);
     }
+
     @PatchMapping("/user/{uuid}")
     public void updateUser(@PathVariable String uuid, @RequestBody UpdateUserDto updateUserDto) {
-        log.info("User id controller {} ",updateUserDto);
+        log.info("User id controller {} ", updateUserDto);
         userService.updateUser(uuid, updateUserDto);
     }
+
     @PutMapping("/user/{uuid}")
-    public UpdateUserImageDto updateProfileImage(@PathVariable String uuid,@RequestBody UpdateUserImageDto updateUserImageDto) {
-        return userService.updateImageUrl(updateUserImageDto.imageUrl(),uuid);
+    public UpdateUserImageDto updateProfileImage(@PathVariable String uuid, @RequestBody UpdateUserImageDto updateUserImageDto) {
+        return userService.updateImageUrl(updateUserImageDto.imageUrl(), uuid);
     }
+
     @GetMapping("/user")
-    public Map<String,Object> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
-        return userService.getAllPublicUser(PageRequest.of(page,size));
+    public Map<String, Object> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return userService.getAllPublicUser(PageRequest.of(page, size));
     }
+
     @GetMapping("/user/student")
-    public Map<String,Object> getAllStudents(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
-        return userService.getAllStudent(PageRequest.of(page,size));
+    public Map<String, Object> getAllStudents(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return userService.getAllStudent(PageRequest.of(page, size));
     }
-    @GetMapping ("/user/mentor")
-    public Map<String,Object> getAllMentors(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
-        return userService.getAllMentor(PageRequest.of(page,size));
+
+    @GetMapping("/user/mentor")
+    public Map<String, Object> getAllMentors(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return userService.getAllMentor(PageRequest.of(page, size));
     }
+
     @PostMapping("/user/student/{uuid}")
     public void promoteStudent(@PathVariable String uuid) {
-        log.info("User id controller {} ",uuid);
+        log.info("User id controller {} ", uuid);
         userService.promoteAsStudent(uuid);
     }
+
     @PostMapping("/user/mentor/{uuid}")
     public void promoteMentor(@PathVariable String uuid) {
         userService.promoteAsMentor(uuid);
     }
+
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Logindto login) {
         Map<String, Object> tokenResponse = keycloakAuthService.login(login.username(), login.password());
@@ -322,9 +337,14 @@ public class AuthRestController {
     }
 
     @GetMapping("/user/profile")
-    public ResponseEntity<?> getUserProfile(@AuthenticationPrincipal Jwt jwt){
+    public ResponseEntity<?> getUserProfile(@AuthenticationPrincipal Jwt jwt) {
         String uuid = jwt.getClaims().get("sub").toString();
         UserProfileResponse userProfile = userService.getUserProfile(uuid);
         return ResponseEntity.ok(userProfile);
+    }
+
+    @GetMapping("/user/adviser")
+    public ResponseEntity<?> getAllAdvisers(){
+        return ResponseEntity.ok(studentService.getAllStudentAdvisers());
     }
 }

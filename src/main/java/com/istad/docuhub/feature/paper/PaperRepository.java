@@ -34,4 +34,6 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     Optional<Paper> findPaperByUuidAndAuthor_Uuid(String uuid, String authorUuid);
 
     Optional<Paper> findPaperByUuidAndIsApprovedTrueAndIsPublishedTrueAndIsDeletedFalse(String uuid);
+
+    List<Paper> findPaperByAuthor_Uuid(String uuid);
 }

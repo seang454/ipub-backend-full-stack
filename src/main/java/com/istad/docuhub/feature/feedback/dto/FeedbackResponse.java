@@ -8,6 +8,7 @@ public record FeedbackResponse(
         String paperUuid,
         String fileUrl,
         LocalDate deadline,
+        String adviserImageUrl,
         String advisorName,
         String receiverName,
         LocalDate createdAt,

@@ -28,4 +28,5 @@ public interface UserService {
     CurrentUser getCurrentUserSub();
     UserProfileResponse getUserProfile(String uuid);
     Map<String, Object> getAllMentor(Pageable pageable);
+
 }
