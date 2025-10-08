@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +97,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DocuhubApplication.executor": "Run",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "Thong",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/final ISTAD/ipub-backend-full-stack",
