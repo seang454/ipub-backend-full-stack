@@ -14,7 +14,7 @@ public record UserResponse(
      String firstName,
      String lastName,
      String imageUrl,
-     Boolean status,
+     String status,
      LocalDate createDate,
      LocalDate updateDate,
      String bio,

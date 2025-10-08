@@ -27,7 +27,7 @@ public class User {
 
     private String imageUrl;
 
-    private Boolean status;
+    private String status;
 
     private LocalDate createDate;
 
