@@ -10,7 +10,7 @@ public record UserPublicResponse(
         String gender,
         String fullName,
         String imageUrl,
-        Boolean status,
+        String status,
         LocalDate createDate,
         LocalDate updateDate,
         String bio,
