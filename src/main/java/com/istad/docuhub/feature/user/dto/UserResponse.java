@@ -24,6 +24,7 @@ public record UserResponse(
      Boolean isUser,
      Boolean isAdmin,
      Boolean isStudent,
-     Boolean isAdvisor
+     Boolean isAdvisor,
+     Boolean isActive
 ) {
 }
