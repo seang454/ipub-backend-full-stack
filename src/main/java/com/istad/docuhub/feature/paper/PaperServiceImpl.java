@@ -44,8 +44,8 @@ public class PaperServiceImpl implements PaperService {
         CurrentUser subId = userService.getCurrentUserSub();
         User author = userRepository.findByUuid(subId.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (!author.getIsStudent() || author.getIsAdvisor()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author must be a student");
+        if (!author.getIsStudent() && !author.getIsAdvisor()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author must be a student and aviser");
         }
 
         int id;

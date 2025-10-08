@@ -117,6 +117,7 @@ public class UserServiceImpl implements UserService {
                             .isAdvisor(false)
                             .isStudent(false)
                             .isDeleted(false)
+                            .isActive(true)
                             .createDate(LocalDate.now())
                             .updateDate(LocalDate.now())
                             .slug(SlugUtil.toSlug(fullName, userCreateDto.username()))

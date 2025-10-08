@@ -9,7 +9,7 @@ public record UpdateUserDto (
         String fullName,
         String firstName,
         String lastName,
-        Boolean status,
+        String status,
         String bio,
         String address,
         String contactNumber,

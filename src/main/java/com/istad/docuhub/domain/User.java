@@ -27,7 +27,7 @@ public class User {
 
     private String imageUrl;
 
-    private Boolean status;
+    private String status;
 
     private LocalDate createDate;
 
@@ -46,6 +46,7 @@ public class User {
     private Boolean isAdmin;
     private Boolean isStudent;
     private Boolean isAdvisor;
+    private Boolean isActive;
     private Boolean isDeleted;
 
     private String slug;

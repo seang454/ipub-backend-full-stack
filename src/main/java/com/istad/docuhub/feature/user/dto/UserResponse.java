@@ -14,7 +14,7 @@ public record UserResponse(
      String firstName,
      String lastName,
      String imageUrl,
-     Boolean status,
+     String status,
      LocalDate createDate,
      LocalDate updateDate,
      String bio,
@@ -24,6 +24,7 @@ public record UserResponse(
      Boolean isUser,
      Boolean isAdmin,
      Boolean isStudent,
-     Boolean isAdvisor
+     Boolean isAdvisor,
+     Boolean isActive
 ) {
 }
