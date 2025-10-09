@@ -24,4 +24,8 @@ public interface AdviserService {
     AdviserDetailResponse updateByToken( UpdateAdviserDetailRequest updateRequest);
 
     Page<AdviserAssignmentResponse> getAllAssignment(Pageable pageable);
+
+
+
+
 }

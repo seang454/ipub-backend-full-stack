@@ -1,9 +1,6 @@
 package com.istad.docuhub.feature.adviserAssignment;
 
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserReviewRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.RejectPaperRequest;
+import com.istad.docuhub.feature.adviserAssignment.dto.*;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 
 import java.time.LocalDate;
@@ -17,4 +14,6 @@ public interface AssignmentService {
     List<AdviserAssignmentResponse> getAssignmentsByAdviserUuid(String adviserUuid);
 
     List<AdviserAssignmentResponse> getAllAssignmentsByAuthorUuid();
+
+    List<AssignmentStudentPaperResponse> getAllAssignmentStudentPapers();
 }

@@ -4,10 +4,7 @@ import com.istad.docuhub.domain.AdviserAssignment;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.enums.STATUS;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserReviewRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.RejectPaperRequest;
+import com.istad.docuhub.feature.adviserAssignment.dto.*;
 import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.sendMail.SendMailService;
@@ -252,4 +249,10 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         ).toList();
     }
 
+    @Override
+    public List<AssignmentStudentPaperResponse> getAllAssignmentStudentPapers() {
+        CurrentUser currentUser = userService.getCurrentUserSub();
+
+        return null;
+    }
 }
