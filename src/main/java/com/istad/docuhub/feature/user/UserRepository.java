@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Page<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse(Pageable pageable);
     Page<User> getUserByIsUserTrueAndIsAdvisorFalseAndIsStudentTrueAndIsAdminFalseAndIsDeletedFalse(Pageable pageable);
     Page<User> getUserByIsUserTrueAndIsAdvisorTrueAndIsStudentFalseAndIsAdminFalseAndIsDeletedFalse(Pageable pageable);
+
+    List<User> findByUuidIn(List<String> uuids);
 }

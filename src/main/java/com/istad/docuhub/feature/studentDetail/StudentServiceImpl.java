@@ -1,12 +1,17 @@
 package com.istad.docuhub.feature.studentDetail;
 
-import com.istad.docuhub.domain.StudentDetail;
-import com.istad.docuhub.domain.User;
+import com.istad.docuhub.domain.*;
 import com.istad.docuhub.enums.STATUS;
+import com.istad.docuhub.feature.adviserAssignment.AdviserAssignmentRepository;
+import com.istad.docuhub.feature.adviserDetail.AdviserDetailRepository;
+import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.sendMail.SendMailService;
 import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
 import com.istad.docuhub.feature.studentDetail.dto.*;
 import com.istad.docuhub.feature.user.UserRepository;
+import com.istad.docuhub.feature.user.UserService;
+import com.istad.docuhub.feature.user.dto.CurrentUser;
+import com.istad.docuhub.feature.user.dto.UserPublicResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +30,10 @@ public class StudentServiceImpl implements StudentService {
     private final StudentDetailRepository studentDetailRepository;
     private final UserRepository userRepository;
     private final SendMailService sendMailService;
+    private final UserService userService;
+    private final AdviserDetailRepository adviserDetailRepository;
+    private final AdviserAssignmentRepository adviserAssignmentRepository;
+    private final PaperRepository paperRepository;
 
     @Override
     public void createStudentDetail(StudentRequest studentRequest) {
@@ -123,8 +132,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentResponse updateStudentDetailByUserUuid(String userUuid, UpdateStudentRequest updateRequest)
-     {
+    public StudentResponse updateStudentDetailByUserUuid(String userUuid, UpdateStudentRequest updateRequest) {
         StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(userUuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
 
@@ -157,6 +165,31 @@ public class StudentServiceImpl implements StudentService {
                 studentDetail.getIsStudent(),
                 studentDetail.getUser().getUuid()
         );
+    }
+
+    @Override
+    public List<UserPublicResponse> getAllStudentAdvisers() {
+        CurrentUser subId = userService.getCurrentUserSub();
+        User user = userRepository.findByUuid(subId.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        List<Paper> papers = paperRepository.findPaperByAuthor_Uuid(user.getUuid());
+        List<AdviserAssignment> adviserAssignments = adviserAssignmentRepository.findByPaper_UuidIn(papers.stream().map(Paper::getUuid).toList());
+        List<String> adviserUuids = adviserAssignments.stream().map(AdviserAssignment::getAdvisor).map(User::getUuid).toList();
+        List<User> advisers = userRepository.findByUuidIn(adviserUuids);
+        return advisers.stream().map(adviser -> new UserPublicResponse(
+                        adviser.getUuid(),
+                        adviser.getSlug(),
+                        adviser.getGender(),
+                        adviser.getFullName(),
+                        adviser.getImageUrl(),
+                        adviser.getStatus(),
+                        adviser.getCreateDate(),
+                        adviser.getUpdateDate(),
+                        adviser.getBio(),
+                        adviser.getIsUser(),
+                        adviser.getIsAdmin(),
+                        adviser.getIsAdvisor(),
+                        adviser.getIsStudent()
+                )).toList();
     }
 
 }

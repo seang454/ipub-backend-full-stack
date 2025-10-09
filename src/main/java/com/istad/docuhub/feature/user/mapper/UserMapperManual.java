@@ -14,6 +14,7 @@ public class UserMapperManual {
                 .isAdmin(user.getIsAdmin())
                 .isAdvisor(user.getIsAdvisor())
                 .isStudent(user.getIsStudent())
+                .isActive(user.getIsActive())
                 .createDate(user.getCreateDate())
                 .updateDate(user.getUpdateDate())
                 .userName(userRepresentation.getUsername())
