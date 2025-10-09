@@ -15,6 +15,7 @@ public interface AssignmentService {
     AdviserAssignmentResponse reviewPaperByAdviser(AdviserReviewRequest reviewRequest);
     PaperResponse rejectPaperByAdmin(RejectPaperRequest rejectRequest);
     List<AdviserAssignmentResponse> getAssignmentsByAdviserUuid(String adviserUuid);
-
     List<AdviserAssignmentResponse> getAllAssignmentsByAuthorUuid();
+
+
 }
