@@ -17,4 +17,6 @@ public interface AssignmentService {
     List<AdviserAssignmentResponse> getAssignmentsByAdviserUuid(String adviserUuid);
 
     List<AdviserAssignmentResponse> getAllAssignmentsByAuthorUuid();
+
+    List<AdviserAssignmentResponse> getAssignmentsByAuthorUuid(String authorUuid);
 }

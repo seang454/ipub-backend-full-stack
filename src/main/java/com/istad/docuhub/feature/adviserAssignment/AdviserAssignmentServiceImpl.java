@@ -41,15 +41,15 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
     public AdviserAssignmentResponse assignAdviserToPaper(AdviserAssignmentRequest request) {
 
         // fetch paper
-        Paper paper = paperRepository.findByUuid(request.paperUuid()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+        Paper paper = paperRepository.findByUuid(request.paperUuid()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
 
         // fetch adviser
         User adviser = userRepository.findByUuid(request.adviserUuid())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
         // fetch admin
         CurrentUser currentUser = userService.getCurrentUserSub();
         User userAdmin = userRepository.findByUuid(currentUser.id())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
 
         // ✅ Update paper status
         paper.setStatus("UNDER_REVIEW"); // pending adviser
@@ -63,7 +63,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 throw new RuntimeException("Failed to generate unique ID after 10 attempts");
             }
             id = new Random().nextInt(Integer.parseInt("1000000"));
-        }while (adviserAssignmentRepository.existsById(id));
+        } while (adviserAssignmentRepository.existsById(id));
 
 
         // create assignment
@@ -79,7 +79,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         assignment.setUpdateDate(null);
 
         AdviserAssignment saved = adviserAssignmentRepository.save(assignment);
-        AdviserAssignment assignUuid = adviserAssignmentRepository.findByUuid(saved.getUuid()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment Not Found"));
+        AdviserAssignment assignUuid = adviserAssignmentRepository.findByUuid(saved.getUuid()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment Not Found"));
         paper.setAssignedId(assignUuid);
         paperRepository.save(paper);
 
@@ -238,6 +238,23 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         List<Paper> papers = paperRepository.findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(currentUser.id());
         List<String> paperUuids = papers.stream().map(Paper::getUuid).toList();
         List<AdviserAssignment> assignments = adviserAssignmentRepository.findByPaper_UuidIn(paperUuids);
+        return assignments.stream().map(
+                assignment -> AdviserAssignmentResponse.builder()
+                        .uuid(assignment.getUuid())
+                        .paperUuid(assignment.getPaper().getUuid())
+                        .adviserUuid(assignment.getAdvisor().getUuid())
+                        .adminUuid(assignment.getAdmin().getUuid())
+                        .deadline(assignment.getDeadline())
+                        .status(assignment.getStatus())
+                        .assignedDate(assignment.getAssignedDate())
+                        .updateDate(assignment.getUpdateDate())
+                        .build()
+        ).toList();
+    }
+
+    @Override
+    public List<AdviserAssignmentResponse> getAssignmentsByAuthorUuid(String authorUuid) {
+        List<AdviserAssignment> assignments = adviserAssignmentRepository.findByAdvisorUuid(authorUuid);
         return assignments.stream().map(
                 assignment -> AdviserAssignmentResponse.builder()
                         .uuid(assignment.getUuid())
