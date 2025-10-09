@@ -26,4 +26,6 @@ public interface StarRepository extends JpaRepository<Star, Integer> {
     boolean existsByUuid(String uuid);
 
     List<Star> findStarByPaper_UuidIn(List<String> paperUuids);
+
+    List<Star> findStarByUser_Uuid(String userUuid);
 }
