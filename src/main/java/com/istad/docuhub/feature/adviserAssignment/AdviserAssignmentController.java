@@ -4,6 +4,9 @@ package com.istad.docuhub.feature.adviserAssignment;
 import com.istad.docuhub.feature.adviserAssignment.dto.*;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,6 +63,15 @@ public class AdviserAssignmentController {
     public ResponseEntity<?> getAllAssignmentsByAuthorUuid() {
         return ResponseEntity.ok(
                 adviserAssignmentService.getAllAssignmentsByAuthorUuid()
+        );
+    }
+
+    @GetMapping("assignments/adviser")
+    public ResponseEntity<?> getAssignments(Pageable pageable) {
+        Page<AdvisorAssignmentResponse> pageData = adviserAssignmentService.getAssignmentsForCurrentAdviser(pageable);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>("OK", pageData)
         );
     }
 

@@ -2,6 +2,8 @@ package com.istad.docuhub.feature.adviserAssignment;
 
 import com.istad.docuhub.feature.adviserAssignment.dto.*;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,5 +17,7 @@ public interface AssignmentService {
 
     List<AdviserAssignmentResponse> getAllAssignmentsByAuthorUuid();
 
-    List<AssignmentStudentPaperResponse> getAllAssignmentStudentPapers();
+    //by thong new
+
+    Page<AdvisorAssignmentResponse> getAssignmentsForCurrentAdviser(Pageable pageable);
 }

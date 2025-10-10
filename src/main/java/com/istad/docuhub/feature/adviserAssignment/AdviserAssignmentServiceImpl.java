@@ -12,8 +12,11 @@ import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
+import com.istad.docuhub.utils.QuickService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,31 +25,32 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class AdviserAssignmentServiceImpl implements AssignmentService {
 
-    private final AdviserAssignmentRepository adviserAssignmentRepository;
     private final PaperRepository paperRepository;
     private final UserRepository userRepository;
     private final SendMailService sendMailService;
     private final UserService userService;
+    private final AdviserAssignmentRepository adviserAssignmentRepository;
+
+    private final QuickService quickService;
 
     // assign adviesr
     @Override
     public AdviserAssignmentResponse assignAdviserToPaper(AdviserAssignmentRequest request) {
 
         // fetch paper
-        Paper paper = paperRepository.findByUuid(request.paperUuid()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+        Paper paper = paperRepository.findByUuid(request.paperUuid()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
 
         // fetch adviser
         User adviser = userRepository.findByUuid(request.adviserUuid())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
         // fetch admin
         CurrentUser currentUser = userService.getCurrentUserSub();
         User userAdmin = userRepository.findByUuid(currentUser.id())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
 
         // ✅ Update paper status
         paper.setStatus("UNDER_REVIEW"); // pending adviser
@@ -60,7 +64,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 throw new RuntimeException("Failed to generate unique ID after 10 attempts");
             }
             id = new Random().nextInt(Integer.parseInt("1000000"));
-        }while (adviserAssignmentRepository.existsById(id));
+        } while (adviserAssignmentRepository.existsById(id));
 
 
         // create assignment
@@ -76,7 +80,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         assignment.setUpdateDate(null);
 
         AdviserAssignment saved = adviserAssignmentRepository.save(assignment);
-        AdviserAssignment assignUuid = adviserAssignmentRepository.findByUuid(saved.getUuid()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment Not Found"));
+        AdviserAssignment assignUuid = adviserAssignmentRepository.findByUuid(saved.getUuid()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment Not Found"));
         paper.setAssignedId(assignUuid);
         paperRepository.save(paper);
 
@@ -249,10 +253,35 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         ).toList();
     }
 
-    @Override
-    public List<AssignmentStudentPaperResponse> getAllAssignmentStudentPapers() {
-        CurrentUser currentUser = userService.getCurrentUserSub();
 
-        return null;
+    @Override
+    public Page<AdvisorAssignmentResponse> getAssignmentsForCurrentAdviser(Pageable pageable) {
+        CurrentUser currentUser = userService.getCurrentUserSub();
+        String adviserUuid = currentUser.id();
+        System.out.println(">>> Adviser UUID from token: " + adviserUuid);
+
+        Page<AdviserAssignment> assignments =
+                adviserAssignmentRepository.findAssignmentsByAdvisorUuid(adviserUuid, pageable);
+
+        return assignments.map(a ->
+                new AdvisorAssignmentResponse(
+                        a.getUuid(),
+                        a.getStatus(),
+                        a.getDeadline(),
+                        a.getAssignedDate(),
+                        new PaperBriefResponse(
+                                a.getPaper().getUuid(),
+                                a.getPaper().getTitle(),
+                                a.getPaper().getFileUrl(),
+                                a.getPaper().getThumbnailUrl()
+                        ),
+                        new StudentBriefResponse(
+                                a.getPaper().getAuthor().getUuid(),
+                                a.getPaper().getAuthor().getFullName(),
+                                a.getPaper().getAuthor().getContactNumber(), // or email
+                                a.getPaper().getAuthor().getImageUrl()
+                        )
+                )
+        );
     }
 }
