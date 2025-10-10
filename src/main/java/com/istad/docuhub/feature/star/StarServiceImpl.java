@@ -8,6 +8,7 @@ import com.istad.docuhub.feature.star.dto.StarResponse;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
+import com.istad.docuhub.feature.user.dto.UserPublicResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,12 +36,12 @@ public class StarServiceImpl implements StarService {
 
         // Get paper by uuid
         Paper paper = paperRepository.findPaperByUuidAndIsApprovedTrueAndIsPublishedTrueAndIsDeletedFalse(paperUuid).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Paper Not Found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found")
         );
 
         // Get user by uuid
         User user = userRepository.findByUuidAndIsDeletedFalse(userId.id()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User Not Found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found")
         );
 
         // Check if already starred of not
@@ -52,7 +53,7 @@ public class StarServiceImpl implements StarService {
 
         // Set ID
         Integer id;
-        do{
+        do {
             id = (int) (Math.random() * 1_000_000);
         } while (starRepository.existsById(id));
         star.setId(id);
@@ -79,7 +80,7 @@ public class StarServiceImpl implements StarService {
 
         // Find paper
         Paper paper = paperRepository.findPaperByUuidAndIsApprovedTrueAndIsPublishedTrueAndIsDeletedFalse(paperUuid).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Paper not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found")
         );
 
         // Get User ID
@@ -87,11 +88,11 @@ public class StarServiceImpl implements StarService {
 
         // Get User
         User user = userRepository.findByUuidAndIsDeletedFalse(userId.id()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
         );
 
         // Check if this user starred the paper
-        if(!starRepository.existsByPaper_UuidAndUser_Uuid(paperUuid, user.getUuid())){
+        if (!starRepository.existsByPaper_UuidAndUser_Uuid(paperUuid, user.getUuid())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Star not found for this user on this paper");
         }
 
@@ -109,14 +110,43 @@ public class StarServiceImpl implements StarService {
     }
 
     @Override
-    public List<User> getUsersByPaperUuid(String paperUuid) {
+    public List<UserPublicResponse> getUsersByPaperUuid(String paperUuid) {
         Paper paper = paperRepository.findByUuid(paperUuid)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Paper not found"
                 ));
         List<Star> stars = starRepository.findByPaper_Uuid(paperUuid);
-        return stars.stream()
-                .map(Star::getUser)
-                .toList();
+        return stars.stream().map(star -> {
+            User user = star.getUser();
+            return new UserPublicResponse(
+                    user.getUuid(),
+                    user.getSlug(),
+                    user.getGender(),
+                    user.getFullName(),
+                    user.getImageUrl(),
+                    user.getStatus(),
+                    user.getCreateDate(),
+                    user.getUpdateDate(),
+                    user.getBio(),
+                    user.getIsUser(),
+                    user.getIsAdmin(),
+                    user.getIsAdvisor(),
+                    user.getIsStudent()
+            );
+        }).toList();
+    }
+
+    @Override
+    public List<StarResponse> getAllStarsByUserUuid(String userUuid) {
+        User user = userRepository.findByUuidAndIsDeletedFalse(userUuid)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                );
+        List<Star> stars = starRepository.findStarByUser_Uuid(user.getUuid());
+
+        return stars.stream().map(star -> new StarResponse(
+                star.getPaper().getUuid(),
+                star.getUser().getUuid()
+        )).toList();
     }
 }

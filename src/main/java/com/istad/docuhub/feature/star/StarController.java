@@ -3,6 +3,7 @@ package com.istad.docuhub.feature.star;
 
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.star.dto.StarResponse;
+import com.istad.docuhub.feature.user.dto.UserPublicResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,10 +41,12 @@ public class StarController {
 
     // Get all users who starred
     @GetMapping("/{paperUuid}/users")
-    public ResponseEntity<List<User>> getUsersWhoStarred(@PathVariable String paperUuid) {
-        List<User> users = starService.getUsersByPaperUuid(paperUuid);
-        return ResponseEntity.ok(users);
+    public ResponseEntity<?> getUsersWhoStarred(@PathVariable String paperUuid) {
+        return ResponseEntity.ok().body(starService.getUsersByPaperUuid(paperUuid));
     }
 
-
+    @GetMapping("/user/{userUuid}")
+    public ResponseEntity<?> getAllStarsByUserUuid(@PathVariable String userUuid) {
+        return ResponseEntity.ok(starService.getAllStarsByUserUuid(userUuid));
+    }
 }

@@ -151,11 +151,13 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/stars/**").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/stars/**").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/stars/{paperUuid}/count").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/stars/{paperUuid}/users").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stars/{paperUuid}/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stars/user/{userUuid}").permitAll()
 
                         // get all assingment
                         .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/assignments").hasAnyRole("ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/author").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/adviser/{adviserUuid}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

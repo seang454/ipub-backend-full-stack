@@ -63,4 +63,10 @@ public class AdviserAssignmentController {
         );
     }
 
+    @GetMapping("/assignments/adviser/{adviserUuid}")
+    public ResponseEntity<?> getAllAssignmentsByAuthorUuid(@PathVariable String adviserUuid) {
+        return ResponseEntity.ok(
+                adviserAssignmentService.getAssignmentsByAuthorUuid(adviserUuid)
+        );
+    }
 }
