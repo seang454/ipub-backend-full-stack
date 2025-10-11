@@ -63,7 +63,7 @@ public class KeyCloakSecurityConfig {
                 "http://localhost:3000"   // dev
         ));
         configuration.setAllowCredentials(true); // must allow credentials (cookies)
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET","PATCH","POST","PUT","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
         configuration.setExposedHeaders(List.of("Set-Cookie")); // optional, for debugging cookies
 
