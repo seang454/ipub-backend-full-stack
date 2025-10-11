@@ -101,8 +101,8 @@ public class KeyCloakSecurityConfig {
                         // Media Endpoints
                         .requestMatchers(HttpMethod.GET,"/api/v1/media").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN", "USER")
 
                         //Paper Endpoints
                         .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
