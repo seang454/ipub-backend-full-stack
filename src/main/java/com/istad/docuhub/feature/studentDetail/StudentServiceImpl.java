@@ -37,21 +37,6 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void createStudentDetail(StudentRequest studentRequest) {
-        if (studentRequest.studentCardUrl() == null || studentRequest.studentCardUrl().isEmpty()) {
-            throw new IllegalArgumentException("Student card URL cannot be null or empty");
-        }
-        if (studentRequest.university() == null || studentRequest.university().isEmpty()) {
-            throw new IllegalArgumentException("University cannot be null or empty");
-        }
-        if (studentRequest.major() == null || studentRequest.major().isEmpty()) {
-            throw new IllegalArgumentException("Major cannot be null or empty");
-        }
-        if (studentRequest.yearsOfStudy() == null || studentRequest.yearsOfStudy().isEmpty()) {
-            throw new IllegalArgumentException("Years of study cannot be null or empty");
-        }
-        if (studentRequest.userUuid() == null || studentRequest.userUuid().isEmpty()) {
-            throw new IllegalArgumentException("User UUID cannot be null or empty");
-        }
 
         int id;
         int retire = 0;

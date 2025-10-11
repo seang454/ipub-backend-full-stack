@@ -80,7 +80,7 @@ public class KeyCloakSecurityConfig {
                 .cors(Customizer.withDefaults()) // enable CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register","/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"api/v1/auth/tokens","/api/v1/auth/user/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/auth/tokens","/api/v1/auth/user/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh/**").permitAll()
                         .requestMatchers("/favicon.ico", "/health").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/auth/refreshTokens").permitAll()
@@ -101,8 +101,8 @@ public class KeyCloakSecurityConfig {
                         // Media Endpoints
                         .requestMatchers(HttpMethod.GET,"/api/v1/media").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN", "USER")
 
                         //Paper Endpoints
                         .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")

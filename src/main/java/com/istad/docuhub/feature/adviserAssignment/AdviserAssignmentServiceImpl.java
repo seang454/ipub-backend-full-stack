@@ -4,10 +4,7 @@ import com.istad.docuhub.domain.AdviserAssignment;
 import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.enums.STATUS;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentResponse;
-import com.istad.docuhub.feature.adviserAssignment.dto.AdviserReviewRequest;
-import com.istad.docuhub.feature.adviserAssignment.dto.RejectPaperRequest;
+import com.istad.docuhub.feature.adviserAssignment.dto.*;
 import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.paper.dto.PaperResponse;
 import com.istad.docuhub.feature.sendMail.SendMailService;
@@ -17,6 +14,8 @@ import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,7 +34,6 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
     private final UserRepository userRepository;
     private final SendMailService sendMailService;
     private final UserService userService;
-
     // assign adviesr
     @Override
     public AdviserAssignmentResponse assignAdviserToPaper(AdviserAssignmentRequest request) {
@@ -63,7 +61,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 throw new RuntimeException("Failed to generate unique ID after 10 attempts");
             }
             id = new Random().nextInt(Integer.parseInt("1000000"));
-        } while (adviserAssignmentRepository.existsById(id));
+        }while (adviserAssignmentRepository.existsById(id));
 
 
         // create assignment
@@ -79,7 +77,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         assignment.setUpdateDate(null);
 
         AdviserAssignment saved = adviserAssignmentRepository.save(assignment);
-        AdviserAssignment assignUuid = adviserAssignmentRepository.findByUuid(saved.getUuid()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment Not Found"));
+        AdviserAssignment assignUuid = adviserAssignmentRepository.findByUuid(saved.getUuid()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment Not Found"));
         paper.setAssignedId(assignUuid);
         paperRepository.save(paper);
 
@@ -269,4 +267,35 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         ).toList();
     }
 
+
+    @Override
+    public Page<AdvisorAssignmentResponse> getAssignmentsForCurrentAdviser(Pageable pageable) {
+        CurrentUser currentUser = userService.getCurrentUserSub();
+        String adviserUuid = currentUser.id();
+        System.out.println(">>> Adviser UUID from token: " + adviserUuid);
+
+        Page<AdviserAssignment> assignments =
+                adviserAssignmentRepository.findAssignmentsByAdvisorUuid(adviserUuid, pageable);
+
+        return assignments.map(a ->
+                new AdvisorAssignmentResponse(
+                        a.getUuid(),
+                        a.getStatus(),
+                        a.getDeadline(),
+                        a.getAssignedDate(),
+                        new PaperBriefResponse(
+                                a.getPaper().getUuid(),
+                                a.getPaper().getTitle(),
+                                a.getPaper().getFileUrl(),
+                                a.getPaper().getThumbnailUrl()
+                        ),
+                        new StudentBriefResponse(
+                                a.getPaper().getAuthor().getUuid(),
+                                a.getPaper().getAuthor().getFullName(),
+                                a.getPaper().getAuthor().getContactNumber(), // or email
+                                a.getPaper().getAuthor().getImageUrl()
+                        )
+                )
+        );
+    }
 }
