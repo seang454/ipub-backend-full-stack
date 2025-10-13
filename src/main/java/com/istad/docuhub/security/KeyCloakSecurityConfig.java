@@ -90,7 +90,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/profile").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
-
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/profile/{uuid}").permitAll()
                         // Category Endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/categories").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/categories/**").hasAnyRole("ADMIN")
