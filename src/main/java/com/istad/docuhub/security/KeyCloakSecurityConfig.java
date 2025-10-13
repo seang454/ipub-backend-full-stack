@@ -63,7 +63,7 @@ public class KeyCloakSecurityConfig {
                 "http://localhost:3000"   // dev
         ));
         configuration.setAllowCredentials(true); // must allow credentials (cookies)
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
         configuration.setExposedHeaders(List.of("Set-Cookie")); // optional, for debugging cookies
 
@@ -101,8 +101,8 @@ public class KeyCloakSecurityConfig {
                         // Media Endpoints
                         .requestMatchers(HttpMethod.GET,"/api/v1/media").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/media/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/media").hasAnyRole("STUDENT", "ADVISER", "ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/media/**").hasAnyRole("STUDENT", "ADVISER", "ADMIN", "USER")
 
                         //Paper Endpoints
                         .requestMatchers(HttpMethod.POST,"/api/v1/papers").hasAnyRole("STUDENT", "ADMIN", "ADVISER")
@@ -158,6 +158,14 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/assignments").hasAnyRole("ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/author").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/adviser/{adviserUuid}").permitAll()
+
+                        // Comment
+                        .requestMatchers(HttpMethod.POST, "/api/v1/comments").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/comments/paper/{paperUuid}").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/comments/{uuid}/replies").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
