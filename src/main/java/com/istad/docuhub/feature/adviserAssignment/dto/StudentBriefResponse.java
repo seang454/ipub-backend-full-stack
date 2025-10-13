@@ -8,6 +8,5 @@ import lombok.Data;
 public record StudentBriefResponse(
         String uuid,
         String fullName,
-        String email,
-         String imageUrl
+        String imageUrl
 ) {}
