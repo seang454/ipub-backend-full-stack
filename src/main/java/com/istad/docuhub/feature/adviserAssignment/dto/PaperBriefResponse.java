@@ -7,7 +7,9 @@ import lombok.Setter;
 @Builder
 public record PaperBriefResponse(
         String uuid,
-       String title,
-       String fileUrl,
-       String thumbnailUr)
-    {}
+        String title,
+        String fileUrl,
+        String thumbnailUr,
+        String Status) {
+
+}
