@@ -571,7 +571,7 @@ public class UserServiceImpl implements UserService {
             adviserDetailResponse = AdviserDetailResponse.builder()
                     .experienceYears(adviserDetail.getExperienceYears())
                     .linkedinUrl(adviserDetail.getLinkedinUrl())
-                    .publication(adviserDetail.getPublication())
+                    .office(adviserDetail.getOffice())
                     .status(adviserDetail.getStatus())
                     .socialLinks(adviserDetail.getSocialLinks())
                     .userUuid(adviserDetail.getUser().getUuid())

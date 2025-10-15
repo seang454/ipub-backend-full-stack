@@ -8,7 +8,7 @@ import java.util.List;
 public record UpdateAdviserDetailRequest(
         Integer experienceYears,
         String linkedinUrl,
-        String publication,
+        String office,
         String socialLinks,
         String status
 ) {}

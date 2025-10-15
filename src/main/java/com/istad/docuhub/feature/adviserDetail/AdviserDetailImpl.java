@@ -40,7 +40,7 @@ public class AdviserDetailImpl implements AdviserService {
         return AdviserDetailResponse.builder()
                 .experienceYears(adviserDetail.getExperienceYears())
                 .linkedinUrl(adviserDetail.getLinkedinUrl())
-                .publication(adviserDetail.getPublication())
+                .office(adviserDetail.getOffice())
                 .status(adviserDetail.getStatus())
                 .socialLinks(adviserDetail.getSocialLinks())
                 .userUuid(adviserDetail.getUser() != null ? adviserDetail.getUser().getUuid() : null)
@@ -63,7 +63,7 @@ public class AdviserDetailImpl implements AdviserService {
         adviserDetail.setUuid(UUID.randomUUID().toString());
         adviserDetail.setExperienceYears(adviserDetailRequest.experienceYears());
         adviserDetail.setLinkedinUrl(adviserDetailRequest.linkedinUrl());
-        adviserDetail.setPublication(adviserDetailRequest.publication());
+        adviserDetail.setOffice(adviserDetailRequest.office());
         adviserDetail.setSocialLinks(adviserDetailRequest.socialLinks());
         adviserDetail.setIsDeleted(false);
 
@@ -91,7 +91,7 @@ public class AdviserDetailImpl implements AdviserService {
 
         adviserDetail.setExperienceYears(updateRequest.experienceYears());
         adviserDetail.setLinkedinUrl(updateRequest.linkedinUrl());
-        adviserDetail.setPublication(updateRequest.publication());
+        adviserDetail.setOffice(updateRequest.office());
         adviserDetail.setSocialLinks(updateRequest.socialLinks());
         adviserDetail.setStatus(updateRequest.status());
 
@@ -142,7 +142,7 @@ public class AdviserDetailImpl implements AdviserService {
         // ✅ Update fields from request
         adviserDetail.setExperienceYears(updateRequest.experienceYears());
         adviserDetail.setLinkedinUrl(updateRequest.linkedinUrl());
-        adviserDetail.setPublication(updateRequest.publication());
+        adviserDetail.setOffice(updateRequest.office());
         adviserDetail.setSocialLinks(updateRequest.socialLinks());
         adviserDetail.setStatus(updateRequest.status());
 
@@ -153,7 +153,7 @@ public class AdviserDetailImpl implements AdviserService {
                 saved.getUuid(),
                 saved.getExperienceYears(),
                 saved.getLinkedinUrl(),
-                saved.getPublication(),
+                saved.getOffice(),
                 saved.getSocialLinks(),
                 saved.getStatus(),
                 saved.getUser().getUuid(),
