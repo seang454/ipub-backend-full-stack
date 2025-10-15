@@ -166,6 +166,13 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/comments/{uuid}/replies").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+
+
+                        // student endpoint
+                        .requestMatchers(HttpMethod.GET,"/api/v1/user-promote/student/{userUuid}").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/user-promote/student/{userUuid}").hasRole("STUDENT")
+
+
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
