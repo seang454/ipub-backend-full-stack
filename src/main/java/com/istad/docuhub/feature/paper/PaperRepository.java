@@ -26,7 +26,7 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     Page<Paper> findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(String uuid, Pageable pageable);
     List<Paper> findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(String uuid);
 
-    Optional<Paper> findByUuidAndIsDeletedFalseAndIsApprovedFalse(String uuid);
+    Optional<Paper> findByUuidAndIsDeletedFalseAndIsApprovedTrue(String uuid);
 
     // added by thongfazon
     Boolean existsByUuid(String uuid);
