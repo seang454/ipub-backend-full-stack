@@ -65,7 +65,6 @@ public class AdviserDetailImpl implements AdviserService {
         adviserDetail.setLinkedinUrl(adviserDetailRequest.linkedinUrl());
         adviserDetail.setPublication(adviserDetailRequest.publication());
         adviserDetail.setSocialLinks(adviserDetailRequest.socialLinks());
-        adviserDetail.setStatus(adviserDetailRequest.status());
         adviserDetail.setIsDeleted(false);
 
         AdviserDetail saved = adviserDetailRepository.save(adviserDetail);
@@ -76,7 +75,7 @@ public class AdviserDetailImpl implements AdviserService {
     public AdviserDetailResponse getAdviserDetailByUuid(String uuid) {
         AdviserDetail adviserDetail = adviserDetailRepository.findAll()
                 .stream()
-                .filter(a -> a.getUuid().equals(uuid))
+                .filter(a -> a.getUser().getUuid().equals(uuid))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Adviser detail not found with uuid: " + uuid));
         return mapToResponse(adviserDetail);
@@ -86,7 +85,7 @@ public class AdviserDetailImpl implements AdviserService {
     public AdviserDetailResponse updateAdviserDetailByUuid(String uuid, UpdateAdviserDetailRequest updateRequest) {
         AdviserDetail adviserDetail = adviserDetailRepository.findAll()
                 .stream()
-                .filter(a -> a.getUuid().equals(uuid))
+                .filter(a -> a.getUser().getUuid().equals(uuid))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Adviser detail not found with uuid: " + uuid));
 

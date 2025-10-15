@@ -28,13 +28,6 @@ public record AdviserDetailRequest(
         @Size(max = 500, message = "Social links must not exceed 500 characters")
         String socialLinks,
 
-        @NotBlank(message = "Status is required")
-        @Pattern(
-                regexp = "^(ACTIVE|PENDING|REJECTED)$",
-                message = "Status must be ACTIVE, PENDING, or REJECTED"
-        )
-        String status,
-
         @NotBlank(message = "User UUID is required")
         @Pattern(
                 regexp = "^[0-9a-fA-F-]{36}$",
