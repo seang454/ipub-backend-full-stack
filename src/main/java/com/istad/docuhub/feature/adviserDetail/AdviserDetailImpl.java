@@ -89,11 +89,21 @@ public class AdviserDetailImpl implements AdviserService {
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Adviser detail not found with uuid: " + uuid));
 
-        adviserDetail.setExperienceYears(updateRequest.experienceYears());
-        adviserDetail.setLinkedinUrl(updateRequest.linkedinUrl());
-        adviserDetail.setOffice(updateRequest.office());
-        adviserDetail.setSocialLinks(updateRequest.socialLinks());
-        adviserDetail.setStatus(updateRequest.status());
+        if (updateRequest.experienceYears() != null) {
+            adviserDetail.setExperienceYears(updateRequest.experienceYears());
+        }
+        if (updateRequest.linkedinUrl() != null && !updateRequest.linkedinUrl().isBlank()) {
+            adviserDetail.setLinkedinUrl(updateRequest.linkedinUrl());
+        }
+        if (updateRequest.office() != null && !updateRequest.office().isBlank()) {
+            adviserDetail.setOffice(updateRequest.office());
+        }
+        if (updateRequest.socialLinks() != null && !updateRequest.socialLinks().isBlank()) {
+            adviserDetail.setSocialLinks(updateRequest.socialLinks());
+        }
+        if (updateRequest.status() != null && !updateRequest.status().isBlank()) {
+            adviserDetail.setStatus(updateRequest.status());
+        }
 
         AdviserDetail updated = adviserDetailRepository.save(adviserDetail);
         return mapToResponse(updated);
