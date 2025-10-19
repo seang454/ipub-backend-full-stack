@@ -1,13 +1,13 @@
 package com.istad.docuhub.feature.studentDetail;
 
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
+import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
+import com.istad.docuhub.feature.studentDetail.dto.UpdateStudentRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,5 +24,24 @@ public class StudentDetailController {
                 HttpStatus.CREATED
         );
     }
+
+    @PatchMapping("/student/{userUuid}")
+    public ResponseEntity<StudentResponse> updateStudentDetail(
+            @PathVariable String userUuid,
+            @Valid @RequestBody UpdateStudentRequest updateRequest
+    ) {
+        StudentResponse updatedStudent = studentService.updateStudentDetailByUserUuid(userUuid, updateRequest);
+        return ResponseEntity.ok(updatedStudent);
+    }
+
+
+    // find studentdetail by uuid
+    @GetMapping("/student/{userUuid}")
+    public StudentResponse findStudentDetailByUserUuid(@PathVariable String userUuid) {
+        return studentService.findStudentDetailApprovedByUserUuid(userUuid);
+    }
+
+
+
 
 }

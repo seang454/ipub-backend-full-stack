@@ -287,12 +287,12 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                                 a.getPaper().getUuid(),
                                 a.getPaper().getTitle(),
                                 a.getPaper().getFileUrl(),
-                                a.getPaper().getThumbnailUrl()
+                                a.getPaper().getThumbnailUrl(),
+                                a.getPaper().getStatus()
                         ),
                         new StudentBriefResponse(
                                 a.getPaper().getAuthor().getUuid(),
                                 a.getPaper().getAuthor().getFullName(),
-                                a.getPaper().getAuthor().getContactNumber(), // or email
                                 a.getPaper().getAuthor().getImageUrl()
                         )
                 )

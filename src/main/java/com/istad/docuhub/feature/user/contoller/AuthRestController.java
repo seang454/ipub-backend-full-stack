@@ -347,4 +347,9 @@ public class AuthRestController {
     public ResponseEntity<?> getAllAdvisers(){
         return ResponseEntity.ok(studentService.getAllStudentAdvisers());
     }
+
+    @GetMapping("/user/profile/{uuid}")
+    public UserProfileResponse getProfileByUuid(@PathVariable String uuid) {
+        return userService.getUserProfile(uuid);
+    }
 }

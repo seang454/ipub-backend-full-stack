@@ -177,6 +177,26 @@ public class StudentServiceImpl implements StudentService {
                 )).toList();
     }
 
+    @Override
+    public StudentResponse findStudentDetailApprovedByUserUuid(String userUuid) {
+        StudentDetail detail = studentDetailRepository.findByUser_Uuid(userUuid)
+                .stream()
+                .filter(d -> Boolean.TRUE.equals(d.getIsStudent()))          // isStudent = false
+                .filter(d -> "APPROVED".equalsIgnoreCase(String.valueOf(d.getStatus())))       // status = PENDING
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
+
+        return new StudentResponse(
+                detail.getUuid(),
+                detail.getStudentCardUrl(),
+                detail.getUniversity(),
+                detail.getMajor(),
+                detail.getYearsOfStudy(),
+                detail.getIsStudent(),
+                detail.getUser().getUuid()
+        );
+    }
+
 }
 
 

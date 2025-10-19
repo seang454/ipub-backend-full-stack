@@ -90,7 +90,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/student").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/users/mentor").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/profile").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
-
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/user/profile/{uuid}").permitAll()
                         // Category Endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/categories").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/categories/**").hasAnyRole("ADMIN")
@@ -158,6 +158,21 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/assignments").hasAnyRole("ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/author").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/adviser/{adviserUuid}").permitAll()
+
+                        // Comment
+                        .requestMatchers(HttpMethod.POST, "/api/v1/comments").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/comments/paper/{paperUuid}").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/{uuid}").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/comments/{uuid}/replies").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
+
+
+                        // student endpoint
+                        .requestMatchers(HttpMethod.GET,"/api/v1/user-promote/student/{userUuid}").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/user-promote/student/{userUuid}").hasRole("STUDENT")
+
+
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

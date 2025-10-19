@@ -28,12 +28,12 @@ public class AdviserDetail {
     private String linkedinUrl;
 
     @Column(nullable = false)
-    private String publication;
+    private String office;
 
     @Column(nullable = false)
     private String socialLinks;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String status;
 
     @Column(nullable = false)

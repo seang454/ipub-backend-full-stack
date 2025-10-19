@@ -13,7 +13,6 @@ import com.istad.docuhub.feature.user.dto.CurrentUser;
 import com.istad.docuhub.utils.FeedBackStatus;
 import com.istad.docuhub.utils.PaperStatus;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.Current;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -49,7 +48,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor not found")
         );
 
-        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedFalse(feedbackRequest.paperUuid()).orElseThrow(
+        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedTrue(feedbackRequest.paperUuid()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper not found")
         );
 
@@ -126,7 +125,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         User advisor = userRepository.findByUuidAndIsDeletedFalse(subId.id()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor not found")
         );
-        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedFalse(paperUuid).orElseThrow(
+        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedTrue(paperUuid).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paper not found")
         );
         Feedback feedback = feedbackRepository.findByPaper_Uuid(paperUuid);

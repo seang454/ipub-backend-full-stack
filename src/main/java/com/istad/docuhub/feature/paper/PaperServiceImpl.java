@@ -88,7 +88,7 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public PaperResponse updatePaperByAuthor(String uuid, PaperRequest paperRequest) {
-        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedFalse(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found or already approved"));
+        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedTrue(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found or already approved"));
         CurrentUser subId = userService.getCurrentUserSub();
         if (!paper.getAuthor().getUuid().equals(subId.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this paper");

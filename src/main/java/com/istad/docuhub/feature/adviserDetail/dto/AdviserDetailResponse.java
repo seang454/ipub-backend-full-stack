@@ -11,7 +11,7 @@ public record AdviserDetailResponse(
         String uuid,
         Integer experienceYears,
         String linkedinUrl,
-        String publication,
+        String office,
         String socialLinks,
         String status,
         String userUuid,

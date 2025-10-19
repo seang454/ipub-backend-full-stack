@@ -20,20 +20,13 @@ public record AdviserDetailRequest(
         )
         String linkedinUrl,
 
-        @NotBlank(message = "Publication is required")
-        @Size(max = 500, message = "Publication must not exceed 500 characters")
-        String publication,
+        @NotBlank(message = "Office is required")
+        @Size(max = 500, message = "office must not exceed 500 characters")
+        String office,
 
         @NotBlank(message = "Social links are required")
         @Size(max = 500, message = "Social links must not exceed 500 characters")
         String socialLinks,
-
-        @NotBlank(message = "Status is required")
-        @Pattern(
-                regexp = "^(ACTIVE|PENDING|REJECTED)$",
-                message = "Status must be ACTIVE, PENDING, or REJECTED"
-        )
-        String status,
 
         @NotBlank(message = "User UUID is required")
         @Pattern(

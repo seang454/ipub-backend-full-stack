@@ -6,7 +6,6 @@ import com.istad.docuhub.feature.adviserDetail.dto.UpdateAdviserDetailRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,11 +30,13 @@ public class AdviserDetailController {
         return ResponseEntity.ok(adviserService.getAdviserDetailByUuid(uuid));
     }
 
-    @PutMapping("/{uuid}")
-    public ResponseEntity<AdviserDetailResponse> updateAdviserDetailByUuid(@PathVariable String uuid,
-                                                               @RequestBody UpdateAdviserDetailRequest request) {
+    @PatchMapping("/{uuid}")
+    public ResponseEntity<AdviserDetailResponse> updateAdviserDetailByUuid(
+            @PathVariable String uuid,
+            @RequestBody UpdateAdviserDetailRequest request) {
         return ResponseEntity.ok(adviserService.updateAdviserDetailByUuid(uuid, request));
     }
+
 
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteAdviser(@PathVariable String uuid) {
