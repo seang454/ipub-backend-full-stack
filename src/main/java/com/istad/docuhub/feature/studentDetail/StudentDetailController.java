@@ -25,7 +25,7 @@ public class StudentDetailController {
         );
     }
 
-    @PutMapping("/student/{userUuid}")
+    @PatchMapping("/student/{userUuid}")
     public ResponseEntity<StudentResponse> updateStudentDetail(
             @PathVariable String userUuid,
             @Valid @RequestBody UpdateStudentRequest updateRequest
@@ -33,6 +33,7 @@ public class StudentDetailController {
         StudentResponse updatedStudent = studentService.updateStudentDetailByUserUuid(userUuid, updateRequest);
         return ResponseEntity.ok(updatedStudent);
     }
+
 
     // find studentdetail by uuid
     @GetMapping("/student/{userUuid}")
