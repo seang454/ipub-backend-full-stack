@@ -323,5 +323,4 @@ public class KeyCloakSecurityConfig {
 
         return manager;
     }
-
 }

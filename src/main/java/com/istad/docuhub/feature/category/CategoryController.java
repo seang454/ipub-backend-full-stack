@@ -4,6 +4,7 @@ package com.istad.docuhub.feature.category;
 import com.istad.docuhub.feature.category.dto.CategoryRequest;
 import com.istad.docuhub.feature.category.dto.CategoryResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/categories")
@@ -50,6 +52,7 @@ public class CategoryController {
 
     @PutMapping("/{uuid}")
     public ResponseEntity<?> updateCategory(@PathVariable String uuid, @RequestBody CategoryRequest categoryRequest) {
+        log.info("Updating category with uuid: " + uuid, categoryRequest);
         categoryService.updateCategory(uuid, categoryRequest);
         return new ResponseEntity<>(
                 Map.of(
