@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/AdviserDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/AdviserDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/AdminServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/dto/AdviserDetailRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/dto/AdviserDetailRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/dto/AdviserDetailResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/dto/AdviserDetailResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/dto/UpdateAdviserDetailRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/dto/UpdateAdviserDetailRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/category/CategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/category/CategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/dto/UpdateStudentRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/dto/UpdateStudentRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
-    </list>
+    <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -70,12 +56,12 @@
     &quot;assignee&quot;: &quot;ButSeavThong&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/seang454/ipub-backend-full-stack.git&quot;,
-    &quot;accountId&quot;: &quot;7ee093f6-4285-4b5b-809d-0cb6d23839a7&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/seang454/ipub-backend-full-stack.git",
+    "accountId": "8b02906d-5613-49b1-a578-3a54ecd294f1"
   }
-}</component>
+}]]></component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -109,7 +95,7 @@
     "Spring Boot.DocuhubApplication.executor": "Run",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "Merging main",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/final ISTAD/ipub-backend-full-stack",
@@ -162,8 +148,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
       </set>
     </attachedChunks>
   </component>
@@ -285,6 +271,7 @@
       <workItem from="1760634102261" duration="646000" />
       <workItem from="1760819217658" duration="3530000" />
       <workItem from="1760845075675" duration="855000" />
+      <workItem from="1761022077752" duration="644000" />
     </task>
     <servers />
   </component>
