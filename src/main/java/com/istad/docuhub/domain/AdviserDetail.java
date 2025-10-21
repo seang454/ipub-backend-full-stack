@@ -28,7 +28,7 @@ public class AdviserDetail {
     private String linkedinUrl;
 
     @Column(nullable = false)
-    private String publication;
+    private String office;
 
     @Column(nullable = false)
     private String socialLinks;

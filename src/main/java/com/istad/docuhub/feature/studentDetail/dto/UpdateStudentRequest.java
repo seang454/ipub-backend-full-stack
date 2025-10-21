@@ -1,19 +1,19 @@
 package com.istad.docuhub.feature.studentDetail.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UpdateStudentRequest(
-        @NotBlank(message = "Student card URL cannot be empty")
+
+        // Optional field, validate only if not null
+        @Size(max = 255, message = "Student card URL must be at most 255 characters")
         String studentCardUrl,
 
-        @NotBlank(message = "University cannot be empty")
+        @Size(max = 255, message = "University name must be at most 255 characters")
         String university,
 
-        @NotBlank(message = "Major cannot be empty")
+        @Size(max = 255, message = "Major must be at most 255 characters")
         String major,
 
-        @NotBlank(message = "Years of study cannot be empty")
         @Size(max = 10, message = "Years of study must be at most 10 characters")
         String yearsOfStudy
 ) {}

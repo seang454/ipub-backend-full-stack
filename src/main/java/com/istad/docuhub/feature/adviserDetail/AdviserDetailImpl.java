@@ -40,7 +40,7 @@ public class AdviserDetailImpl implements AdviserService {
         return AdviserDetailResponse.builder()
                 .experienceYears(adviserDetail.getExperienceYears())
                 .linkedinUrl(adviserDetail.getLinkedinUrl())
-                .publication(adviserDetail.getPublication())
+                .office(adviserDetail.getOffice())
                 .status(adviserDetail.getStatus())
                 .socialLinks(adviserDetail.getSocialLinks())
                 .userUuid(adviserDetail.getUser() != null ? adviserDetail.getUser().getUuid() : null)
@@ -63,7 +63,7 @@ public class AdviserDetailImpl implements AdviserService {
         adviserDetail.setUuid(UUID.randomUUID().toString());
         adviserDetail.setExperienceYears(adviserDetailRequest.experienceYears());
         adviserDetail.setLinkedinUrl(adviserDetailRequest.linkedinUrl());
-        adviserDetail.setPublication(adviserDetailRequest.publication());
+        adviserDetail.setOffice(adviserDetailRequest.office());
         adviserDetail.setSocialLinks(adviserDetailRequest.socialLinks());
         adviserDetail.setIsDeleted(false);
 
@@ -89,11 +89,21 @@ public class AdviserDetailImpl implements AdviserService {
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Adviser detail not found with uuid: " + uuid));
 
-        adviserDetail.setExperienceYears(updateRequest.experienceYears());
-        adviserDetail.setLinkedinUrl(updateRequest.linkedinUrl());
-        adviserDetail.setPublication(updateRequest.publication());
-        adviserDetail.setSocialLinks(updateRequest.socialLinks());
-        adviserDetail.setStatus(updateRequest.status());
+        if (updateRequest.experienceYears() != null) {
+            adviserDetail.setExperienceYears(updateRequest.experienceYears());
+        }
+        if (updateRequest.linkedinUrl() != null && !updateRequest.linkedinUrl().isBlank()) {
+            adviserDetail.setLinkedinUrl(updateRequest.linkedinUrl());
+        }
+        if (updateRequest.office() != null && !updateRequest.office().isBlank()) {
+            adviserDetail.setOffice(updateRequest.office());
+        }
+        if (updateRequest.socialLinks() != null && !updateRequest.socialLinks().isBlank()) {
+            adviserDetail.setSocialLinks(updateRequest.socialLinks());
+        }
+        if (updateRequest.status() != null && !updateRequest.status().isBlank()) {
+            adviserDetail.setStatus(updateRequest.status());
+        }
 
         AdviserDetail updated = adviserDetailRepository.save(adviserDetail);
         return mapToResponse(updated);
@@ -142,7 +152,7 @@ public class AdviserDetailImpl implements AdviserService {
         // ✅ Update fields from request
         adviserDetail.setExperienceYears(updateRequest.experienceYears());
         adviserDetail.setLinkedinUrl(updateRequest.linkedinUrl());
-        adviserDetail.setPublication(updateRequest.publication());
+        adviserDetail.setOffice(updateRequest.office());
         adviserDetail.setSocialLinks(updateRequest.socialLinks());
         adviserDetail.setStatus(updateRequest.status());
 
@@ -153,7 +163,7 @@ public class AdviserDetailImpl implements AdviserService {
                 saved.getUuid(),
                 saved.getExperienceYears(),
                 saved.getLinkedinUrl(),
-                saved.getPublication(),
+                saved.getOffice(),
                 saved.getSocialLinks(),
                 saved.getStatus(),
                 saved.getUser().getUuid(),

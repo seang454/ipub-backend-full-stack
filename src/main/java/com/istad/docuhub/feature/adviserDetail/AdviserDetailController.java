@@ -30,11 +30,13 @@ public class AdviserDetailController {
         return ResponseEntity.ok(adviserService.getAdviserDetailByUuid(uuid));
     }
 
-    @PutMapping("/{uuid}")
-    public ResponseEntity<AdviserDetailResponse> updateAdviserDetailByUuid(@PathVariable String uuid,
-                                                               @RequestBody UpdateAdviserDetailRequest request) {
+    @PatchMapping("/{uuid}")
+    public ResponseEntity<AdviserDetailResponse> updateAdviserDetailByUuid(
+            @PathVariable String uuid,
+            @RequestBody UpdateAdviserDetailRequest request) {
         return ResponseEntity.ok(adviserService.updateAdviserDetailByUuid(uuid, request));
     }
+
 
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteAdviser(@PathVariable String uuid) {

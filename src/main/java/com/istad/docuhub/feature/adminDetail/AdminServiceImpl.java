@@ -173,8 +173,8 @@ public class AdminServiceImpl implements AdminService {
                     idAdviser = new Random().nextInt(1_000_000);
                 } while (adviserDetailRepository.existsById(idAdviser));
                 adviserDetail.setId(idAdviser);
-                adviserDetail.setPublication("ISTAD");
-                adviserDetail.setExperienceYears(1);
+                adviserDetail.setOffice("ISTAD");
+                adviserDetail.setExperienceYears(2);
                 adviserDetail.setIsDeleted(false);
                 adviserDetail.setLinkedinUrl("https://www.linkedin.com/in/istad/");
                 adviserDetail.setSocialLinks("https://www.facebook.com/istad.co");
