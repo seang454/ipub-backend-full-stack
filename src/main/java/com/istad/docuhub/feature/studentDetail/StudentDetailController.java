@@ -1,5 +1,6 @@
 package com.istad.docuhub.feature.studentDetail;
 
+import com.istad.docuhub.feature.studentDetail.dto.StudentLogic;
 import com.istad.docuhub.feature.studentDetail.dto.StudentRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
 import com.istad.docuhub.feature.studentDetail.dto.UpdateStudentRequest;
@@ -42,6 +43,10 @@ public class StudentDetailController {
     }
 
 
-
+    // find studentdetail by uuid
+    @GetMapping("/pending/student/{userUuid}")
+    public StudentLogic findStudentDetailPendingByUserUuid(@PathVariable String userUuid) {
+        return studentService.findStudentDetailPendingByUserUuid(userUuid);
+    }
 
 }

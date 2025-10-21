@@ -33,6 +33,7 @@ public class User {
 
     private LocalDate updateDate;
 
+    @Column(nullable = true, unique = false, length = 1000)
     private String bio;
 
     private String address;
