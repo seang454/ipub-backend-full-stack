@@ -6,6 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/Paper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/Paper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,8 +45,8 @@
       <list>
         <option value="Interface" />
         <option value="Enum" />
-        <option value="Record" />
         <option value="Class" />
+        <option value="Record" />
       </list>
     </option>
   </component>
@@ -100,7 +106,7 @@
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/final ISTAD/ipub-backend-full-stack&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Error/ipub-backend-full-stack&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -130,15 +136,6 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <configuration name="DocuhubApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="docuhub.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.istad.docuhub.DocuhubApplication" />
@@ -273,6 +270,9 @@
       <workItem from="1760634102261" duration="646000" />
       <workItem from="1760819217658" duration="3530000" />
       <workItem from="1760845075675" duration="855000" />
+      <workItem from="1761023169905" duration="163000" />
+      <workItem from="1761023345670" duration="969000" />
+      <workItem from="1761029678581" duration="4951000" />
     </task>
     <servers />
   </component>

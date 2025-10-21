@@ -197,6 +197,19 @@ public class StudentServiceImpl implements StudentService {
         );
     }
 
+    @Override
+    public StudentLogic findStudentDetailPendingByUserUuid(String userUuid) {
+        StudentDetail detail = studentDetailRepository.findByUser_Uuid(userUuid)
+                .stream()
+                .filter(d -> Boolean.FALSE.equals(d.getIsStudent()))          // isStudent = false
+                .filter(d -> "Pending".equalsIgnoreCase(String.valueOf(d.getStatus())))       // status = PENDING
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
+
+        return new StudentLogic(
+                detail.getIsStudent()
+        );
+    }
 }
 
 

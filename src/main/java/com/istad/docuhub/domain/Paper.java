@@ -25,7 +25,7 @@ public class Paper {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT",length = 30000)
     private String abstractText;
 
     @Column(nullable = true)

@@ -14,4 +14,5 @@ public interface StudentService {
     StudentResponse updateStudentDetailByUserUuid(String userUuid, UpdateStudentRequest updateRequest);
     List<UserPublicResponse> getAllStudentAdvisers();
     StudentResponse findStudentDetailApprovedByUserUuid(String userUuid);
+    StudentLogic findStudentDetailPendingByUserUuid(String userUuid);
 }

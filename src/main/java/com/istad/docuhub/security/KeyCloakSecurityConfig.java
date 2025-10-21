@@ -172,6 +172,8 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/v1/user-promote/student/{userUuid}").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/api/v1/user-promote/student/{userUuid}").hasRole("STUDENT")
 
+                        // user endpoint
+                        .requestMatchers(HttpMethod.GET,"/api/v1/user-promote/pending/student/{userUuid}").hasAnyRole("ADMIN","USER","STUDENT")
 
                         .anyRequest().authenticated()
                 )
