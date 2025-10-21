@@ -6,12 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/Paper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/Paper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/domain/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/studentDetail/StudentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
