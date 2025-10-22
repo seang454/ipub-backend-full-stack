@@ -254,6 +254,7 @@ public class AdminServiceImpl implements AdminService {
         userRepository.save(user);
 
 
+
         // update student detail when apporve
         StudentDetail stdt = studentDetailRepository.findByUser_Uuid(studentUuidOrUsername)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found in Keycloak"));

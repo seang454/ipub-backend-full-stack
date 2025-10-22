@@ -15,7 +15,7 @@ public interface PaperService {
     Page<PaperResponse> getAllPapersIsPending(Pageable pageable);
     Page<PaperResponse> getAllPaper(Pageable pageable);
     void deletePaperById(String uuid);
-    void updatePaperByAdmin(String uuid, AdminPaperRequest paperRequest);
+    void updatePaperPartiallyByAdmin(String uuid, AdminPaperRequest paperRequest);
 
     //Public
     PaperResponse getPaperById(String Uuid);
