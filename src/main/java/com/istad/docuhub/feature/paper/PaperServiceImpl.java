@@ -44,10 +44,6 @@ public class PaperServiceImpl implements PaperService {
         CurrentUser subId = userService.getCurrentUserSub();
         User author = userRepository.findByUuid(subId.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (!author.getIsStudent() && !author.getIsAdvisor() && !author.getIsAdmin()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author must be a docuhub student or advisor or admin");
-        }
-
         int id;
         int retries = 0;
         do {
