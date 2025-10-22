@@ -177,7 +177,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/v1/user-promote/pending/student/{userUuid}").hasAnyRole("ADMIN","USER","STUDENT")
 
                         //webSocket
-//                        .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/ws-chat/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
