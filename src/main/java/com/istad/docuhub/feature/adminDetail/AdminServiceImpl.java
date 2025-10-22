@@ -135,6 +135,7 @@ public class AdminServiceImpl implements AdminService {
                     .isAdvisor("ADVISER".equals(roleName))
                     .isStudent("STUDENT".equals(roleName))
                     .isDeleted(false)
+                    .isActive(true)
                     .createDate(LocalDate.now())
                     .updateDate(LocalDate.now())
                     .slug(SlugUtil.toSlug(fullName, safeUsername))
