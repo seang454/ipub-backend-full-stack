@@ -22,7 +22,6 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
 
     @Autowired
     private JwtDecoder jwtDecoder;
-
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
@@ -32,18 +31,33 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    String authHeader = accessor.getFirstNativeHeader("Authorization");
-                    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                        throw new IllegalArgumentException("No valid Authorization header");
+
+                    String token = accessor.getFirstNativeHeader("Authorization");
+
+                    // Fallback: check query parameter
+                    if (token == null) {
+                        Object accessTokenAttr = accessor.getSessionAttributes().get("access_token");
+                        if (accessTokenAttr != null) {
+                            token = accessTokenAttr.toString();
+                        }
                     }
 
-                    String token = authHeader.substring(7);
+                    if (token == null) {
+                        throw new IllegalArgumentException("No valid JWT token found");
+                    }
+
+                    // Remove Bearer prefix if present
+                    if (token.startsWith("Bearer ")) {
+                        token = token.substring(7);
+                    }
+
                     try {
                         Jwt jwt = jwtDecoder.decode(token);
-                        String userUuid = jwt.getClaimAsString("sub"); // Keycloak subject (UUID)
+                        String userUuid = jwt.getClaimAsString("sub");
                         accessor.setUser(new StompPrincipal(userUuid));
+                        System.out.println("WebSocket connected user UUID: " + userUuid);
                     } catch (Exception e) {
-                        throw new IllegalArgumentException("Invalid JWT token");
+                        throw new IllegalArgumentException("Invalid JWT token", e);
                     }
                 }
 
@@ -51,5 +65,6 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
             }
         });
     }
+
 }
 
