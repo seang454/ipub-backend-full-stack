@@ -6,8 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adminDetail/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -100,7 +98,7 @@
     "Spring Boot.DocuhubApplication.executor": "Run",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "Merging main",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/Error/ipub-backend-full-stack",
@@ -271,7 +269,7 @@
       <workItem from="1761023345670" duration="969000" />
       <workItem from="1761029678581" duration="4951000" />
       <workItem from="1761067898145" duration="230000" />
-      <workItem from="1761106189993" duration="382000" />
+      <workItem from="1761106189993" duration="1104000" />
     </task>
     <servers />
   </component>

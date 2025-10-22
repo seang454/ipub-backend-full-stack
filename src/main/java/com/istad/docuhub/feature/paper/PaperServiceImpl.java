@@ -92,19 +92,10 @@ public class PaperServiceImpl implements PaperService {
             // Find category by name and get its UUID
             String categoryName = paperRequest.categoryNames().getFirst();
             Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
-
             paper.setTitle(paperRequest.title());
             paper.setAbstractText(paperRequest.abstractText());
-            String fileUrl = paper.getFileUrl();
-            mediaService.deleteMedia(fileUrl);
             paper.setFileUrl(paperRequest.fileUrl());
-            if (paper.getThumbnailUrl() == null) {
-                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
-            } else {
-                String thumbnailUrl = paper.getThumbnailUrl();
-                mediaService.deleteMedia(thumbnailUrl);
-                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
-            }
+            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
             paper.setCategory(category);
             paperRepository.save(paper);
 
