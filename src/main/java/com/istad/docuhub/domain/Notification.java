@@ -27,7 +27,7 @@ public class Notification {
     private String message;
     
     @Column(nullable = false)
-    private String ReceiverUuid;
+    private String receiverUuid;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
