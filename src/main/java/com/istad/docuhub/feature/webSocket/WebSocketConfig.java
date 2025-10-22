@@ -1,4 +1,4 @@
-package com.istad.docuhub.security;
+package com.istad.docuhub.feature.webSocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
