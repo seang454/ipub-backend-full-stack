@@ -184,32 +184,50 @@ public class PaperServiceImpl implements PaperService {
         paperRepository.save(paper);
     }
 
+    // upate by thong
     @Override
-    public void updatePaperByAdmin(String uuid, AdminPaperRequest paperRequest) {
-        Paper paper = paperRepository.findByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+    public void updatePaperPartiallyByAdmin(String uuid, AdminPaperRequest paperRequest) {
+        Paper paper = paperRepository.findByUuid(uuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
 
-        // Find category by name and get its UUID
-        String categoryName = paperRequest.category().getFirst();
-        Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
+        // Update title if provided
+        if (paperRequest.title() != null && !paperRequest.title().isBlank()) {
+            paper.setTitle(paperRequest.title());
+        }
 
-        paper.setTitle(paperRequest.title());
-        paper.setAbstractText(paperRequest.abstractText());
-        if (paperRequest.fileUrl() != null && !paperRequest.fileUrl().isEmpty()) {
-            String fileUrl = paper.getFileUrl();
-            mediaService.deleteMedia(fileUrl);
+        // Update abstract if provided
+        if (paperRequest.abstractText() != null && !paperRequest.abstractText().isBlank()) {
+            paper.setAbstractText(paperRequest.abstractText());
+        }
+
+        // Update file URL if provided
+        if (paperRequest.fileUrl() != null && !paperRequest.fileUrl().isBlank()) {
+            String oldFileUrl = paper.getFileUrl();
+            if (oldFileUrl != null) {
+                mediaService.deleteMedia(oldFileUrl);
+            }
             paper.setFileUrl(paperRequest.fileUrl());
         }
-        if (paperRequest.thumbnailUrl() != null && !paperRequest.thumbnailUrl().isEmpty()) {
-            if (paper.getThumbnailUrl() == null) {
-                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
-            } else {
-                String thumbnailUrl = paper.getThumbnailUrl();
-                mediaService.deleteMedia(thumbnailUrl);
-                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
+
+        // Update thumbnail URL if provided
+        if (paperRequest.thumbnailUrl() != null && !paperRequest.thumbnailUrl().isBlank()) {
+            String oldThumbnailUrl = paper.getThumbnailUrl();
+            if (oldThumbnailUrl != null) {
+                mediaService.deleteMedia(oldThumbnailUrl);
             }
+            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
         }
-        paper.setCategory(category);
+
+        // Update category if provided
+        if (paperRequest.category() != null && !paperRequest.category().isEmpty()) {
+            String categoryName = paperRequest.category().getFirst();
+            Category category = categoryRepository.findByName(categoryName)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
+            paper.setCategory(category);
+        }
+
         paperRepository.save(paper);
     }
+
 }
 

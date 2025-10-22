@@ -284,14 +284,16 @@ public class AdminController {
             paperService.deletePaperById(uuid);
     }
 
-    @PutMapping("/paper/{uuid}")
-    @ResponseStatus(HttpStatus.NO_CONTENT) // 204: success, no response body
-    public void updatePaperByAdmin(
+    // upate by tong
+    @PatchMapping("/paper/{uuid}")
+    public ResponseEntity<Map<String, String>> updatePaperPartiallyByAdmin(
             @PathVariable String uuid,
-            @Valid @RequestBody AdminPaperRequest paperRequest
+            @RequestBody AdminPaperRequest paperRequest
     ) {
-        paperService.updatePaperByAdmin(uuid, paperRequest);
+        paperService.updatePaperPartiallyByAdmin(uuid, paperRequest);
+        return ResponseEntity.ok(Map.of("message", "Paper updated successfully"));
     }
+
 
     // category management
     @PostMapping("/categories")
