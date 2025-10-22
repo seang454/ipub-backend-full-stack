@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/paper/PaperServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +62,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/seang454/ipub-backend-full-stack.git&quot;,
-    &quot;accountId&quot;: &quot;8b02906d-5613-49b1-a578-3a54ecd294f1&quot;
+    &quot;accountId&quot;: &quot;7ee093f6-4285-4b5b-809d-0cb6d23839a7&quot;
   }
 }</component>
   <component name="KubernetesApiPersistence">{}</component>
@@ -145,8 +142,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
-        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
       </set>
     </attachedChunks>
   </component>
@@ -271,10 +268,7 @@
       <workItem from="1761023169905" duration="163000" />
       <workItem from="1761023345670" duration="969000" />
       <workItem from="1761029678581" duration="4951000" />
-      <workItem from="1761067898145" duration="230000" />
-      <workItem from="1761106189993" duration="1243000" />
-      <workItem from="1761118177521" duration="54000" />
-      <workItem from="1761120095311" duration="1658000" />
+      <workItem from="1761102058328" duration="2449000" />
     </task>
     <servers />
   </component>
