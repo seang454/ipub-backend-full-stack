@@ -44,10 +44,6 @@ public class PaperServiceImpl implements PaperService {
         CurrentUser subId = userService.getCurrentUserSub();
         User author = userRepository.findByUuid(subId.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (!author.getIsStudent() && !author.getIsAdvisor() && !author.getIsAdmin()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author must be a docuhub student or advisor or admin");
-        }
-
         int id;
         int retries = 0;
         do {
@@ -96,19 +92,10 @@ public class PaperServiceImpl implements PaperService {
             // Find category by name and get its UUID
             String categoryName = paperRequest.categoryNames().getFirst();
             Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found: " + categoryName));
-
             paper.setTitle(paperRequest.title());
             paper.setAbstractText(paperRequest.abstractText());
-            String fileUrl = paper.getFileUrl();
-            mediaService.deleteMedia(fileUrl);
             paper.setFileUrl(paperRequest.fileUrl());
-            if (paper.getThumbnailUrl() == null) {
-                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
-            } else {
-                String thumbnailUrl = paper.getThumbnailUrl();
-                mediaService.deleteMedia(thumbnailUrl);
-                paper.setThumbnailUrl(paperRequest.thumbnailUrl());
-            }
+            paper.setThumbnailUrl(paperRequest.thumbnailUrl());
             paper.setCategory(category);
             paperRepository.save(paper);
 
