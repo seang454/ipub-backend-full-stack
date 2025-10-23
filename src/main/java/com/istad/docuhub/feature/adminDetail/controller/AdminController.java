@@ -284,7 +284,7 @@ public class AdminController {
             paperService.deletePaperById(uuid);
     }
 
-    // upate by ton
+    // update by ton
     @PatchMapping("/paper/{uuid}")
     public ResponseEntity<Map<String, String>> updatePaperPartiallyByAdmin(
             @PathVariable String uuid,
