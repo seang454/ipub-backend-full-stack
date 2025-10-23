@@ -51,6 +51,10 @@ public class NotificationController {
 //            messagingTemplate.convertAndSend("/topic/user." + autoReply.getReceiverId(), autoReply);
 //        }
     }
+    @MessageMapping("/update-read")
+    public void updateRead(@Payload Read read) {
+        websocketService.readChatMessage(read.senderUuid(),read.receiverUuid());
+    }
 
     @GetMapping("/history/{currentUserId}/{selectedUserId}")
     public List<Notification> getHistory(@PathVariable String currentUserId,
