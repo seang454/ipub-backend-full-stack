@@ -15,6 +15,7 @@ import com.istad.docuhub.feature.star.dto.StarResponse;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
+import com.istad.docuhub.utils.FeedBackStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -125,6 +126,17 @@ public class PaperServiceImpl implements PaperService {
                 )
         ).toList(
         );
+    }
+
+    @Override
+    public void publishPaperByPaperUuid(String paperUuid) {
+        CurrentUser subId = userService.getCurrentUserSub();
+        User author = userRepository.findByUuid(subId.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Paper paper = paperRepository.findPaperByUuidAndAuthor_UuidAndIsApprovedTrueAndIsDeletedFalseAndIsPublishedFalseAndStatus(paperUuid, author.getUuid(), FeedBackStatus.APPROVED.toString())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper is not found or already published"));
+        paper.setIsPublished(true);
+        paper.setPublishedAt(LocalDate.now());
+        paperRepository.save(paper);
     }
 
     @Override

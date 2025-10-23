@@ -31,4 +31,6 @@ public interface PaperService {
     void publishPaperByUuid(String uuid);
 
     List<StarResponse> getAllStarOfPapers();
+
+    void publishPaperByPaperUuid(String paperUuid);
 }

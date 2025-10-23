@@ -1,6 +1,7 @@
 package com.istad.docuhub.feature.paper;
 
 import com.istad.docuhub.domain.Paper;
+import com.istad.docuhub.utils.FeedBackStatus;
 import org.checkerframework.checker.nullness.Opt;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -40,4 +41,6 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     List<Paper> findPaperByAuthor_Uuid(String uuid);
 
     Optional<Paper> findByUuidAndIsDeletedFalseAndIsApprovedFalse(String uuid);
+
+    Optional<Paper> findPaperByUuidAndAuthor_UuidAndIsApprovedTrueAndIsDeletedFalseAndIsPublishedFalseAndStatus(String uuid, String author_uuid, String status);
 }

@@ -51,102 +51,151 @@ public class UserServiceImpl implements UserService {
     private final StudentDetailRepository studentDetailRepository;
     private final AdviserDetailRepository adviserDetailRepository;
 
+    // update by thong
     @Override
     public UserResponse register(UserCreateDto userCreateDto) {
         log.info("Registering user in service {}", userCreateDto);
+
+        // Validate password match
         if (!userCreateDto.password().equals(userCreateDto.confirmedPassword())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Passwords do not match");
         }
+
+        // Validate username
+        if (userCreateDto.username() == null || userCreateDto.username().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Username cannot be empty");
+        } else if (userCreateDto.username().length() < 3) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Username too short");
+        }
+
+        //  Validate email
+        if (userCreateDto.email() == null || userCreateDto.email().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Email cannot be empty");
+        }
+
+        //  Normalize username & email (avoid case/space issues)
+        String normalizedUsername = userCreateDto.username().trim().toLowerCase();
+        String normalizedEmail = userCreateDto.email().trim().toLowerCase();
+
+
+        // Check if username already exists
+        List<UserRepresentation> usersByUsername = keycloak.realm("docuapi")
+                .users()
+                .search(normalizedUsername, true);
+
+        boolean usernameExists = usersByUsername.stream()
+                .anyMatch(u -> u.getUsername() != null &&
+                        u.getUsername().equalsIgnoreCase(normalizedUsername));
+
+        //  Check if email already exists (search by email explicitly)
+        List<UserRepresentation> usersByEmail = keycloak.realm("docuapi")
+                .users()
+                .search(null, null, null, normalizedEmail, 0, 1);
+
+        boolean emailExists = usersByEmail.stream()
+                .anyMatch(u -> u.getEmail() != null &&
+                        u.getEmail().equalsIgnoreCase(normalizedEmail));
+
+        if (usernameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+        }
+
+        if (emailExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+        }
+
+        // Create Keycloak user
         UserRepresentation user = new UserRepresentation();
-        user.setUsername(userCreateDto.username());
-        user.setEmail(userCreateDto.email());
+        user.setUsername(normalizedUsername);
+        user.setEmail(normalizedEmail);
         user.setFirstName(userCreateDto.firstname());
         user.setLastName(userCreateDto.lastname());
+        user.setEmailVerified(false);
+        user.setEnabled(true);
 
-        // setPassword
+        //  Set password
         CredentialRepresentation cred = new CredentialRepresentation();
         cred.setType(CredentialRepresentation.PASSWORD);
         cred.setValue(userCreateDto.password());
         user.setCredentials(List.of(cred));
 
-        user.setEmailVerified(false);
-        user.setEnabled(true);
-        log.info("Registering user in service {}", user);
-
         try (Response response = keycloak.realm("docuapi").users().create(user)) {
-            log.info("Created user {}", response.getStatus());
             if (response.getStatus() == HttpStatus.CREATED.value()) {
-                //example : http://localhost:9090/admin/realms/docuapi/users/414d407a-65a2-4814-b595-3759b64fc12b
-                AtomicReference<String> UserUuid = new AtomicReference<>("");
-                if (response.getStatus() == HttpStatus.CREATED.value()) {
-                    //verify email
-                    List<UserRepresentation> userRepresentations = keycloak.realm("docuapi")
-                            .users()
-                            .search(user.getUsername(), true);
-                    userRepresentations.stream()
-                            .filter(userRepresentation -> userRepresentation.isEmailVerified().equals(false))
-                            .findFirst()
-                            .ifPresent(userRepresentation -> {
-                                UserUuid.set(userRepresentation.getId());
-                                verify(userRepresentation.getId());
+                AtomicReference<String> userUuid = new AtomicReference<>("");
 
-                            });
-                    Integer id;
+                // Get user ID from Keycloak after creation
+                List<UserRepresentation> userRepresentations = keycloak.realm("docuapi")
+                        .users()
+                        .search(normalizedUsername, true);
 
-                    //assign role
-                    UserResource userResource = keycloak.realm("docuapi").users().get(UserUuid.get());
-                    RoleRepresentation userRole = keycloak.realm("docuapi").roles().get("USER").toRepresentation();
-                    userResource.roles().realmLevel().add(Collections.singletonList(userRole));
+                userRepresentations.stream()
+                        .filter(u -> !u.isEmailVerified())
+                        .findFirst()
+                        .ifPresent(u -> {
+                            userUuid.set(u.getId());
+                            verify(u.getId()); // send email verification
+                        });
 
-                    int retries = 0;
-                    do {
-                        if (retries++ > 50) {
-                            throw new RuntimeException("Unable to generate unique ID after 50 attempts");
-                        }
-                        id = new Random().nextInt(Integer.parseInt("1000000"));
-                    } while (userRepository.existsByIdAndIsDeletedFalse(id));
-                    String fullName = userCreateDto.firstname() + " " + userCreateDto.lastname();
-                    log.info("User id ", user.getId());
+                // Generate unique numeric ID
+                Integer id;
+                int retries = 0;
+                do {
+                    if (retries++ > 50) {
+                        throw new RuntimeException("Unable to generate unique ID after 50 attempts");
+                    }
+                    id = new Random().nextInt(1_000_000);
+                } while (userRepository.existsByIdAndIsDeletedFalse(id));
 
-                    User saveUser = User.builder()
-                            .id(id)
-                            .uuid(UserUuid.get())
-                            .fullName(fullName)
-                            .isUser(true)
-                            .isAdmin(false)
-                            .isAdvisor(false)
-                            .isStudent(false)
-                            .isDeleted(false)
-                            .isActive(true)
-                            .createDate(LocalDate.now())
-                            .updateDate(LocalDate.now())
-                            .slug(SlugUtil.toSlug(fullName, userCreateDto.username()))
-                            .build();
-                    userRepository.save(saveUser);
+                // 🔹 Assign USER role
+                UserResource userResource = keycloak.realm("docuapi").users().get(userUuid.get());
+                RoleRepresentation userRole = keycloak.realm("docuapi").roles().get("USER").toRepresentation();
+                userResource.roles().realmLevel().add(Collections.singletonList(userRole));
 
-                    return UserResponse.builder()
-                            .uuid(UserUuid.get())
-                            .userName(userCreateDto.username())
-                            .email(user.getEmail())
-                            .firstName(user.getFirstName())
-                            .lastName(user.getLastName())
-                            .fullName(fullName)
-                            .isUser(saveUser.getIsUser())
-                            .isAdmin(saveUser.getIsAdmin())
-                            .isAdvisor(saveUser.getIsAdvisor())
-                            .isStudent(saveUser.getIsStudent())
-                            .createDate(saveUser.getCreateDate())
-                            .updateDate(saveUser.getUpdateDate())
-                            .slug(saveUser.getSlug())
-                            .build();
-                }
+                // 🔹 Save user to your local database
+                String fullName = userCreateDto.firstname() + " " + userCreateDto.lastname();
+
+                User saveUser = User.builder()
+                        .id(id)
+                        .uuid(userUuid.get())
+                        .fullName(fullName)
+                        .isUser(true)
+                        .isAdmin(false)
+                        .isAdvisor(false)
+                        .isStudent(false)
+                        .isDeleted(false)
+                        .isActive(true)
+                        .createDate(LocalDate.now())
+                        .updateDate(LocalDate.now())
+                        .slug(SlugUtil.toSlug(fullName, normalizedUsername))
+                        .build();
+
+                userRepository.save(saveUser);
+
+                // 🔹 Return response DTO
+                return UserResponse.builder()
+                        .uuid(userUuid.get())
+                        .userName(normalizedUsername)
+                        .email(normalizedEmail)
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .fullName(fullName)
+                        .isUser(saveUser.getIsUser())
+                        .isAdmin(saveUser.getIsAdmin())
+                        .isAdvisor(saveUser.getIsAdvisor())
+                        .isStudent(saveUser.getIsStudent())
+                        .createDate(saveUser.getCreateDate())
+                        .updateDate(saveUser.getUpdateDate())
+                        .slug(saveUser.getSlug())
+                        .build();
             } else {
-
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Something went wrong or user already exited");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Something went wrong or user already exists"
+                );
             }
         }
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not register user");
     }
+
 
     @Override
     public Page<UserResponse> getAllUsersByPage(int page, int size) {
