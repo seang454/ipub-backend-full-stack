@@ -17,9 +17,11 @@ public class WebsocketService {
             notificationRes.save(notification);
         }
     }
-    public List<Notification> getChatMessage(String senderUUid) {
+    public List<Notification> getChatMessage(String senderUUid,String receiverUUid) {
         if (senderUUid != null) {
-            List<Notification> notifications = notificationRes.findAll().stream().filter(senderUUid::equals).collect(Collectors.toList());
+            List<Notification> notifications = notificationRes.findAll().stream()
+                    .filter(n -> n.getSenderUuid().equals(senderUUid) && n.getReceiverUuid().equals(receiverUUid))
+                    .collect(Collectors.toList());
             notifications.forEach(System.out::println);
             return notifications;
         }

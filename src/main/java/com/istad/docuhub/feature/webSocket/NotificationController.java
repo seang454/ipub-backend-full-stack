@@ -56,7 +56,7 @@ public class NotificationController {
     public List<Notification> getHistory(@PathVariable String currentUserId,
                                         @PathVariable String selectedUserId) {
         log.info("History request: {} <-> {}", currentUserId, selectedUserId);
-        return websocketService.getChatMessage(selectedUserId);
+        return websocketService.getChatMessage(currentUserId,selectedUserId);
     }
     @GetMapping("")
     public List<Notification> getNotifications() {

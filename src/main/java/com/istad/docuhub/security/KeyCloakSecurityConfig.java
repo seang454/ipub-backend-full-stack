@@ -178,6 +178,7 @@ public class KeyCloakSecurityConfig {
 
                         //webSocket
                         .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/api/v1/messages/history/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
