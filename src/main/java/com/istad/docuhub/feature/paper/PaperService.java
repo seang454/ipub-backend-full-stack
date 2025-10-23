@@ -33,4 +33,6 @@ public interface PaperService {
     List<StarResponse> getAllStarOfPapers();
 
     void publishPaperByPaperUuid(String paperUuid);
+
+    String addPaperDownloadCount(String paperUuid);
 }

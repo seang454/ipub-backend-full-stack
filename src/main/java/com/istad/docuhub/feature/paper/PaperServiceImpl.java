@@ -140,6 +140,14 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
+    public String addPaperDownloadCount(String paperUuid) {
+        Paper paper = paperRepository.findByUuid(paperUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
+        paper.setDownloadCount(paper.getDownloadCount() + 1);
+        paperRepository.save(paper);
+        return paper.getDownloadCount().toString();
+    }
+
+    @Override
     public PaperResponse getPaperById(String Uuid) {
         Paper paper = paperRepository.findByUuid(Uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
         return new PaperResponse(paper.getUuid(), paper.getTitle(), paper.getAbstractText(), paper.getFileUrl(), paper.getThumbnailUrl(), paper.getAuthor().getUuid(), List.of(paper.getCategory().getName()), paper.getStatus(), paper.getIsApproved(), paper.getSubmittedAt(), paper.getCreatedAt(), paper.getIsPublished(), paper.getPublishedAt(), paper.getDownloadCount());

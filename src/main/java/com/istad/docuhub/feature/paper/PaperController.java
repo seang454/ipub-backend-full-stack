@@ -121,4 +121,10 @@ public class PaperController {
     public ResponseEntity<?> getAllDownloadCountOfPapers(){
         return ResponseEntity.ok(paperService.getAllStarOfPapers());
     }
+
+    @PostMapping("/download/{paperUuid}")
+    public ResponseEntity<?> addPaperDownloadCount(@PathVariable String paperUuid){
+        paperService.addPaperDownloadCount(paperUuid);
+        return ResponseEntity.ok("Download count updated successfully");
+    }
 }
