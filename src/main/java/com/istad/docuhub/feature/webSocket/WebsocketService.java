@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -14,6 +15,15 @@ public class WebsocketService {
 
     public void saveChatMessage(Notification notification) {
         if (notification != null) {
+            notificationRes.save(notification);
+        }
+    }
+    public void readChatMessage(String senderUuid,String receiverUuid) {
+        if (senderUuid != null) {
+            Optional<Notification> notification1 = notificationRes.findBySenderUuidAndReceiverUuidAndIsReadIsFalse(senderUuid, receiverUuid);
+            Notification notification = notification1.orElse(null);
+            assert notification != null;
+            notification.setRead(true);
             notificationRes.save(notification);
         }
     }
