@@ -119,13 +119,19 @@ public class PaperServiceImpl implements PaperService {
         CurrentUser subId = userService.getCurrentUserSub();
         List<Paper> papers = paperRepository.findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(subId.id()).stream().toList();
         List<Star> stars = starRepository.findStarByPaper_UuidIn(papers.stream().map(Paper::getUuid).toList());
-        return stars.stream().map(
-                star -> new StarResponse(
-                        star.getPaper().getUuid(),
-                        star.getUser().getUuid()
-                )
-        ).toList(
-        );
+
+        return stars.stream().map(star -> {
+            // Get star count for each paper
+            long starCount = starRepository.countByPaper_Uuid(star.getPaper().getUuid());
+
+            return StarResponse.builder()
+                    .paperUuid(star.getPaper().getUuid())
+                    .userUuid(star.getUser().getUuid())
+                    .starred(true) // Since these are stars from the repository, they are starred
+                    .message("Starred paper")
+                    .starCount(starCount)
+                    .build();
+        }).toList();
     }
 
     @Override
