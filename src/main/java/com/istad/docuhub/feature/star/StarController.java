@@ -1,7 +1,5 @@
 package com.istad.docuhub.feature.star;
 
-
-import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.star.dto.StarResponse;
 import com.istad.docuhub.feature.user.dto.UserPublicResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/stars")
@@ -27,9 +26,9 @@ public class StarController {
 
     // Unstar a paper
     @DeleteMapping("/{paperUuid}")
-    public ResponseEntity<Void> unstarPaper(@PathVariable String paperUuid) {
-        starService.unstarReaction(paperUuid);
-        return ResponseEntity.noContent().build(); // 204 NO CONTENT
+    public ResponseEntity<StarResponse> unstarPaper(@PathVariable String paperUuid) {
+        StarResponse response = starService.unstarReaction(paperUuid);
+        return ResponseEntity.ok(response);
     }
 
     // Get star count
@@ -39,14 +38,30 @@ public class StarController {
         return ResponseEntity.ok(count);
     }
 
-    // Get all users who starred
-    @GetMapping("/{paperUuid}/users")
-    public ResponseEntity<?> getUsersWhoStarred(@PathVariable String paperUuid) {
-        return ResponseEntity.ok().body(starService.getUsersByPaperUuid(paperUuid));
+    // Check if user has starred a paper
+    @GetMapping("/{paperUuid}/user/{userUuid}")
+    public ResponseEntity<Map<String, Object>> hasUserStarred(
+            @PathVariable String paperUuid,
+            @PathVariable String userUuid) {
+        boolean hasStarred = starService.hasUserStarredPaper(paperUuid, userUuid);
+        return ResponseEntity.ok(Map.of(
+                "paperUuid", paperUuid,
+                "userUuid", userUuid,
+                "hasStarred", hasStarred
+        ));
     }
 
+    // Get all users who starred
+    @GetMapping("/{paperUuid}/users")
+    public ResponseEntity<List<UserPublicResponse>> getUsersWhoStarred(@PathVariable String paperUuid) {
+        List<UserPublicResponse> users = starService.getUsersByPaperUuid(paperUuid);
+        return ResponseEntity.ok(users);
+    }
+
+    // Get all stars by user
     @GetMapping("/user/{userUuid}")
-    public ResponseEntity<?> getAllStarsByUserUuid(@PathVariable String userUuid) {
-        return ResponseEntity.ok(starService.getAllStarsByUserUuid(userUuid));
+    public ResponseEntity<List<StarResponse>> getAllStarsByUserUuid(@PathVariable String userUuid) {
+        List<StarResponse> stars = starService.getAllStarsByUserUuid(userUuid);
+        return ResponseEntity.ok(stars);
     }
 }
