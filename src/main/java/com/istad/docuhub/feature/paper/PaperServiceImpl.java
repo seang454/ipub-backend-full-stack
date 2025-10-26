@@ -186,7 +186,7 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public Page<PaperResponse> getAllPaper(Pageable pageable) {
-        Page<Paper> papers = paperRepository.findAll(pageable);
+        Page<Paper> papers = paperRepository.findAllByIsDeletedIsFalse(pageable);
         return papers.map(p -> new PaperResponse(p.getUuid(), p.getTitle(), p.getAbstractText(), p.getFileUrl(), p.getThumbnailUrl(), p.getAuthor().getUuid(), List.of(p.getCategory().getName()), p.getStatus(), p.getIsApproved(), p.getSubmittedAt(), p.getCreatedAt(), p.getIsPublished(), p.getPublishedAt(), p.getDownloadCount()));
     }
 

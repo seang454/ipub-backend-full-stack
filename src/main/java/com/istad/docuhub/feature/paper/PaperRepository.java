@@ -25,6 +25,7 @@ public interface PaperRepository extends JpaRepository<Paper, Integer> {
     Page<Paper> findByIsApprovedFalse(Pageable pageable);
     Page<Paper> findByIsDeletedIsFalseAndIsApprovedTrue(Pageable pageable);
     Page<Paper> findByAuthor_UuidAndIsDeletedFalse(String uuid, Pageable pageable);
+    Page<Paper> findAllByIsDeletedIsFalse(Pageable pageable);
 
     Page<Paper> findByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(String uuid, Pageable pageable);
     List<Paper> findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(String uuid);
