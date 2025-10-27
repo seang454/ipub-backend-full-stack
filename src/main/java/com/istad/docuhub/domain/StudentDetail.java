@@ -36,6 +36,9 @@ public class StudentDetail {
 
     STATUS status;
 
+    @Column(nullable = true, length = 3000)
+    String reason;
+
     // one to one user
     @OneToOne
     @JoinColumn(name = "user_uuid",referencedColumnName = "uuid")

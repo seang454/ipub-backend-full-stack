@@ -29,7 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -349,5 +348,14 @@ public class AdminController {
         return ResponseEntity.ok(categories);
     }
 
+    @PostMapping("/approved/adviser/paper/{uuid}")
+    public ResponseEntity<?> approvedPaperForAdviser(@PathVariable String uuid) {
+            adminService.approvedPaperForAdviser(uuid);
+            return new ResponseEntity<>(
+                    Map.of(
+                            "message", "Approved paper for adviser successfully"
+                    ), HttpStatus.OK
+            );
+    }
 }
 

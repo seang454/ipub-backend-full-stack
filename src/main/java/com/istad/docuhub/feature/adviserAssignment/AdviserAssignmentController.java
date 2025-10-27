@@ -10,6 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/paper")
@@ -72,11 +76,18 @@ public class AdviserAssignmentController {
                 assignmentService.getAssignmentsByAuthorUuid(adviserUuid)
         );
     }
-    @GetMapping("assignments/adviser")
+    @GetMapping("/assignments/adviser")
     public ResponseEntity<?> getAssignments(Pageable pageable) {
         Page<AdvisorAssignmentResponse> pageData = assignmentService.getAssignmentsForCurrentAdviser(pageable);
         return ResponseEntity.ok(
                 new ApiResponse<>("OK", pageData)
+        );
+    }
+
+    @GetMapping("/assignment")
+    public ResponseEntity<?> getAllAdviser(){
+        return ResponseEntity.ok(
+                assignmentService.getAllAssignment()
         );
     }
 

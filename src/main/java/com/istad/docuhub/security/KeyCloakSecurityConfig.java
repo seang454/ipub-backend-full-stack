@@ -130,6 +130,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/reject").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/paper/**").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/papers/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/approved/adviser/paper/{uuid}").hasAnyRole("ADMIN")
 
                         // by thong ( admin -create student, adviser, reject-user-reqeust-to-student and approve
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/student/create-student").hasAnyRole("ADMIN")
@@ -160,6 +161,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/adviser_details/assignments").hasAnyRole("ADVISER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/author").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignments/adviser/{adviserUuid}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/paper/assignment").hasAnyRole("ADMIN")
 
                         // Comment
                         .requestMatchers(HttpMethod.POST, "/api/v1/comments").hasAnyRole("USER", "STUDENT", "ADVISER", "ADMIN")
@@ -176,6 +178,7 @@ public class KeyCloakSecurityConfig {
 
                         // user endpoint
                         .requestMatchers(HttpMethod.GET,"/api/v1/user-promote/pending/student/{userUuid}").hasAnyRole("ADMIN","USER","STUDENT")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/user-promote/student/{userUuid}").hasAnyRole("ADMIN","USER","STUDENT")
 
                         //webSocket
                         .requestMatchers("/ws-chat/**").permitAll()
