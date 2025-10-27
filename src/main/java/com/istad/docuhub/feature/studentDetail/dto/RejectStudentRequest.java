@@ -1,5 +1,6 @@
 package com.istad.docuhub.feature.studentDetail.dto;
 
+import com.istad.docuhub.enums.STATUS;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -8,7 +9,11 @@ public record RejectStudentRequest(
         String userUuid,
 
         @NotBlank(message = "Reason is required")
-        @Size(max = 500, message = "Reason must not exceed 500 characters")
-        String reason
+        @Size(max = 3000, message = "Reason must not exceed 3000 characters")
+        String reason,
+
+        String status
+
+
 ) {
 }
