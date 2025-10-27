@@ -135,7 +135,7 @@ public class AdminController {
 
         // 4️⃣ Filter only students whose User is not deleted
         List<StudentResponse> filteredList = pendingStudentsPage.getContent().stream()
-                .filter(student -> activeUserUuids.contains(student.getUserUuid()))
+                .filter(student -> activeUserUuids.contains(student.userUuid()))
                 .toList();
 
         // 5️⃣ Return new Page object with filtered data
