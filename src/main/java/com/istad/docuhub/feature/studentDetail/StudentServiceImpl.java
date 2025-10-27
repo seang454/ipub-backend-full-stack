@@ -69,6 +69,7 @@ public class StudentServiceImpl implements StudentService {
         studentDetail.setUser(user);
         studentDetail.setIsStudent(false);
         studentDetail.setStatus(STATUS.PENDING);
+        studentDetail.setReason(null);
         studentDetailRepository.save(studentDetail);
     }
 
