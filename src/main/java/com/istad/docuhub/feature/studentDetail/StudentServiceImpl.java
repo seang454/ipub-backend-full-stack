@@ -116,7 +116,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
-                status(detail.getStatus()),
+                detail.getStatus().toString(),
                 detail.getUser().getUuid()
         );
     }
@@ -136,7 +136,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
-                status(detail.getStatus()),
+                detail.getStatus().toString(),
                 detail.getUser() != null ? detail.getUser().getUuid() : null
         ));
     }
@@ -173,7 +173,7 @@ public class StudentServiceImpl implements StudentService {
                 studentDetail.getMajor(),
                 studentDetail.getYearsOfStudy(),
                 studentDetail.getIsStudent(),
-                status(studentDetail.getStatus()),
+                studentDetail.getStatus().toString(),
                 studentDetail.getUser().getUuid()
         );
     }
@@ -219,7 +219,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
-                status(detail.getStatus()),
+                detail.getStatus().toString(),
                 detail.getUser().getUuid()
         );
     }
