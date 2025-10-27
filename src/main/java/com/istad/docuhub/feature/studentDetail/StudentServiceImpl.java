@@ -145,7 +145,8 @@ public class StudentServiceImpl implements StudentService {
     public StudentResponse updateStudentDetailByUserUuid(String userUuid, UpdateStudentRequest updateRequest) {
         StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(userUuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
-
+        studentDetail.setStatus(STATUS.PENDING);
+        studentDetail.setReason(null);
         // Update only fields that are not null or empty
         if (updateRequest.studentCardUrl() != null && !updateRequest.studentCardUrl().isEmpty()) {
             studentDetail.setStudentCardUrl(updateRequest.studentCardUrl());
