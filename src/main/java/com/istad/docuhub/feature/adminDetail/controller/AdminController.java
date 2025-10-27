@@ -117,7 +117,7 @@ public class AdminController {
     @GetMapping("student/pending")
     public Page<StudentResponse> getPendingStudents(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "20") int size
     ) {
         return studentService.findStudentPendingStudents(page, size);
     }
