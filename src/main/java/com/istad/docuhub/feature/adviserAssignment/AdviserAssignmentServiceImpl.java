@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toList;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -236,6 +238,23 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
         List<Paper> papers = paperRepository.findPaperByAuthor_UuidAndIsDeletedFalseAndIsApprovedTrue(currentUser.id());
         List<String> paperUuids = papers.stream().map(Paper::getUuid).toList();
         List<AdviserAssignment> assignments = adviserAssignmentRepository.findByPaper_UuidIn(paperUuids);
+        return assignments.stream().map(
+                assignment -> AdviserAssignmentResponse.builder()
+                        .uuid(assignment.getUuid())
+                        .paperUuid(assignment.getPaper().getUuid())
+                        .adviserUuid(assignment.getAdvisor().getUuid())
+                        .adminUuid(assignment.getAdmin().getUuid())
+                        .deadline(assignment.getDeadline())
+                        .status(assignment.getStatus())
+                        .assignedDate(assignment.getAssignedDate())
+                        .updateDate(assignment.getUpdateDate())
+                        .build()
+        ).toList();
+    }
+
+    @Override
+    public List<AdviserAssignmentResponse> getAllAssignment() {
+        List<AdviserAssignment> assignments = adviserAssignmentRepository.findAll();
         return assignments.stream().map(
                 assignment -> AdviserAssignmentResponse.builder()
                         .uuid(assignment.getUuid())
