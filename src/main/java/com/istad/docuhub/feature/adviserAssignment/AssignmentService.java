@@ -17,7 +17,7 @@ public interface AssignmentService {
 
     List<AdviserAssignmentResponse> getAllAssignmentsByAuthorUuid();
 
-    //by thong new
+    List<AdviserAssignmentResponse> getAllAssignment();
 
     Page<AdvisorAssignmentResponse> getAssignmentsForCurrentAdviser(Pageable pageable);
 

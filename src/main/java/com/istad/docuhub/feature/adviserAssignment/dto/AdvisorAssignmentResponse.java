@@ -1,7 +1,10 @@
 package com.istad.docuhub.feature.adviserAssignment.dto;
 
-import java.time.LocalDate;
 
+import lombok.Builder;
+
+import java.time.LocalDate;
+@Builder
 public record AdvisorAssignmentResponse(
         String assignmentUuid,
         String status,
@@ -10,7 +13,6 @@ public record AdvisorAssignmentResponse(
         PaperBriefResponse paper,
         StudentBriefResponse student
 ) {
-
 
 }
 
