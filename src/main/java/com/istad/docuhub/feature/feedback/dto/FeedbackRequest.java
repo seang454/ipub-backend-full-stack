@@ -10,7 +10,6 @@ public record FeedbackRequest(
         String feedbackText,
         FeedBackStatus status,
         String paperUuid,
-        String advisorUuid,
         String fileUrl,
         LocalDate deadline
 ) {

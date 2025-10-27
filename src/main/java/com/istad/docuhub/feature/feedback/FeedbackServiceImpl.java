@@ -13,6 +13,7 @@ import com.istad.docuhub.feature.user.dto.CurrentUser;
 import com.istad.docuhub.utils.FeedBackStatus;
 import com.istad.docuhub.utils.PaperStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeedbackServiceImpl implements FeedbackService {
 
     private final PaperRepository paperRepository;
@@ -56,13 +58,10 @@ public class FeedbackServiceImpl implements FeedbackService {
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver not found")
         );
 
-        if (!paper.getAuthor().getUuid().equals(receiver.getUuid())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver is not the author of the paper");
-        }
+//
+//        System.out.println("Creating feedback for paper {}" +  paper.getAssignedId().getAdvisor());
+//        System.out.println("adviser id {}" + advisor.getUuid());
 
-        if (!Objects.equals(paper.getAssignedId().getAdvisor().getUuid(), advisor.getUuid())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Advisor is not assigned to the paper");
-        }
 
         int id;
         int retries = 0;
@@ -84,15 +83,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.setReceiver(receiver);
 
         if (feedbackRequest.status() == FeedBackStatus.APPROVED) {
-            feedback.setStatus(FeedBackStatus.APPROVED);
-            feedback.setDeadline(null);
-            paper.setIsApproved(true);
-            paper.setStatus(PaperStatus.APPROVED.toString());
-        } else {
-            feedback.setStatus(FeedBackStatus.REVISION);
+            feedback.setStatus(feedbackRequest.status());
             feedback.setDeadline(feedbackRequest.deadline());
-            paper.setIsApproved(false);
-            paper.setStatus(PaperStatus.REJECTED.toString());
+            paper.setStatus(PaperStatus.APPROVED.toString());
+        } else if (feedbackRequest.status() == FeedBackStatus.REVISION){
+            feedback.setStatus (feedbackRequest.status());
+            feedback.setDeadline(feedbackRequest.deadline());
+            paper.setStatus(FeedBackStatus.REVISION.toString());
         }
         paperRepository.save(paper);
         feedbackRepository.save(feedback);
