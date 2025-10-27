@@ -1,10 +1,12 @@
 package com.istad.docuhub.feature.adminDetail;
 
 import com.istad.docuhub.domain.AdviserDetail;
+import com.istad.docuhub.domain.Paper;
 import com.istad.docuhub.domain.StudentDetail;
 import com.istad.docuhub.domain.User;
 import com.istad.docuhub.enums.STATUS;
 import com.istad.docuhub.feature.adviserDetail.AdviserDetailRepository;
+import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.studentDetail.StudentDetailRepository;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
@@ -36,6 +38,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final StudentDetailRepository studentDetailRepository;
     private final AdviserDetailRepository adviserDetailRepository;
+    private final PaperRepository paperRepository;
 
     @Override
     public void createStudent(UserCreateDto userCreateDto) {
@@ -263,6 +266,15 @@ public class AdminServiceImpl implements AdminService {
         stdt.setStatus(STATUS.APPROVED);
         studentDetailRepository.save(stdt);
 
+    }
+
+    @Override
+    public void approvedPaperForAdviser(String paperUuid) {
+        Paper paper = paperRepository.findByUuidAndIsDeletedFalseAndIsApprovedFalseAndIsPublishedFalse(paperUuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper not found"));
+        paper.setIsApproved(true);
+        paper.setStatus("APPROVED");
+        paperRepository.save(paper);
     }
 
 
