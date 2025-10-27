@@ -1,5 +1,6 @@
 package com.istad.docuhub.feature.adminDetail.controller;
 
+import com.istad.docuhub.domain.User;
 import com.istad.docuhub.feature.adminDetail.AdminService;
 import com.istad.docuhub.feature.adviserAssignment.AdviserAssignmentServiceImpl;
 import com.istad.docuhub.feature.adviserAssignment.dto.AdviserAssignmentRequest;
@@ -16,22 +17,23 @@ import com.istad.docuhub.feature.studentDetail.StudentService;
 import com.istad.docuhub.feature.studentDetail.dto.RejectStudentRequest;
 import com.istad.docuhub.feature.studentDetail.dto.StudentResponse;
 import com.istad.docuhub.feature.studentDetail.dto.UpdateStudentRequest;
+import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.UserCreateDto;
 import com.istad.docuhub.feature.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -45,6 +47,7 @@ public class AdminController {
     private final StudentService studentService;
     private final AdviserAssignmentServiceImpl adviserAssignmentService;
     private final CategoryService categoryService;
+    private final UserRepository userRepository;
 
         // normal user pagination
         @GetMapping("users")
@@ -117,10 +120,32 @@ public class AdminController {
     @GetMapping("student/pending")
     public Page<StudentResponse> getPendingStudents(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "20") int size
     ) {
-        return studentService.findStudentPendingStudents(page, size);
+        // 1️⃣ Get all non-deleted users
+        List<User> userList = userRepository.getAllUsersByIsDeletedFalse();
+
+        // 2️⃣ Convert to a Set for faster lookup
+        Set<String> activeUserUuids = userList.stream()
+                .map(User::getUuid)
+                .collect(Collectors.toSet());
+
+        // 3️⃣ Get paginated pending students
+        Page<StudentResponse> pendingStudentsPage = studentService.findStudentPendingStudents(page, size);
+
+        // 4️⃣ Filter only students whose User is not deleted
+        List<StudentResponse> filteredList = pendingStudentsPage.getContent().stream()
+                .filter(student -> activeUserUuids.contains(student.userUuid()))
+                .toList();
+
+        // 5️⃣ Return new Page object with filtered data
+        return new PageImpl<>(
+                filteredList,
+                PageRequest.of(page, size),
+                filteredList.size()
+        );
     }
+
 
     @PutMapping("student/{userUuid}")
     public ResponseEntity<StudentResponse> updateStudentDetail(

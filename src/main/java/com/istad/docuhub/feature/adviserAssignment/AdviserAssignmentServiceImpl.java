@@ -14,6 +14,7 @@ import com.istad.docuhub.feature.user.UserService;
 import com.istad.docuhub.feature.user.dto.CurrentUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdviserAssignmentServiceImpl implements AssignmentService {
@@ -95,40 +97,37 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AdviserAssignmentResponse reassignAdviser(String paperUuid, String newAdviserUuid, String adminUuid, LocalDate newDeadline) {
-        // fetch paper
+        // Fetch paper
         Paper paper = paperRepository.findByUuid(paperUuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paper Not Found"));
 
-        // fetch new adviser
+        // Fetch new adviser
         User newAdviser = userRepository.findByUuid(newAdviserUuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adviser Not Found"));
 
-        // fetch admin
+        // Fetch admin (who reassigns)
         User admin = userRepository.findByUuid(adminUuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin Not Found"));
 
-        // find current assignment (if any)
-        AdviserAssignment currentAssignment = adviserAssignmentRepository.findByPaperUuid(paperUuid)
+        // Find existing assignment
+        AdviserAssignment assignment = adviserAssignmentRepository.findByPaperUuid(paperUuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No Current Adviser Assigned"));
 
-        // mark old one as REASSIGNED
-        currentAssignment.setStatus("REASSIGNED");
-        currentAssignment.setUpdateDate(LocalDate.now());
-        adviserAssignmentRepository.save(currentAssignment);
+        // ✅ Check if adviser is actually changing
+        if (assignment.getAdvisor().getUuid().equals(newAdviserUuid)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The same adviser is already assigned to this paper.");
+        }
 
-        // create new assignment
-        AdviserAssignment newAssignment = new AdviserAssignment();
-        newAssignment.setUuid(UUID.randomUUID().toString());
-        newAssignment.setPaper(paper);
-        newAssignment.setAdvisor(newAdviser);
-        newAssignment.setAdmin(admin);
-        newAssignment.setDeadline(newDeadline);
-        newAssignment.setStatus("ASSIGNED");
-        newAssignment.setAssignedDate(LocalDate.now());
-        newAssignment.setUpdateDate(null);
+        // ✅ Update adviser and other fields
+        assignment.setAdvisor(newAdviser);
+        assignment.setAdmin(admin);              // who made the change
+        assignment.setDeadline(newDeadline);     // update deadline
+        assignment.setStatus("REASSIGNED");      // or keep "ASSIGNED" if you prefer
+        assignment.setUpdateDate(LocalDate.now());
 
-        AdviserAssignment saved = adviserAssignmentRepository.save(newAssignment);
+        AdviserAssignment saved = adviserAssignmentRepository.save(assignment);
 
+        // ✅ Build and return response
         return AdviserAssignmentResponse.builder()
                 .uuid(saved.getUuid())
                 .paperUuid(saved.getPaper().getUuid())
@@ -140,6 +139,7 @@ public class AdviserAssignmentServiceImpl implements AssignmentService {
                 .updateDate(saved.getUpdateDate())
                 .build();
     }
+
 
     // adviser review paper
     @Transactional

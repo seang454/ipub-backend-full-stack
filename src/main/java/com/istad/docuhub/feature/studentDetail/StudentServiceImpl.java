@@ -34,6 +34,16 @@ public class StudentServiceImpl implements StudentService {
     private final AdviserAssignmentRepository adviserAssignmentRepository;
     private final PaperRepository paperRepository;
 
+    int status (STATUS status){
+        int statusCode = switch (status) {
+            case STATUS.PENDING -> 0;
+            case STATUS.APPROVED -> 1;
+            case STATUS.ADMIN_REJECTED -> 2; // optional, add more if needed
+            default -> -1;
+        };
+        return statusCode;
+    }
+
     @Override
     public void createStudentDetail(StudentRequest studentRequest) {
 
@@ -105,6 +115,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
+                status(detail.getStatus()),
                 detail.getUser().getUuid()
         );
     }
@@ -124,6 +135,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
+                status(detail.getStatus()),
                 detail.getUser() != null ? detail.getUser().getUuid() : null
         ));
     }
@@ -160,6 +172,7 @@ public class StudentServiceImpl implements StudentService {
                 studentDetail.getMajor(),
                 studentDetail.getYearsOfStudy(),
                 studentDetail.getIsStudent(),
+                status(studentDetail.getStatus()),
                 studentDetail.getUser().getUuid()
         );
     }
@@ -205,6 +218,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
+                status(detail.getStatus()),
                 detail.getUser().getUuid()
         );
     }
