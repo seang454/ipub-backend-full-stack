@@ -176,6 +176,7 @@ public class KeyCloakSecurityConfig {
 
                         // user endpoint
                         .requestMatchers(HttpMethod.GET,"/api/v1/user-promote/pending/student/{userUuid}").hasAnyRole("ADMIN","USER","STUDENT")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/user-promote/student/{userUuid}").hasAnyRole("ADMIN","USER","STUDENT")
 
                         //webSocket
                         .requestMatchers("/ws-chat/**").permitAll()
