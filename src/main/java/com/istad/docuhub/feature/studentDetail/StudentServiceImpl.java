@@ -6,7 +6,6 @@ import com.istad.docuhub.feature.adviserAssignment.AdviserAssignmentRepository;
 import com.istad.docuhub.feature.adviserDetail.AdviserDetailRepository;
 import com.istad.docuhub.feature.paper.PaperRepository;
 import com.istad.docuhub.feature.sendMail.SendMailService;
-import com.istad.docuhub.feature.sendMail.dto.SendMailRequest;
 import com.istad.docuhub.feature.studentDetail.dto.*;
 import com.istad.docuhub.feature.user.UserRepository;
 import com.istad.docuhub.feature.user.UserService;
@@ -35,6 +34,16 @@ public class StudentServiceImpl implements StudentService {
     private final AdviserAssignmentRepository adviserAssignmentRepository;
     private final PaperRepository paperRepository;
 
+    int status (STATUS status){
+        int statusCode = switch (status) {
+            case STATUS.PENDING -> 0;
+            case STATUS.APPROVED -> 1;
+            case STATUS.ADMIN_REJECTED -> 2; // optional, add more if needed
+            default -> -1;
+        };
+        return statusCode;
+    }
+
     @Override
     public void createStudentDetail(StudentRequest studentRequest) {
 
@@ -60,6 +69,7 @@ public class StudentServiceImpl implements StudentService {
         studentDetail.setUser(user);
         studentDetail.setIsStudent(false);
         studentDetail.setStatus(STATUS.PENDING);
+        studentDetail.setReason(null);
         studentDetailRepository.save(studentDetail);
     }
 
@@ -67,15 +77,28 @@ public class StudentServiceImpl implements StudentService {
     public void rejectStudentDetail(RejectStudentRequest rejectRequest) {
         StudentDetail studentDetail = studentDetailRepository.findByUser_Uuid(rejectRequest.userUuid())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
+
+        // Safely convert string to enum (case-insensitive)
+        STATUS status = null;
+        for (STATUS s : STATUS.values()) {
+            if (s.name().equalsIgnoreCase(rejectRequest.status())) {
+                status = s;
+                break;
+            }
+        }
+
+        if (status == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status value: " + rejectRequest.status());
+        }
+
+        studentDetail.setStatus(status);
+        studentDetail.setReason(rejectRequest.reason());
         studentDetail.setIsStudent(false);
+
         studentDetailRepository.save(studentDetail);
-
-        SendMailRequest mailRequest = new SendMailRequest(rejectRequest.userUuid(), rejectRequest.reason());
-
-        // Send rejection email
-        sendMailService.sendMailReject(mailRequest);
-
     }
+
+
 
     @Override
     public StudentResponse findStudentDetailByUserUuid(String userUuid) {
@@ -93,6 +116,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
+                status(detail.getStatus()),
                 detail.getUser().getUuid()
         );
     }
@@ -112,6 +136,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
+                status(detail.getStatus()),
                 detail.getUser() != null ? detail.getUser().getUuid() : null
         ));
     }
@@ -148,6 +173,7 @@ public class StudentServiceImpl implements StudentService {
                 studentDetail.getMajor(),
                 studentDetail.getYearsOfStudy(),
                 studentDetail.getIsStudent(),
+                status(studentDetail.getStatus()),
                 studentDetail.getUser().getUuid()
         );
     }
@@ -193,6 +219,7 @@ public class StudentServiceImpl implements StudentService {
                 detail.getMajor(),
                 detail.getYearsOfStudy(),
                 detail.getIsStudent(),
+                status(detail.getStatus()),
                 detail.getUser().getUuid()
         );
     }
@@ -201,15 +228,19 @@ public class StudentServiceImpl implements StudentService {
     public StudentLogic findStudentDetailPendingByUserUuid(String userUuid) {
         StudentDetail detail = studentDetailRepository.findByUser_Uuid(userUuid)
                 .stream()
-                .filter(d -> Boolean.FALSE.equals(d.getIsStudent()))          // isStudent = false
-                .filter(d -> "Pending".equalsIgnoreCase(String.valueOf(d.getStatus())))       // status = PENDING
+                .filter(d -> Boolean.FALSE.equals(d.getIsStudent()))
+                .filter(d -> d.getStatus() == STATUS.PENDING || d.getStatus() == STATUS.ADMIN_REJECTED)
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student detail not found"));
 
+        // Convert enum to string for frontend
         return new StudentLogic(
-                detail.getIsStudent()
+                detail.getIsStudent(),
+                detail.getReason(),
+                detail.getStatus().name()
         );
     }
+
 }
 
 

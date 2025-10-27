@@ -1,6 +1,10 @@
 package com.istad.docuhub.feature.studentDetail.dto;
 
+
+
 public record StudentLogic(
-        Boolean isStudent
+        Boolean isStudent,
+        String reason,
+        String status
 ) {
 }

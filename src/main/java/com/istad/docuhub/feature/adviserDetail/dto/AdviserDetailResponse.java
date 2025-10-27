@@ -1,7 +1,6 @@
 package com.istad.docuhub.feature.adviserDetail.dto;
 
 import com.istad.docuhub.domain.Specialize;
-import com.istad.docuhub.enums.AdviserSpecialize;
 import lombok.Builder;
 
 import java.util.List;

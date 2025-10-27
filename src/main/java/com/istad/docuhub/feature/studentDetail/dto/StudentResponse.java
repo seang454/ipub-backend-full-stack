@@ -10,6 +10,8 @@ public record StudentResponse(
         String major,
         Integer yearsOfStudy,
         Boolean isStudent,
+        int status,
         String userUuid
+
 ) {
 }
