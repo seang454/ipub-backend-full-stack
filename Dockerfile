@@ -1,14 +1,41 @@
-# 1️⃣ Use lightweight Java runtime
-FROM eclipse-temurin:21-jre-alpine
+# -----------------------------
+# 1️⃣ Build Stage (Optional: Multi-stage build)
+# -----------------------------
+FROM gradle:8.3.3-jdk21 AS builder
 
-# 2️⃣ Working directory inside container
+# Set working directory inside container
 WORKDIR /app
 
-# 3️⃣ Copy the built JAR into the container
-COPY build/libs/*.jar app.jar
+# Copy Gradle wrapper and build scripts
+COPY gradlew .
+COPY gradlew.bat .
+COPY build.gradle .
+COPY settings.gradle .
+COPY gradle/ ./gradle/
 
-# 4️⃣ Expose app port
+# Copy all source code
+COPY src/ ./src/
+
+# Set Gradle user home for caching (optional)
+ENV GRADLE_USER_HOME=/tmp/.gradle
+
+# Build fat JAR
+RUN chmod +x gradlew \
+    && ./gradlew clean build -x test --no-daemon --parallel
+
+# -----------------------------
+# 2️⃣ Runtime Stage
+# -----------------------------
+FROM eclipse-temurin:21-jdk-jammy
+
+# Set working directory
+WORKDIR /app
+
+# Copy JAR from builder stage
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Expose port
 EXPOSE 8080
 
-# 5️⃣ Run app
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the Spring Boot application
+ENTRYPOINT ["java","-jar","app.jar"]
