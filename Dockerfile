@@ -1,5 +1,5 @@
 # -----------------------------
-# 1️⃣ Build Stage (Optional: Multi-stage build)
+# 1️⃣ Build Stage (Multi-stage)
 # -----------------------------
 FROM gradle:8.3.3-jdk21 AS builder
 
@@ -16,10 +16,10 @@ COPY gradle/ ./gradle/
 # Copy all source code
 COPY src/ ./src/
 
-# Set Gradle user home for caching (optional)
+# Set Gradle cache for faster builds
 ENV GRADLE_USER_HOME=/tmp/.gradle
 
-# Build fat JAR
+# Make gradlew executable and build fat JAR without tests
 RUN chmod +x gradlew \
     && ./gradlew clean build -x test --no-daemon --parallel
 
@@ -34,7 +34,7 @@ WORKDIR /app
 # Copy JAR from builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Expose port
+# Expose port consistent with Spring Boot server.port
 EXPOSE 8083
 
 # Run the Spring Boot application

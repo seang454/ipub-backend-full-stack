@@ -28,36 +28,29 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                echo "🛠️ Installing Java 21 if missing, building project, and running tests..."
+                echo "🛠️ Building project with Gradle..."
                 withCredentials([sshUserPrivateKey(credentialsId: 'vagrant-ssh-key', keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
 set -e
 set -o pipefail
 
-# Install OpenJDK 21 if not installed
+# Ensure OpenJDK 21 is installed
 if ! java -version 2>/dev/null | grep "21" >/dev/null; then
-    echo "☕ Installing OpenJDK 21..."
     sudo add-apt-repository ppa:openjdk-r/ppa -y
     sudo apt-get update -y
     sudo apt-get install -y openjdk-21-jdk
 fi
 
-# Configure alternatives to point to Java 21
-sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-21-openjdk-amd64/bin/java 21
-sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-21-openjdk-amd64/bin/javac 21
-sudo update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java
-sudo update-alternatives --set javac /usr/lib/jvm/java-21-openjdk-amd64/bin/javac
+# Set JAVA_HOME and PATH
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+export PATH=$JAVA_HOME/bin:$PATH
 
-# Export JAVA_HOME dynamically
-export JAVA_HOME=\$(dirname \$(dirname \$(readlink -f \$(which java))))
-export PATH=\$JAVA_HOME/bin:\$PATH
-
-echo "✅ JAVA_HOME = \$JAVA_HOME"
+echo "✅ JAVA_HOME = $JAVA_HOME"
 java -version
 javac -version
 
-# Clone repo if not exists, else update
+# Clone or update repo
 if [ -d "${APP_DIR}" ]; then
     cd ${APP_DIR}
     git fetch origin
@@ -67,38 +60,40 @@ else
     cd ${APP_DIR}
 fi
 
+# Make Gradle wrapper executable
 chmod +x gradlew
 
-# Build and test using correct JAVA_HOME
-JAVA_HOME=\$JAVA_HOME PATH=\$PATH ./gradlew clean build --no-daemon --parallel
-JAVA_HOME=\$JAVA_HOME PATH=\$PATH ./gradlew test --no-daemon
+# Stop previous Gradle daemons and clean build
+./gradlew --stop
+./gradlew clean build -x test --no-daemon --parallel
+
 EOF
                     """
                 }
             }
         }
 
-        stage('Delivery') {
+        stage('Docker Build') {
             steps {
-                echo "📦 Building Docker image..."
+                echo "🐳 Building Docker image..."
                 withCredentials([sshUserPrivateKey(credentialsId: 'vagrant-ssh-key', keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
 set -e
 
-# Install Docker if not installed
+# Install Docker if missing
 if ! command -v docker >/dev/null 2>&1; then
-    echo "🐳 Docker not found, installing..."
     sudo apt-get update -y
     sudo apt-get install -y docker.io
     sudo systemctl enable --now docker
 fi
 
-# Remove old image if exists
+# Remove old image
 sudo docker rmi ${APP_NAME} || true
 
 # Build new Docker image
 sudo docker build -t ${APP_NAME} ${APP_DIR}
+
 EOF
                     """
                 }
@@ -110,15 +105,15 @@ EOF
                 echo "🚀 Deploying container..."
                 withCredentials([sshUserPrivateKey(credentialsId: 'vagrant-ssh-key', keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
 set -e
 
-# Stop and remove old container
+# Stop & remove old container
 sudo docker stop ${CONTAINER_NAME} || true
 sudo docker rm ${CONTAINER_NAME} || true
 
 # Run new container
-sudo docker run -d -p 8080:8080 \
+sudo docker run -d -p 8083:8083 \
   --name ${CONTAINER_NAME} \
   --restart unless-stopped \
   ${APP_NAME}
