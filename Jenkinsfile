@@ -10,9 +10,6 @@ pipeline {
         CONTAINER_NAME = "docuhub-container"
         APP_DIR = "/home/vagrant/docuhub-api"
         GRADLE_USER_HOME = "/home/vagrant/.gradle"
-
-        // Correct JAVA_HOME path
-        JAVA_HOME_PATH = "/usr/lib/jvm/java-21-openjdk-amd64"
     }
 
     options {
@@ -46,8 +43,14 @@ if ! java -version 2>/dev/null | grep "21" >/dev/null; then
     sudo apt-get install -y openjdk-21-jdk
 fi
 
-# Set correct JAVA_HOME
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+# Configure alternatives to point to Java 21
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-21-openjdk-amd64/bin/java 21
+sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-21-openjdk-amd64/bin/javac 21
+sudo update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java
+sudo update-alternatives --set javac /usr/lib/jvm/java-21-openjdk-amd64/bin/javac
+
+# Export JAVA_HOME dynamically
+export JAVA_HOME=\$(dirname \$(dirname \$(readlink -f \$(which java))))
 export PATH=\$JAVA_HOME/bin:\$PATH
 
 echo "✅ JAVA_HOME = \$JAVA_HOME"
