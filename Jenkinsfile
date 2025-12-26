@@ -34,39 +34,44 @@ pipeline {
                     keyFileVariable: 'SSH_KEY'
                 )]) {
                     sh """
-                    # Test SSH connection first
-                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} 'echo "✅ Connected to VM"'
+                    # Test SSH connection
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} 'echo "✅ Connected to VM"'
 
-                    # Build and test
-                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
-        set -e
-        set -o pipefail
+                    # Build, install Java 21 if needed
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+set -e
+set -o pipefail
 
-        # Install OpenJDK 21 if Java not found
-        if ! java -version 2>/dev/null | grep "21" >/dev/null; then
-            echo "☕ Java 21 not found, installing OpenJDK 21..."
-            sudo apt-get update -y
-            sudo apt-get install -y openjdk-21-jdk
-        fi
+# Install OpenJDK 21 if not found
+if ! java -version 2>/dev/null | grep "21" >/dev/null; then
+    echo "☕ Java 21 not found, installing OpenJDK 21..."
+    sudo add-apt-repository ppa:openjdk-r/ppa -y
+    sudo apt-get update -y
+    sudo apt-get install -y openjdk-21-jdk
+fi
 
-        # Verify Java
-        java -version
-        javac -version
+# Set JAVA_HOME
+export JAVA_HOME=\$(dirname \$(dirname \$(readlink -f \$(which java))))
+export PATH=\$JAVA_HOME/bin:\$PATH
 
-        # Clone repo if not exists, else update
-        if [ -d "${APP_DIR}" ]; then
-            cd ${APP_DIR}
-            git fetch origin
-            git reset --hard origin/main
-        else
-            git clone https://github.com/seang454/ipub-backend-full-stack.git ${APP_DIR}
-            cd ${APP_DIR}
-        fi
+# Verify Java
+java -version
+javac -version
 
-        chmod +x gradlew
-        ./gradlew clean build --no-daemon --parallel
-        ./gradlew test --no-daemon
-        EOF
+# Clone repo if not exists, else update
+if [ -d "${APP_DIR}" ]; then
+    cd ${APP_DIR}
+    git fetch origin
+    git reset --hard origin/main
+else
+    git clone https://github.com/seang454/ipub-backend-full-stack.git ${APP_DIR}
+    cd ${APP_DIR}
+fi
+
+chmod +x gradlew
+./gradlew clean build --no-daemon --parallel
+./gradlew test --no-daemon
+EOF
                     """
                 }
             }
@@ -80,12 +85,12 @@ pipeline {
                     keyFileVariable: 'SSH_KEY'
                 )]) {
                     sh """
-                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
 set -e
-cd ${APP_DIR}
 
 # Install Docker if not installed
 if ! command -v docker >/dev/null 2>&1; then
+    echo "🐳 Docker not found, installing..."
     sudo apt-get update -y
     sudo apt-get install -y docker.io
     sudo systemctl enable --now docker
@@ -95,7 +100,7 @@ fi
 sudo docker rmi ${APP_NAME} || true
 
 # Build new Docker image
-sudo docker build -t ${APP_NAME} .
+sudo docker build -t ${APP_NAME} ${APP_DIR}
 EOF
                     """
                 }
@@ -110,7 +115,7 @@ EOF
                     keyFileVariable: 'SSH_KEY'
                 )]) {
                     sh """
-                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
 set -e
 
 # Stop and remove old container
