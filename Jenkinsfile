@@ -28,7 +28,7 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                echo "🛠️ Building project and running tests..."
+                echo "🛠️ Checking Java, building project, and running tests..."
                 withCredentials([sshUserPrivateKey(
                     credentialsId: 'vagrant-ssh-key',
                     keyFileVariable: 'SSH_KEY'
@@ -39,23 +39,34 @@ pipeline {
 
                     # Build and test
                     ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
-set -e
-set -o pipefail
+        set -e
+        set -o pipefail
 
-# Clone repo if not exists, else update
-if [ -d "${APP_DIR}" ]; then
-    cd ${APP_DIR}
-    git fetch origin
-    git reset --hard origin/main
-else
-    git clone https://github.com/seang454/ipub-backend-full-stack.git ${APP_DIR}
-    cd ${APP_DIR}
-fi
+        # Install OpenJDK 21 if Java not found
+        if ! java -version 2>/dev/null | grep "21" >/dev/null; then
+            echo "☕ Java 21 not found, installing OpenJDK 21..."
+            sudo apt-get update -y
+            sudo apt-get install -y openjdk-21-jdk
+        fi
 
-chmod +x gradlew
-./gradlew clean build --no-daemon --parallel
-./gradlew test --no-daemon
-EOF
+        # Verify Java
+        java -version
+        javac -version
+
+        # Clone repo if not exists, else update
+        if [ -d "${APP_DIR}" ]; then
+            cd ${APP_DIR}
+            git fetch origin
+            git reset --hard origin/main
+        else
+            git clone https://github.com/seang454/ipub-backend-full-stack.git ${APP_DIR}
+            cd ${APP_DIR}
+        fi
+
+        chmod +x gradlew
+        ./gradlew clean build --no-daemon --parallel
+        ./gradlew test --no-daemon
+        EOF
                     """
                 }
             }
