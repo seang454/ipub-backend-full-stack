@@ -34,7 +34,7 @@ pipeline {
                 echo "🛠️ Installing Java 21 if missing, building project, and running tests..."
                 withCredentials([sshUserPrivateKey(credentialsId: 'vagrant-ssh-key', keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
 set -e
 set -o pipefail
 
@@ -50,7 +50,7 @@ fi
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export PATH=\$JAVA_HOME/bin:\$PATH
 
-echo "✅ JAVA_HOME set to \$JAVA_HOME"
+echo "✅ JAVA_HOME = \$JAVA_HOME"
 java -version
 javac -version
 
@@ -80,7 +80,7 @@ EOF
                 echo "📦 Building Docker image..."
                 withCredentials([sshUserPrivateKey(credentialsId: 'vagrant-ssh-key', keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
 set -e
 
 # Install Docker if not installed
@@ -107,7 +107,7 @@ EOF
                 echo "🚀 Deploying container..."
                 withCredentials([sshUserPrivateKey(credentialsId: 'vagrant-ssh-key', keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
 set -e
 
 # Stop and remove old container
