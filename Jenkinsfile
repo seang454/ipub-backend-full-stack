@@ -26,47 +26,35 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build & Test') {
             steps {
-                echo "🛠️ Building project (Gradle)..."
+                echo "🛠️ Building project and running tests..."
                 withCredentials([sshUserPrivateKey(
                     credentialsId: 'vagrant-ssh-key',
                     keyFileVariable: 'SSH_KEY'
                 )]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-                    set -e
-                    set -o pipefail
+                    # Test SSH connection first
+                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} 'echo "✅ Connected to VM"'
 
-                    if [ -d "${APP_DIR}" ]; then
-                      cd ${APP_DIR}
-                      git fetch origin
-                      git reset --hard origin/main
-                    else
-                      git clone https://github.com/seang454/ipub-backend-full-stack.git ${APP_DIR}
-                      cd ${APP_DIR}
-                    fi
+                    # Build and test
+                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+set -e
+set -o pipefail
 
-                    chmod +x gradlew
-                    ./gradlew clean build --no-daemon --parallel
-EOF
-                    """
-                }
-            }
-        }
+# Clone repo if not exists, else update
+if [ -d "${APP_DIR}" ]; then
+    cd ${APP_DIR}
+    git fetch origin
+    git reset --hard origin/main
+else
+    git clone https://github.com/seang454/ipub-backend-full-stack.git ${APP_DIR}
+    cd ${APP_DIR}
+fi
 
-        stage('Test') {
-            steps {
-                echo "🧪 Running tests..."
-                withCredentials([sshUserPrivateKey(
-                    credentialsId: 'vagrant-ssh-key',
-                    keyFileVariable: 'SSH_KEY'
-                )]) {
-                    sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-                    set -e
-                    cd ${APP_DIR}
-                    ./gradlew test --no-daemon
+chmod +x gradlew
+./gradlew clean build --no-daemon --parallel
+./gradlew test --no-daemon
 EOF
                     """
                 }
@@ -81,19 +69,22 @@ EOF
                     keyFileVariable: 'SSH_KEY'
                 )]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-                    set -e
-                    cd ${APP_DIR}
+                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+set -e
+cd ${APP_DIR}
 
-                    if ! docker --version >/dev/null 2>&1; then
-                        sudo apt-get update -y
-                        sudo apt-get install -y docker.io
-                        sudo systemctl enable --now docker
-                        sudo usermod -aG docker ${SSH_USER}
-                    fi
+# Install Docker if not installed
+if ! command -v docker >/dev/null 2>&1; then
+    sudo apt-get update -y
+    sudo apt-get install -y docker.io
+    sudo systemctl enable --now docker
+fi
 
-                    docker rmi ${APP_NAME} || true
-                    docker build -t ${APP_NAME} .
+# Remove old image if exists
+sudo docker rmi ${APP_NAME} || true
+
+# Build new Docker image
+sudo docker build -t ${APP_NAME} .
 EOF
                     """
                 }
@@ -108,18 +99,21 @@ EOF
                     keyFileVariable: 'SSH_KEY'
                 )]) {
                     sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-                    set -e
+                    ssh -i $SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << EOF
+set -e
 
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
+# Stop and remove old container
+sudo docker stop ${CONTAINER_NAME} || true
+sudo docker rm ${CONTAINER_NAME} || true
 
-                    docker run -d -p 8080:8080 \
-                      --name ${CONTAINER_NAME} \
-                      --restart unless-stopped \
-                      ${APP_NAME}
+# Run new container
+sudo docker run -d -p 8080:8080 \
+  --name ${CONTAINER_NAME} \
+  --restart unless-stopped \
+  ${APP_NAME}
 
-                    docker ps | grep ${CONTAINER_NAME}
+# Show running container
+sudo docker ps | grep ${CONTAINER_NAME}
 EOF
                     """
                 }
