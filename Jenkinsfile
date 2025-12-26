@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        SSH_KEY = "jammy-machine/private-key"
         SSH_PORT = "2222"
         SSH_USER = "vagrant"
         SSH_HOST = "127.0.0.1"
@@ -20,7 +19,6 @@ pipeline {
 
     stages {
 
-        // ----------------------------
         stage('Checkout') {
             steps {
                 echo "📥 Checking out code from GitHub..."
@@ -28,16 +26,18 @@ pipeline {
             }
         }
 
-        // ----------------------------
         stage('Build') {
             steps {
                 echo "🛠️ Building project (Gradle)..."
-                sh """
-                    ssh -i ${SSH_KEY} -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'vagrant-ssh-key',
+                    keyFileVariable: 'SSH_KEY'
+                )]) {
+                    sh """
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
                     set -e
                     set -o pipefail
 
-                    # Clone repo if not exists, else update
                     if [ -d "${APP_DIR}" ]; then
                       cd ${APP_DIR}
                       git fetch origin
@@ -50,84 +50,86 @@ pipeline {
                     chmod +x gradlew
                     ./gradlew clean build --no-daemon --parallel
 EOF
-                """
+                    """
+                }
             }
         }
 
-        // ----------------------------
         stage('Test') {
             steps {
                 echo "🧪 Running tests..."
-                sh """
-                    ssh -i ${SSH_KEY} -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'vagrant-ssh-key',
+                    keyFileVariable: 'SSH_KEY'
+                )]) {
+                    sh """
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
                     set -e
-                    set -o pipefail
-
                     cd ${APP_DIR}
-                    chmod +x gradlew
                     ./gradlew test --no-daemon
 EOF
-                """
+                    """
+                }
             }
         }
 
-        // ----------------------------
         stage('Delivery') {
             steps {
-                echo "📦 Packaging app into Docker image..."
-                sh """
-                    ssh -i ${SSH_KEY} -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+                echo "📦 Building Docker image..."
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'vagrant-ssh-key',
+                    keyFileVariable: 'SSH_KEY'
+                )]) {
+                    sh """
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
                     set -e
-                    set -o pipefail
-
                     cd ${APP_DIR}
 
-                    # Install Docker if missing
-                    if ! docker --version > /dev/null 2>&1; then
-                        echo "🐳 Installing Docker..."
+                    if ! docker --version >/dev/null 2>&1; then
                         sudo apt-get update -y
                         sudo apt-get install -y docker.io
                         sudo systemctl enable --now docker
                         sudo usermod -aG docker ${SSH_USER}
                     fi
 
-                    # Remove old image
                     docker rmi ${APP_NAME} || true
-
-                    # Build new Docker image
                     docker build -t ${APP_NAME} .
 EOF
-                """
+                    """
+                }
             }
         }
 
-        // ----------------------------
         stage('Deploy') {
             steps {
                 echo "🚀 Deploying container..."
-                sh """
-                    ssh -i ${SSH_KEY} -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'vagrant-ssh-key',
+                    keyFileVariable: 'SSH_KEY'
+                )]) {
+                    sh """
+                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
                     set -e
-                    set -o pipefail
 
-                    # Stop old container if exists
                     docker stop ${CONTAINER_NAME} || true
                     docker rm ${CONTAINER_NAME} || true
 
-                    # Run new container
-                    docker run -d -p 8080:8080 --name ${CONTAINER_NAME} --restart unless-stopped ${APP_NAME}
+                    docker run -d -p 8080:8080 \
+                      --name ${CONTAINER_NAME} \
+                      --restart unless-stopped \
+                      ${APP_NAME}
 
-                    echo "✅ Deployment complete!"
                     docker ps | grep ${CONTAINER_NAME}
 EOF
-                """
+                    """
+                }
             }
         }
     }
 
     post {
         success {
-            echo "🎉 Full CI/CD pipeline completed successfully!"
+            echo "🎉 CI/CD pipeline completed successfully!"
         }
         failure {
             echo "❌ Pipeline failed!"
