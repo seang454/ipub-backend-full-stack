@@ -10,6 +10,8 @@ pipeline {
         CONTAINER_NAME = "docuhub-container"
         APP_DIR = "/home/vagrant/docuhub-api"
         GRADLE_USER_HOME = "/home/vagrant/.gradle"
+
+        // Correct JAVA_HOME path
         JAVA_HOME_PATH = "/usr/lib/jvm/java-21-openjdk-amd64"
     }
 
@@ -44,8 +46,8 @@ if ! java -version 2>/dev/null | grep "21" >/dev/null; then
     sudo apt-get install -y openjdk-21-jdk
 fi
 
-# Export JAVA_HOME for the session
-export JAVA_HOME=${JAVA_HOME_PATH}
+# Set correct JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export PATH=\$JAVA_HOME/bin:\$PATH
 
 echo "✅ JAVA_HOME set to \$JAVA_HOME"
