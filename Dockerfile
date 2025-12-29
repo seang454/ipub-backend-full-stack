@@ -1,7 +1,7 @@
 # -----------------------------
-# 1️⃣ Build Stage (Multi-stage)
+# 1️⃣ Build Stage
 # -----------------------------
-FROM gradle:8.3.3-jdk21 AS builder
+FROM gradle:8.3-jdk21 AS builder
 
 # Set working directory inside container
 WORKDIR /app
@@ -13,10 +13,10 @@ COPY build.gradle .
 COPY settings.gradle .
 COPY gradle/ ./gradle/
 
-# Copy all source code
+# Copy source code
 COPY src/ ./src/
 
-# Set Gradle cache for faster builds
+# Set Gradle cache
 ENV GRADLE_USER_HOME=/tmp/.gradle
 
 # Make gradlew executable and build fat JAR without tests
@@ -34,8 +34,8 @@ WORKDIR /app
 # Copy JAR from builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Expose port consistent with Spring Boot server.port
-EXPOSE 8083
+# Expose port that your pipeline maps (8084)
+EXPOSE 8084
 
 # Run the Spring Boot application
 ENTRYPOINT ["java","-jar","app.jar"]
