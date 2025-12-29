@@ -1,7 +1,7 @@
 # -----------------------------
 # 1️⃣ Build Stage
 # -----------------------------
-FROM gradle:8.3-jdk21 AS builder
+FROM gradle:8.4.0-jdk21 AS builder
 
 # Set working directory inside container
 WORKDIR /app
