@@ -117,7 +117,7 @@ sudo docker stop ${CONTAINER_NAME} || true
 sudo docker rm ${CONTAINER_NAME} || true
 
 sudo docker run -d \\
-  -p 8083:8083 \\
+  -p 8084:8084 \\
   --name ${CONTAINER_NAME} \\
   --restart unless-stopped \\
   ${APP_NAME}
