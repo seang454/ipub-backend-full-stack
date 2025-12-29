@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Jenkinsfile" beforeDir="false" afterPath="$PROJECT_DIR$/Jenkinsfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -280,7 +279,8 @@
       <workItem from="1766711995780" duration="3418000" />
       <workItem from="1766719017947" duration="6471000" />
       <workItem from="1766735071541" duration="2515000" />
-      <workItem from="1766746501277" duration="4357000" />
+      <workItem from="1766746501277" duration="4760000" />
+      <workItem from="1766814452455" duration="8598000" />
     </task>
     <servers />
   </component>
@@ -367,7 +367,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/adviserDetail/AdviserDetailImpl.java</url>
           <line>134</line>
-          <properties class="com.istad.docuhub.feature.adviserDetail.AdviserDetailImpl" method="updateByToken">
+          <properties class="com.istad.docuhub.feature.adviserDetail.AdviserDetailImpl">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
