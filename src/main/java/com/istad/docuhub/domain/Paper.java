@@ -44,7 +44,7 @@ public class Paper {
     private LocalDate createdAt;
 
     @Column(nullable = true)
-    private Integer downloadCount = 0;
+    private Integer downloadCount;
 
 
     @Column(nullable = false)

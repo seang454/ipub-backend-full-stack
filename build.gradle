@@ -73,4 +73,11 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	// prevent Gradle daemon crash on small VM
+	maxParallelForks = 2
+
+	testLogging {
+		events "passed", "skipped", "failed"
+		exceptionFormat "full"
+	}
 }
