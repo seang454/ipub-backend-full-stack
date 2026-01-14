@@ -1,142 +1,190 @@
+@Library('spring-docuhub-share-library@master') _
+
 pipeline {
     agent any
 
     environment {
-        SSH_USER = "vagrant"
-        SSH_HOST = "192.168.56.12"
-        SSH_PORT = "22"
-
-        APP_NAME = "docuhub-app"
-        CONTAINER_NAME = "docuhub-container"
-        APP_DIR = "/home/vagrant/docuhub-api"
-        GRADLE_USER_HOME = "/home/vagrant/.gradle"
-    }
-
-    options {
-        timestamps()
-        timeout(time: 60, unit: 'MINUTES')
+        REPO_NAME  = 'seang454'
+        IMAGE_NAME = 'docuhub-spring'
+        TAG        = 'latest'
+        NETWORK    = 'spring-net'
+        DB_NAME    = 'postgres'
+        DB_USER    = 'postgres'
+        DB_PASS    = 'password'
     }
 
     stages {
 
-        stage('Checkout') {
+        // 1️⃣ Clone Spring Boot Code
+        stage('Clone Code') {
             steps {
-                echo "📥 Checking out code from GitHub..."
-                checkout scm
+                git ' https://github.com/seang454/ipub-backend-full-stack.git'
             }
         }
 
-        stage('Build & Test') {
+        // 2️⃣ Build & Test with H2 (no need for Postgres)
+        stage('Build & Test with H2') {
             steps {
-                echo "🛠️ Building project on remote VM..."
-                withCredentials([
-                    sshUserPrivateKey(
-                        credentialsId: 'vagrant-ssh-key',
-                        keyFileVariable: 'SSH_KEY'
-                    )
-                ]) {
-                    sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-set -e
-set -o pipefail
-
-# Ensure Java 21
-if ! java -version 2>&1 | grep -q "21"; then
-    sudo apt-get update -y
-    sudo apt-get install -y openjdk-21-jdk
-fi
-
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-export PATH=\$JAVA_HOME/bin:\$PATH
-
-java -version
-javac -version
-
-# Clone or update repo
-if [ -d "${APP_DIR}" ]; then
-    cd ${APP_DIR}
-    git fetch origin
-    git reset --hard origin/main
-else
-    git clone https://github.com/seang454/ipub-backend-full-stack.git ${APP_DIR}
-    cd ${APP_DIR}
-fi
-
-chmod +x gradlew
-./gradlew --stop
-./gradlew clean build -x test --no-daemon
-
-EOF
-                    """
+                script {
+                    if (fileExists('pom.xml')) {
+                        // Maven
+                        withEnv(['SPRING_PROFILES_ACTIVE=test']) {
+                            sh 'mvn clean test'
+                        }
+                    } else if (fileExists('build.gradle')) {
+                        // Gradle
+                        withEnv(['SPRING_PROFILES_ACTIVE=test']) {
+                            sh 'chmod +x gradlew && ./gradlew clean test'
+                        }
+                    } else {
+                        error "No build file found"
+                    }
                 }
             }
         }
 
-        stage('Docker Build') {
+        // 3️⃣ Prepare Dockerfile
+        stage('Prepare Dockerfile') {
             steps {
-                echo "🐳 Building Docker image..."
-                withCredentials([
-                    sshUserPrivateKey(
-                        credentialsId: 'vagrant-ssh-key',
-                        keyFileVariable: 'SSH_KEY'
-                    )
-                ]) {
-                    sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-set -e
+                script {
+                    def sharedDockerfile = libraryResource 'springboot/dev.Dockerfile'
+                    def dockerfilePath = 'Dockerfile'
 
-if ! command -v docker >/dev/null; then
-    sudo apt-get update -y
-    sudo apt-get install -y docker.io
-    sudo systemctl enable --now docker
-fi
+                    if (fileExists(dockerfilePath)) {
+                        def existingDockerfile = readFile(dockerfilePath)
 
-sudo docker rmi ${APP_NAME} || true
-sudo docker build -t ${APP_NAME} ${APP_DIR}
-
-EOF
-                    """
+                        if (existingDockerfile != sharedDockerfile) {
+                            echo 'Dockerfile differs from shared library. Replacing it.'
+                            sh "rm -f ${dockerfilePath}"
+                            writeFile file: dockerfilePath, text: sharedDockerfile
+                        } else {
+                            echo 'Dockerfile is already up-to-date.'
+                        }
+                    } else {
+                        echo 'Dockerfile not found. Creating from shared library.'
+                        writeFile file: dockerfilePath, text: sharedDockerfile
+                    }
                 }
             }
         }
 
-        stage('Deploy') {
+
+        stage('Deploy Nginx config from shared library') {
             steps {
-                echo "🚀 Deploying container..."
-                withCredentials([
-                    sshUserPrivateKey(
-                        credentialsId: 'vagrant-ssh-key',
-                        keyFileVariable: 'SSH_KEY'
-                    )
-                ]) {
-                    sh """
-                    ssh -i \$SSH_KEY -p ${SSH_PORT} -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-set -e
+                script {
+                    // Load config
+                    def sharedNginxConfig = libraryResource 'springboot/nginx.conf'
 
-sudo docker stop ${CONTAINER_NAME} || true
-sudo docker rm ${CONTAINER_NAME} || true
+                    // Write to temporary file
+                    writeFile file: 'nginx.conf', text: sharedNginxConfig
 
-sudo docker run -d \\
-  -p 8084:8084 \\
-  --name ${CONTAINER_NAME} \\
-  --restart unless-stopped \\
-  ${APP_NAME}
+                    // Move to nginx folder
+                    sh "sudo mv nginx.conf /etc/nginx/sites-available/docuhub.seang.shop"
 
-sudo docker ps | grep ${CONTAINER_NAME}
+                    // Enable site
+                    sh "sudo ln -sf /etc/nginx/sites-available/docuhub.seang.shop /etc/nginx/sites-enabled/"
 
-EOF
-                    """
+                    // Test and reload
+                    sh "sudo nginx -t"
+                    sh "sudo systemctl reload nginx"
                 }
             }
         }
-    }
 
-    post {
-        success {
-            echo "🎉 CI/CD pipeline completed successfully!"
+        // 4️⃣ Build Docker Image (with no-cache to ensure fresh build)
+        stage('Build Image') {
+            steps {
+                sh 'docker build --no-cache -t ${REPO_NAME}/${IMAGE_NAME}:${TAG} .'
+            }
         }
-        failure {
-            echo "❌ Pipeline failed!"
+
+        // 5️⃣ Ensure Docker Hub Repo Exists
+        stage('Ensure Docker Hub Repo Exists') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DOCKERHUB-CREDENTIAL',
+                    usernameVariable: 'DH_USERNAME',
+                    passwordVariable: 'DH_PASSWORD'
+                )]) {
+                    sh '''
+                    STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "$DH_USERNAME:$DH_PASSWORD" \
+                      https://hub.docker.com/v2/repositories/$REPO_NAME/$IMAGE_NAME/)
+
+                    if [ "$STATUS" -eq 404 ]; then
+                      curl -s -u "$DH_USERNAME:$DH_PASSWORD" -X POST \
+                        https://hub.docker.com/v2/repositories/ \
+                        -H "Content-Type: application/json" \
+                        -d "{\"name\":\"$IMAGE_NAME\",\"is_private\":false}"
+                    fi
+                    '''
+                }
+            }
+        }
+
+        // 6️⃣ Push Docker Image
+        stage('Push Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DOCKERHUB-CREDENTIAL',
+                    usernameVariable: 'DH_USERNAME',
+                    passwordVariable: 'DH_PASSWORD'
+                )]) {
+                    sh '''
+                    echo "$DH_PASSWORD" | docker login -u "$DH_USERNAME" --password-stdin
+                    docker push ${REPO_NAME}/${IMAGE_NAME}:${TAG}
+                    docker logout
+                    '''
+                }
+            }
+        }
+
+        // 7️⃣ Create Docker Network
+        stage('Create Docker Network') {
+            steps {
+                sh '''
+                docker network inspect ${NETWORK} >/dev/null 2>&1 || \
+                docker network create ${NETWORK}
+                '''
+            }
+        }
+
+        // 8️⃣ Run PostgreSQL Container
+        stage('Run PostgreSQL') {
+            steps {
+                sh '''
+                docker rm -f postgres || true
+
+                docker run -d \
+                  --name postgres \
+                  --network ${NETWORK} \
+                  -e POSTGRES_DB=${DB_NAME} \
+                  -e POSTGRES_USER=${DB_USER} \
+                  -e POSTGRES_PASSWORD=${DB_PASS} \
+                  -p 5432:5432 \
+                  postgres:16
+
+                # Wait for Postgres to be ready
+                until docker exec postgres pg_isready -U ${DB_USER}; do
+                  echo "Waiting for Postgres..."
+                  sleep 2
+                done
+                '''
+            }
+        }
+
+        // 9️⃣ Run Spring Boot Container
+        stage('Run Spring Boot') {
+            steps {
+                sh """
+                docker rm -f spring-app || true
+
+                docker run -d \
+                  --name spring-app \
+                  --network ${NETWORK} \
+                  -p 8083:8080 \
+                  ${REPO_NAME}/${IMAGE_NAME}:${TAG}
+                """
+            }
         }
     }
 }
