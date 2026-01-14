@@ -216,7 +216,7 @@ pipeline {
                 else
                     echo "SSL certificate not found. Generating new one..."
                     sudo certbot --nginx -d $DOMAIN \
-                        --non-interactive --agree-tos -m ${EMAIL} --redirect
+                        --non-interactive --agree-tos -m $EMAIL --redirect
                 fi
                 '''
             }
