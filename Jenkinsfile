@@ -10,7 +10,9 @@ pipeline {
         NETWORK    = 'spring-net'
         DB_NAME    = 'postgres'
         DB_USER    = 'postgres'
-        DB_PASS    = 'password'
+        DB_PASS    = 'qwer'   // Update to your password
+        SPRING_HOST_PORT = '8083'
+        SPRING_CONTAINER_PORT = '8080' // Should match server.port in Spring Boot
     }
 
     stages {
@@ -18,21 +20,19 @@ pipeline {
         // 1️⃣ Clone Spring Boot Code
         stage('Clone Code') {
             steps {
-                git ' https://github.com/seang454/ipub-backend-full-stack.git'
+                git 'https://github.com/seang454/spring-share-library.git'
             }
         }
 
-        // 2️⃣ Build & Test with H2 (no need for Postgres)
+        // 2️⃣ Build & Test with H2 (test profile)
         stage('Build & Test with H2') {
             steps {
                 script {
                     if (fileExists('pom.xml')) {
-                        // Maven
                         withEnv(['SPRING_PROFILES_ACTIVE=test']) {
                             sh 'mvn clean test'
                         }
                     } else if (fileExists('build.gradle')) {
-                        // Gradle
                         withEnv(['SPRING_PROFILES_ACTIVE=test']) {
                             sh 'chmod +x gradlew && ./gradlew clean test'
                         }
@@ -43,7 +43,7 @@ pipeline {
             }
         }
 
-        // 3️⃣ Prepare Dockerfile
+        // 3️⃣ Prepare Dockerfile from shared library
         stage('Prepare Dockerfile') {
             steps {
                 script {
@@ -52,8 +52,7 @@ pipeline {
 
                     if (fileExists(dockerfilePath)) {
                         def existingDockerfile = readFile(dockerfilePath)
-
-                        if (existingDockerfile != sharedDockerfile) {
+                        if (existingDockerfile.trim() != sharedDockerfile.trim()) {
                             echo 'Dockerfile differs from shared library. Replacing it.'
                             sh "rm -f ${dockerfilePath}"
                             writeFile file: dockerfilePath, text: sharedDockerfile
@@ -68,37 +67,31 @@ pipeline {
             }
         }
 
-
-        stage('Deploy Nginx config from shared library') {
+        // 4️⃣ Deploy Nginx config from shared library
+        stage('Deploy Nginx config') {
             steps {
                 script {
-                    // Load config
                     def sharedNginxConfig = libraryResource 'springboot/nginx.conf'
-
-                    // Write to temporary file
                     writeFile file: 'nginx.conf', text: sharedNginxConfig
 
-                    // Move to nginx folder
-                    sh "sudo mv nginx.conf /etc/nginx/sites-available/docuhub.seang.shop"
-
-                    // Enable site
-                    sh "sudo ln -sf /etc/nginx/sites-available/docuhub.seang.shop /etc/nginx/sites-enabled/"
-
-                    // Test and reload
-                    sh "sudo nginx -t"
-                    sh "sudo systemctl reload nginx"
+                    sh """
+                        sudo mv nginx.conf /etc/nginx/sites-available/docuhub.seang.shop
+                        sudo ln -sf /etc/nginx/sites-available/docuhub.seang.shop /etc/nginx/sites-enabled/
+                        sudo nginx -t
+                        sudo systemctl reload nginx
+                    """
                 }
             }
         }
 
-        // 4️⃣ Build Docker Image (with no-cache to ensure fresh build)
+        // 5️⃣ Build Docker Image
         stage('Build Image') {
             steps {
                 sh 'docker build --no-cache -t ${REPO_NAME}/${IMAGE_NAME}:${TAG} .'
             }
         }
 
-        // 5️⃣ Ensure Docker Hub Repo Exists
+        // 6️⃣ Ensure Docker Hub Repo Exists
         stage('Ensure Docker Hub Repo Exists') {
             steps {
                 withCredentials([usernamePassword(
@@ -121,7 +114,7 @@ pipeline {
             }
         }
 
-        // 6️⃣ Push Docker Image
+        // 7️⃣ Push Docker Image
         stage('Push Image') {
             steps {
                 withCredentials([usernamePassword(
@@ -138,7 +131,7 @@ pipeline {
             }
         }
 
-        // 7️⃣ Create Docker Network
+        // 8️⃣ Create Docker Network
         stage('Create Docker Network') {
             steps {
                 sh '''
@@ -148,10 +141,10 @@ pipeline {
             }
         }
 
-        // 8️⃣ Run PostgreSQL Container
+        // 9️⃣ Run PostgreSQL Container
         stage('Run PostgreSQL') {
             steps {
-                sh '''
+                sh """
                 docker rm -f postgres || true
 
                 docker run -d \
@@ -160,7 +153,6 @@ pipeline {
                   -e POSTGRES_DB=${DB_NAME} \
                   -e POSTGRES_USER=${DB_USER} \
                   -e POSTGRES_PASSWORD=${DB_PASS} \
-                  -p 5432:5432 \
                   postgres:16
 
                 # Wait for Postgres to be ready
@@ -168,11 +160,11 @@ pipeline {
                   echo "Waiting for Postgres..."
                   sleep 2
                 done
-                '''
+                """
             }
         }
 
-        // 9️⃣ Run Spring Boot Container
+        // 🔟 Run Spring Boot Container
         stage('Run Spring Boot') {
             steps {
                 sh """
@@ -181,9 +173,50 @@ pipeline {
                 docker run -d \
                   --name spring-app \
                   --network ${NETWORK} \
-                  -p 8083:8080 \
+                  -p ${SPRING_HOST_PORT}:${SPRING_CONTAINER_PORT} \
+                  -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_NAME} \
+                  -e SPRING_DATASOURCE_USERNAME=${DB_USER} \
+                  -e SPRING_DATASOURCE_PASSWORD=${DB_PASS} \
                   ${REPO_NAME}/${IMAGE_NAME}:${TAG}
                 """
+            }
+        }
+
+        stage('Generate SSL with Certbot') {
+            steps {
+                sh '''
+                # Install certbot if not installed
+                sudo apt update
+                sudo apt install -y certbot python3-certbot-nginx openssl
+
+                DOMAIN="docuhub.seang.shop"
+                CERT_PATH="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+
+                if [ -f "$CERT_PATH" ]; then
+                    echo "SSL certificate exists. Checking expiry date..."
+
+                    # Get expiry date in seconds since epoch
+                    EXPIRY_DATE=$(openssl x509 -enddate -noout -in "$CERT_PATH" | cut -d= -f2)
+                    EXPIRY_SECONDS=$(date -d "$EXPIRY_DATE" +%s)
+                    NOW_SECONDS=$(date +%s)
+
+                    # Calculate remaining days
+                    REMAINING_DAYS=$(( (EXPIRY_SECONDS - NOW_SECONDS) / 86400 ))
+
+                    echo "Certificate expires in $REMAINING_DAYS days."
+
+                    if [ "$REMAINING_DAYS" -le 30 ]; then
+                        echo "Certificate expires in 30 days or less. Renewing..."
+                        sudo certbot renew --quiet --deploy-hook "sudo systemctl reload nginx"
+                    else
+                        echo "Certificate is valid for more than 30 days. Skipping renewal."
+                    fi
+                else
+                    echo "SSL certificate not found. Generating new one..."
+                    sudo certbot --nginx -d $DOMAIN \
+                        --non-interactive --agree-tos -m your-email@example.com --redirect
+                fi
+                '''
             }
         }
     }
