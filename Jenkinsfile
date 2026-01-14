@@ -13,6 +13,9 @@ pipeline {
         DB_PASS    = 'qwer'   // Update to your password
         SPRING_HOST_PORT = '8083'
         SPRING_CONTAINER_PORT = '8080' // Should match server.port in Spring Boot
+        EMAIL='pengseangsim210@gmail.com'
+        DOMAIN="docuhub.seang.shop"
+
     }
 
     stages {
@@ -189,7 +192,6 @@ pipeline {
                 sudo apt update
                 sudo apt install -y certbot python3-certbot-nginx openssl
 
-                DOMAIN="docuhub.seang.shop"
                 CERT_PATH="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
 
                 if [ -f "$CERT_PATH" ]; then
@@ -214,7 +216,7 @@ pipeline {
                 else
                     echo "SSL certificate not found. Generating new one..."
                     sudo certbot --nginx -d $DOMAIN \
-                        --non-interactive --agree-tos -m your-email@example.com --redirect
+                        --non-interactive --agree-tos -m $EMAIL --redirect
                 fi
                 '''
             }
