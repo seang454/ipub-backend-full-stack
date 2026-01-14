@@ -23,7 +23,7 @@ pipeline {
         // 1️⃣ Clone Spring Boot Code
         stage('Clone Code') {
             steps {
-                git 'https://github.com/seang454/spring-share-library.git'
+                git 'https://github.com/seang454/ipub-backend-full-stack.git'
             }
         }
 
@@ -216,7 +216,7 @@ pipeline {
                 else
                     echo "SSL certificate not found. Generating new one..."
                     sudo certbot --nginx -d $DOMAIN \
-                        --non-interactive --agree-tos -m $EMAIL --redirect
+                        --non-interactive --agree-tos -m ${EMAIL} --redirect
                 fi
                 '''
             }
