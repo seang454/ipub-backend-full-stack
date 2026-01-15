@@ -215,7 +215,7 @@ public class KeyCloakSecurityConfig {
                                             .path("/")
                                             .maxAge(30 * 24 * 3600)
                                             .sameSite("None")
-                                            .domain(".docuhub.me")
+                                            .domain(".seang.shop")
                                             .build();
                                     response.addHeader("Set-Cookie", refreshCookie.toString());
                                 }
@@ -243,7 +243,7 @@ public class KeyCloakSecurityConfig {
 //                                }
                             }
                             else {
-                                response.sendRedirect("https://api.docuhub.me/api/v1/auth/keycloak/login");
+                                response.sendRedirect("https://docuhub.seang.shop//api/v1/auth/keycloak/login");
                             }
                         })
                 )
@@ -269,7 +269,7 @@ public class KeyCloakSecurityConfig {
                             deleteCookie(response, "refresh_token");
                             deleteCookie(response, "JSESSIONID"); // optional
                             // Redirect to frontend or Keycloak logout
-                            String keycloakLogoutUrl = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/logout";
+                            String keycloakLogoutUrl = "https://keycloak.seang.shop/realms/docuapi/protocol/openid-connect/logout";
                             String frontendRedirect = "http://localhost:3000"; // must match Keycloak redirect URI
 
                             response.sendRedirect(keycloakLogoutUrl + "?redirect_uri=" + frontendRedirect);

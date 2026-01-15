@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 public class KeycloakAuthService {
 
-    private final String KEYCLOAK_URL = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/token";
+    private final String KEYCLOAK_URL = "https://keycloak.seang.shop/realms/docuapi/protocol/openid-connect/token";
     private final String CLIENT_ID = "docuhub-client";
     private final String CLIENT_SECRET = "uyqTuen3kD9PmUKw3mGTPS9RyozUs9t7"; // optional if public client
 

@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="" />
+    <list default="true" id="d9865143-5774-465c-b384-8d9bc9e72429" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/KeycloakAuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/KeycloakAuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/contoller/AuthRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/feature/user/contoller/AuthRestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/istad/docuhub/security/KeyCloakSecurityConfig.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -281,7 +286,9 @@
       <workItem from="1766814452455" duration="8598000" />
       <workItem from="1767837131748" duration="5087000" />
       <workItem from="1767877829577" duration="126000" />
-      <workItem from="1768411203885" duration="5875000" />
+      <workItem from="1768411203885" duration="6861000" />
+      <workItem from="1768436426809" duration="1045000" />
+      <workItem from="1768439812241" duration="3389000" />
     </task>
     <servers />
   </component>

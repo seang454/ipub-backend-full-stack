@@ -51,7 +51,7 @@ public class AuthRestController {
     private final RefreshTokenService refreshTokenService;
     private final RestTemplate restTemplate = new RestTemplate();
     // to verify token
-    private static final String JWKS_URL = "https://keycloak.docuhub.me/realms/docuapi/protocol/openid-connect/certs";
+    private static final String JWKS_URL = "https://keycloak.seang.shop/realms/docuapi/protocol/openid-connect/certs";
     private final StudentService studentService;
 
 
